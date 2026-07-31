@@ -9,7 +9,7 @@
 <meta name="theme-color" id="meta-theme-color" content="#0d1424">
 <title>Ulalek</title>
 
-<!-- PWA Manifest explicitly set to FULLSCREEN to remove the top Android status bar -->
+<!-- PWA Manifest -->
 <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Ulalek%22%2C%22short_name%22%3A%22Ulalek%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23080b12%22%2C%22theme_color%22%3A%22%230d1424%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22icon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
 <style>
@@ -309,8 +309,8 @@
   // Authentic MTG Colorless Mana Symbol SVG
   const symC = `<svg class="sym-c" viewBox="0 0 100 100"><circle cx="48" cy="52" r="44" fill="#000000"/><circle cx="50" cy="48" r="44" fill="#cbc5be"/><path d="M 50 10 Q 50 48 88 48 Q 50 48 50 86 Q 50 48 12 48 Q 50 48 50 10 Z" fill="#181615"/></svg>`;
   
-  // Symmetrical Geometric Infinity Loop SVG
-  const symInf = `<svg class="sym-inf" viewBox="0 0 100 50"><path d="M25,10 C10,10 10,40 25,40 C35,40 40,30 50,25 C60,20 65,10 75,10 C90,10 90,40 75,40 C65,40 60,30 50,25 C40,20 35,10 25,10 Z" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  // Symmetrical Geometric Infinity Loop SVG (Imposing & Powerful)
+  const symInf = `<svg class="sym-inf" viewBox="0 0 100 50"><path d="M 28 40 C 6 40, 6 10, 28 10 C 46 10, 54 40, 72 40 C 94 40, 94 10, 72 10 C 54 10, 46 40, 28 40 Z" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 </script>
 
 <!-- Glass Swipe Tutorial Overlay -->
@@ -606,6 +606,9 @@
 
   // PWA Install Check (Hides button if already installed)
   window.addEventListener('DOMContentLoaded', () => {
+    // Explicitly uncheck the tutorial box on page load
+    document.getElementById('tut-checkbox').checked = false;
+    
     if (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone) {
       const installBtn = document.getElementById('install-btn-container');
       if(installBtn) installBtn.style.display = 'none';
@@ -618,9 +621,14 @@
     }
   });
 
-  function dismissTut() {
+  function dismissTut(e) {
     const tut = document.getElementById('swipe-tut');
-    if(!tut || tut.style.opacity === '0') return;
+    if(!tut || tut.style.display === 'none') return;
+    
+    // Do NOT dismiss if the user tapped directly inside the checkbox container
+    if (e && e.target && e.target.closest && e.target.closest('.tut-check-container')) {
+      return; 
+    }
     
     if(document.getElementById('tut-checkbox').checked) {
       localStorage.setItem('hideSwipeTut', 'true');
@@ -758,7 +766,7 @@
         </div>
         <div class="glossary-item" style="border:none; padding:0; margin:0;">
           <div class="glossary-title">Remaining ${symC}</div>
-          <div class="glossary-desc">The total liquid resources (Spawns + Floating Mana) remaining after the stack resolves.<br><b>Hold down</b> the number to see the exact breakdown of Spawns / Mana.</div>
+          <div class="glossary-desc">The total liquid resources (Spawns + Floating Mana) remaining after the stack resolves. <b>Hold down</b> the number to see the exact breakdown of Spawns / Mana.</div>
         </div>`;
     } else if (currentMode === 2) {
       dynamicHTML = `
@@ -808,22 +816,6 @@
     target.classList.add(isExtreme ? 'pop-extreme' : 'pop');
   }
 
-  function applyInfiniteClasses(isInf) {
-    const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
-    const paymentsEl = document.getElementById('out-payments');
-    const leftoverEl = document.getElementById('out-leftover');
-    
-    if (isInf) {
-      spellsEl.classList.add('hero-infinite');
-      paymentsEl.classList.add('symbol-infinite');
-      leftoverEl.classList.add('symbol-infinite');
-    } else {
-      spellsEl.classList.remove('hero-infinite');
-      paymentsEl.classList.remove('symbol-infinite');
-      leftoverEl.classList.remove('symbol-infinite');
-    }
-  }
-
   function switchMode(mode, title) {
     currentMode = mode;
     document.getElementById('sys-mode-text').innerText = title;
@@ -857,7 +849,13 @@
         card.classList.add('flash-reset');
       }
     });
-    updateAllDisplays();
+    
+    // Hard reset visual values to 0
+    Object.keys(s).forEach(k => {
+        let el = document.getElementById(`val${currentMode}-${k}`);
+        if(el) el.innerText = "0";
+    });
+    
     calcCurrent();
   }
 
@@ -886,12 +884,6 @@
   }
 
   function stopUpdate() { clearTimeout(holdTimer); clearInterval(holdInterval); }
-
-  function updateAllDisplays() {
-    Object.keys(state1).forEach(k => document.getElementById(`val1-${k}`).innerText = state1[k]);
-    Object.keys(state2).forEach(k => document.getElementById(`val2-${k}`).innerText = state2[k]);
-    Object.keys(state3).forEach(k => document.getElementById(`val3-${k}`).innerText = state3[k]);
-  }
 
   function calcCurrent() {
     if (currentMode === 1) calcMode1();
@@ -929,8 +921,6 @@
       damage = Infinity; 
     }
     
-    applyInfiniteClasses(isInfCurrent);
-    
     const damageBox = document.getElementById('damage-box');
     if (F > 0) {
       damageBox.style.display = 'block';
@@ -954,7 +944,15 @@
     
     const newSpellsText = isInfCurrent ? "INFINITE" : currentSpells.toString();
     const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
-    if (spellsEl.innerHTML !== newSpellsText) { spellsEl.innerHTML = newSpellsText; triggerPop('out-spells', isInfCurrent); }
+    if (spellsEl.innerHTML !== newSpellsText) { 
+        spellsEl.innerHTML = newSpellsText; 
+        if(isInfCurrent) {
+             spellsEl.classList.add('hero-infinite');
+        } else {
+             spellsEl.classList.remove('hero-infinite');
+        }
+        triggerPop('out-spells', isInfCurrent); 
+    }
     
     const newPaymentsText = isInfCurrent ? symInf : P.toString();
     if (document.getElementById('out-payments').innerHTML !== newPaymentsText) { document.getElementById('out-payments').innerHTML = newPaymentsText; triggerPop('out-payments', isInfCurrent); }
