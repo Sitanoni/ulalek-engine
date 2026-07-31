@@ -1,4 +1,4 @@
-Ulalek Stack Engine is a bespoke, mobile-first Progressive Web App (PWA) built for Magic: The Gathering Commander players. Designed specifically for colorless Eldrazi lists featuring Ulalek, Fused Atrocity, it eliminates guesswork during complex stack resolution by providing instant calculations for:
+Ulalek Engine is a bespoke, mobile-first Progressive Web App (PWA) built for Magic: The Gathering Commander players. Designed specifically for colorless Eldrazi lists featuring Ulalek, Fused Atrocity, it eliminates guesswork during complex stack resolution by providing instant calculations for:
 
 Core Stack Engine (Mode 1): Tracks lethal ETB damage (via Glaring Fleshraker and Echoes of Eternity), copy triggers, and infinite loop requirements.
 
