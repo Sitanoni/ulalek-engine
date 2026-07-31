@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" id="meta-theme-color" content="#0d1424">
+<title>Ulalek</title>
+
+<!-- PWA Manifest explicitly set to FULLSCREEN to remove the top Android status bar -->
+<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Ulalek%22%2C%22short_name%22%3A%22Ulalek%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23080b12%22%2C%22theme_color%22%3A%22%230d1424%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22icon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@700;800&display=swap');
+
+  /* Theme Variables */
+  :root {
+    --bg-color: #080b12;
+    --bg-overlay: rgba(8, 11, 18, 0.92);
+    --bg-image: url('bg.jpg');
+    --panel-bg: rgba(18, 26, 41, 0.75);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --hero-grad: radial-gradient(110% 110% at 50% 0%, rgba(30, 64, 175, 0.85) 0%, rgba(15, 23, 42, 0.85) 100%);
+    --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.6);
+    --header-bg: rgba(15, 23, 42, 0.85);
+    --accent: #3b82f6;
+    --card-glow-opacity: 0.9;
+  }
+
+  body.theme-stealth {
+    --bg-color: #050505;
+    --bg-overlay: rgba(5, 5, 5, 0.96);
+    --bg-image: none;
+    --panel-bg: rgba(20, 20, 20, 0.85);
+    --panel-border: rgba(255, 255, 255, 0.05);
+    --hero-grad: radial-gradient(110% 110% at 50% 0%, rgba(40, 40, 40, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%);
+    --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.9);
+    --header-bg: rgba(18, 18, 18, 0.9);
+    --accent: #737373;
+    --card-glow-opacity: 0.4;
+  }
+
+  /* Structural Base */
+  html, body {
+    height: 100dvh; width: 100%; margin: 0; padding: 0; overflow: hidden;
+    background-color: var(--bg-color); transition: background-color 0.4s ease;
+  }
+
+  body { 
+    font-family: 'Inter', sans-serif; 
+    background-image: 
+      linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+      var(--bg-image),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: cover, cover, 32px 32px, 32px 32px;
+    background-position: center center; background-repeat: no-repeat; background-attachment: fixed;
+    color: #f8fafc; user-select: none; -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box; display: flex; flex-direction: column;
+    transition: background-image 0.4s ease;
+  }
+
+  /* Custom SVG Graphic Styles */
+  .sym-c { width: 1.15em; height: 1.15em; vertical-align: -0.18em; display: inline-block; }
+  .sym-inf { width: 1.25em; height: 0.65em; display: inline-block; vertical-align: middle; }
+
+  /* Top Actions Row */
+  .top-actions {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: max(16px, env(safe-area-inset-top, 16px)) 16px 16px 16px;
+    flex-shrink: 0; width: 100%; box-sizing: border-box; z-index: 10;
+  }
+
+  .engine-header {
+    flex: 1; min-width: 0; 
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: var(--header-bg); backdrop-filter: blur(20px);
+    border: 1px solid var(--panel-border); border-radius: 100px;
+    box-shadow: var(--shadow-soft); cursor: pointer; transition: all 0.2s ease;
+  }
+  .engine-header:active { transform: scale(0.98); }
+  .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+  
+  .pulse-dot { flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; transition: all 0.4s ease; }
+  .pulse-dot.mode-1 { background: #10b981; box-shadow: 0 0 12px #10b981; animation: pulse1 2s infinite; }
+  .pulse-dot.mode-2 { background: #06b6d4; box-shadow: 0 0 12px #06b6d4; animation: pulse2 2s infinite; }
+  .pulse-dot.mode-3 { background: #f43f5e; box-shadow: 0 0 12px #f43f5e; animation: pulse3 2s infinite; }
+  
+  @keyframes pulse1 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #10b981; } }
+  @keyframes pulse2 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #06b6d4; } }
+  @keyframes pulse3 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #f43f5e; } }
+
+  .header-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+  .sys-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; font-weight: 700; margin-bottom: 2px; }
+  .sys-mode { 
+    font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #fff; font-weight: 800; letter-spacing: 0.05em; 
+    text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  
+  .mode-arrow { flex-shrink: 0; color: var(--accent); transition: color 0.4s; margin-left: 6px; }
+
+  /* Circle Action Buttons */
+  .circle-btn {
+    width: 46px; height: 46px; border-radius: 16px; background: var(--header-bg); backdrop-filter: blur(20px);
+    border: 1px solid var(--panel-border); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-shrink: 0; outline: none; color: #94a3b8;
+  }
+  .circle-btn:active { transform: scale(0.92); }
+  .btn-info { color: #60a5fa; border-color: rgba(96, 165, 250, 0.25); }
+  .btn-info:active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+  .btn-reset { color: #fca5a5; border-color: rgba(239, 68, 68, 0.25); }
+  .btn-reset svg { transition: transform 0.4s ease; }
+  .btn-reset:active { background: #ef4444; color: #fff; border-color: #ef4444; }
+  .btn-reset:active svg { transform: rotate(-180deg); }
+
+  /* Modals & Menus */
+  .mode-menu-overlay {
+    position: fixed; inset: 0; background: rgba(4, 6, 10, 0.94); backdrop-filter: blur(28px);
+    z-index: 200; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+    padding: max(80px, env(safe-area-inset-top, 80px)) 24px 24px 24px;
+  }
+  .mode-menu-overlay.active { opacity: 1; visibility: visible; }
+  
+  .modal-content { 
+    display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 500px;
+    transform: translateY(-40px); opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+  }
+  .mode-menu-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
+
+  #info-modal { justify-content: center; padding-top: 24px; }
+  #install-modal { justify-content: center; padding-top: 24px; }
+  
+  .menu-title { font-family: 'Outfit', sans-serif; color: #fff; font-size: 1.8rem; text-align: center; margin-bottom: 8px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+  
+  .mode-card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 18px; border-radius: 20px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(16px); }
+  .mode-card:active { transform: scale(0.95); }
+  .mode-card.active { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
+  .mode-card h2 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #fff; }
+  .mode-card p { margin: 0; font-size: 0.85rem; color: #94a3b8; line-height: 1.4; }
+
+  /* Utilities */
+  .utilities-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+  .toggle-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 4px; display: flex; position: relative; cursor: pointer; align-items: center; }
+  .toggle-option { flex: 1; text-align: center; font-size: 0.75rem; font-weight: 800; color: #64748b; z-index: 2; transition: color 0.3s; letter-spacing: 0.05em; padding: 12px 0; }
+  .toggle-option.active { color: #fff; }
+  .toggle-pill { position: absolute; top: 4px; bottom: 4px; width: calc(50% - 4px); background: #3b82f6; border-radius: 18px; z-index: 1; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+  body.theme-stealth #theme-pill { transform: translateX(100%); background: #525252; box-shadow: 0 0 15px rgba(0,0,0,0.8); }
+  body.haptics-off #haptics-pill { transform: translateX(100%); background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+
+  .install-bubble { background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #34d399; border-radius: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px; color: #fff; font-weight: 800; font-family: 'Outfit', sans-serif; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); margin-top: 4px; }
+  .install-bubble:active { transform: scale(0.95); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+
+  /* Glass Swipe Overlay */
+  .swipe-tut {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+    transition: opacity 0.4s ease; pointer-events: none;
+  }
+  .swipe-anim-container { display: flex; align-items: center; gap: 16px; color: var(--accent); animation: swipeDrift 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+  @keyframes swipeDrift { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-24px); } 75% { transform: translateX(24px); } }
+  .tut-text { color: #fff; font-weight: 800; font-family: 'Outfit'; font-size: 1.5rem; letter-spacing: 0.12em; text-shadow: 0 0 24px rgba(255,255,255,0.4); }
+  
+  .tut-check-container { pointer-events: auto; background: rgba(0,0,0,0.5); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .tut-check-container span { color: #94a3b8; font-size: 0.95rem; font-family: 'Inter', sans-serif; font-weight: 600; }
+  .tut-check-container input { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
+
+  /* App Content Area */
+  .app-content { 
+    flex: 1; overflow-y: auto; padding: 0 16px max(16px, env(safe-area-inset-bottom, 16px)) 16px; 
+    box-sizing: border-box; display: flex; flex-direction: column; position: relative;
+  }
+  .mode-container { 
+    display: none; flex-direction: column; gap: 10px; 
+    max-width: 600px; width: 100%; margin: 0 auto; box-sizing: border-box; flex: 1;
+  }
+  .mode-container.active { display: flex; animation: fadeIn 0.3s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Card Reset Animation */
+  @keyframes flashRed { 0% { background-color: rgba(239, 68, 68, 0.4); transform: scale(0.96); border-color: #ef4444; } 100% { background-color: var(--panel-bg); transform: scale(1); border-color: var(--panel-border); } }
+  .flash-reset { animation: flashRed 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+  /* Pop UI Animations */
+  @keyframes popScale { 0% { transform: scale(1); } 40% { transform: scale(1.25); color: #93c5fd; } 100% { transform: scale(1); } }
+  .pop { animation: popScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes popScaleExtreme { 0% { transform: scale(1); } 40% { transform: scale(1.6); color: #fff; text-shadow: 0 0 30px #fef08a, 0 0 60px #f97316; } 100% { transform: scale(1); } }
+  .pop-extreme { animation: popScaleExtreme 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  
+  .hero-infinite { font-size: 2.8rem !important; letter-spacing: 2px; color: #fff !important; text-shadow: 0 0 20px #fef08a, 0 0 40px #f97316 !important; }
+
+  /* Damage Fire FX */
+  .shake-lethal { animation: shake 0.3s infinite ease-in-out; }
+  .shake-infinite { animation: shake-hard 0.2s infinite ease-in-out; }
+  @keyframes shake { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-2px, 2px); } 50% { transform: translate(2px, -2px); } 75% { transform: translate(-2px, -2px); } }
+  @keyframes shake-hard { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(-3px, 3px) rotate(-1deg); } 50% { transform: translate(3px, -3px) rotate(1deg); } 75% { transform: translate(-3px, -3px) rotate(-1deg); } }
+  
+  .real-fire { position: relative; overflow: hidden; background: linear-gradient(to top, #7f1d1d 0%, #450a0a 100%) !important; border-color: #ef4444 !important; box-shadow: 0 0 25px rgba(239, 68, 68, 0.5) !important; }
+  .real-fire::before { content: ''; position: absolute; top: -50%; left: -50%; right: -50%; bottom: -50%; background: radial-gradient(circle at 50% 120%, #fef08a 0%, transparent 25%), radial-gradient(circle at 50% 90%, #f97316 0%, transparent 45%), radial-gradient(circle at 50% 60%, #ef4444 0%, transparent 65%); filter: blur(10px); mix-blend-mode: color-dodge; animation: flicker 0.6s infinite alternate; z-index: 0; }
+  .real-fire > * { position: relative; z-index: 1; }
+  @keyframes flicker { 0% { transform: translateY(0) scale(1); opacity: 0.8; } 100% { transform: translateY(-10px) scale(1.05); opacity: 1; } }
+
+  /* Compact Bespoke Output Dashboards */
+  .outputs-area { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+
+  .hero { background: var(--hero-grad); padding: 14px 16px; border-radius: 20px; text-align: center; box-shadow: 0 0 0 1px var(--panel-border), var(--shadow-soft); position: relative; overflow: hidden; backdrop-filter: blur(16px); transition: background 0.4s; }
+  .hero-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.22em; color: #93c5fd; margin-bottom: 2px; font-weight: 700; transition: color 0.4s; }
+  body.theme-stealth .hero-label { color: #a3a3a3; }
+  .hero h1 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 3.2rem; color: #ffffff; line-height: 1; font-variant-numeric: tabular-nums; display: inline-block; transition: all 0.2s ease; }
+
+  .metrics { display: flex; gap: 10px; }
+  .metric-box { background: var(--panel-bg); flex: 1; padding: 12px 6px; border-radius: 16px; text-align: center; border: 1px solid var(--panel-border); font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; backdrop-filter: blur(16px); transition: all 0.3s ease; position: relative;}
+  .metric-box strong { display: block; font-family: 'Outfit', sans-serif; font-size: 1.6rem; color: #ffffff; margin-top: 4px; font-variant-numeric: tabular-nums; transition: all 0.3s ease; }
+
+  /* Compact Grid */
+  .grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; margin-bottom: auto; }
+  .grid-full { grid-column: span 2; }
+  
+  .card { 
+    position: relative; background: var(--panel-bg); border-radius: 20px; 
+    border: 1px solid var(--panel-border); backdrop-filter: blur(16px); box-shadow: var(--shadow-soft); 
+    overflow: hidden; transition: all 0.4s ease;
+    display: flex; flex-direction: column; justify-content: center; padding: 12px 10px; gap: 10px;
+  }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: var(--card-glow-opacity); transition: opacity 0.4s; }
+  
+  /* Universal Color Strips */
+  .card.echoes::before { background: #e11d48; box-shadow: 0 0 14px #e11d48; } 
+  .card.fleshraker::before { background: #d97706; box-shadow: 0 0 14px #d97706; } 
+  .card.throne::before { background: #94a3b8; box-shadow: 0 0 14px #94a3b8; } 
+  .card.unsealing::before { background: #2563eb; box-shadow: 0 0 14px #2563eb; } 
+  .card.cast::before { background: #10b981; box-shadow: 0 0 14px #10b981; } 
+  .card.colorless::before { background: #8b5cf6; box-shadow: 0 0 14px #8b5cf6; } 
+  .card.colored::before { background: #06b6d4; box-shadow: 0 0 14px #06b6d4; }
+  .card.spellcost::before { background: #eab308; box-shadow: 0 0 14px #eab308; }
+  .card.leftover::before { background: #ec4899; box-shadow: 0 0 14px #ec4899; }
+  .card.targetmv::before { background: #f43f5e; box-shadow: 0 0 14px #f43f5e; } 
+  
+  .card h3 { margin: 0; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #cbd5e1; font-weight: 700; text-align: center; }
+  
+  .stepper { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); border-radius: 12px; padding: 4px; border: 1px solid rgba(255, 255, 255, 0.04); box-shadow: inset 0 2px 6px rgba(0,0,0,0.4); }
+  .btn { background: rgba(255,255,255,0.08); color: #94a3b8; border: none; font-size: 1.6rem; width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; transition: 0.1s; }
+  .btn:active { transform: scale(0.85); background: rgba(255,255,255,0.22); color: #fff; }
+  
+  .val-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0; height: 100%; pointer-events: none; }
+  .val { font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700; width: 100%; text-align: center; color: #f8fafc; font-variant-numeric: tabular-nums; display: inline-block; }
+
+  /* SVG Accordions */
+  .smooth-accordion { background: var(--panel-bg); border-radius: 18px; border: 1px solid var(--panel-border); backdrop-filter: blur(16px); flex-shrink: 0; overflow: hidden; transition: all 0.4s ease; display: flex; flex-direction: column; margin-bottom: 2px;}
+  .acc-header { padding: 14px 18px; font-weight: 700; cursor: pointer; color: #60a5fa; font-size: 0.88rem; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; transition: color 0.4s; user-select: none; }
+  body.theme-stealth .acc-header { color: #a3a3a3; }
+  
+  .acc-arrow { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .smooth-accordion.open .acc-arrow { transform: rotate(-180deg); }
+  
+  .acc-content-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .smooth-accordion.open .acc-content-wrapper { grid-template-rows: 1fr; }
+  .acc-content-inner { overflow: hidden; }
+  
+  .proof-container { padding: 0 18px 18px 18px; color: #94a3b8; font-size: 0.85rem; white-space: pre-line; line-height: 1.65; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: -4px; max-height: 160px; overflow-y: auto;}
+  .proof-container span { color: #f8fafc; font-weight: 600; }
+  .missing-note { background: rgba(239, 68, 68, 0.12); border-left: 3px solid #ef4444; padding: 12px; margin-top: 12px; border-radius: 8px; color: #fca5a5; }
+
+  /* Dashboards */
+  .dash-container { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; margin-bottom: auto;}
+  .dash { background: var(--header-bg); border: 1px solid var(--panel-border); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft); backdrop-filter: blur(16px); transition: all 0.4s ease; display: flex; flex-direction: column; }
+  .dash.highlight { border-color: #10b981; background: rgba(16, 185, 129, 0.09); box-shadow: 0 0 20px rgba(16, 185, 129, 0.18); }
+  body.theme-stealth .dash.highlight { border-color: #525252; background: rgba(255,255,255,0.05); box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+  
+  .dash-header { padding: 18px 18px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; user-select: none; }
+  .dash-sum-header { display: flex; justify-content: space-between; align-items: center; font-family: 'Outfit', sans-serif; font-size: 1.15rem; color: #fff; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; }
+  .dash-sum-header span { font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+  
+  .dash-sum-stats { display: flex; justify-content: space-between; align-items: center; }
+  .stat-col { display: flex; flex-direction: column; gap: 4px; }
+  .stat-col.right { text-align: right; align-items: flex-end; }
+  .stat-label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+  .stat-val { font-family: 'Outfit', sans-serif; font-size: 1.6rem; color: #fff; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; line-height: 1; }
+  .stat-val.blue { color: var(--accent); transition: color 0.4s; }
+  .stat-val.red { color: #ef4444; font-size: 1.2rem; }
+  
+  .dash-body { padding: 0 18px 18px 18px; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.06); margin-top: -6px; padding-top: 16px;}
+  .mini-proof { font-size: 0.85rem; color: #cbd5e1; line-height: 1.55; border-left: 3px solid var(--accent); padding-left: 12px; margin-bottom: 10px; transition: border-color 0.4s; }
+  .mini-proof b { color: #fff; }
+  .yield-breakdown { font-size: 0.82rem; color: #94a3b8; margin-top: 6px; }
+
+  .badge { font-family: 'Inter', sans-serif; font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; line-height: 1; display: flex; align-items: center; }
+  .badge-ok { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+  body.theme-stealth .badge-ok { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); }
+  .badge-short { background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.35); }
+  
+  .alt-note { font-size: 0.82rem; color: #94a3b8; margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border-top: 1px dashed rgba(255,255,255,0.12); line-height: 1.45; }
+
+  /* Info Guide Items */
+  .guide-header-text { font-size: 0.95rem; color: #fff; line-height: 1.5; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center;}
+  .glossary-item { margin-bottom: 16px; }
+  .glossary-item:last-child { margin-bottom: 0; }
+  .glossary-title { color: #fff; font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; text-align: center; gap: 8px; }
+  .glossary-desc { color: #94a3b8; font-size: 0.9rem; line-height: 1.5; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- SVG Global Definitions -->
+<script>
+  // Authentic MTG Colorless Mana Symbol SVG
+  const symC = `<svg class="sym-c" viewBox="0 0 100 100"><circle cx="48" cy="52" r="44" fill="#000000"/><circle cx="50" cy="48" r="44" fill="#cbc5be"/><path d="M 50 10 Q 50 48 88 48 Q 50 48 50 86 Q 50 48 12 48 Q 50 48 50 10 Z" fill="#181615"/></svg>`;
+  
+  // Symmetrical Geometric Infinity Loop SVG
+  const symInf = `<svg class="sym-inf" viewBox="0 0 100 50"><path d="M25,10 C10,10 10,40 25,40 C35,40 40,30 50,25 C60,20 65,10 75,10 C90,10 90,40 75,40 C65,40 60,30 50,25 C40,20 35,10 25,10 Z" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+</script>
+
+<!-- Glass Swipe Tutorial Overlay -->
+<div id="swipe-tut" class="swipe-tut" style="opacity: 0; display:none;">
+  <div class="swipe-anim-container">
+    <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    <svg viewBox="0 0 24 24" width="54" height="54" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg>
+    <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </div>
+  <div class="tut-text">SWIPE TO CHANGE MODE</div>
+  
+  <label class="tut-check-container" onclick="event.stopPropagation()">
+    <input type="checkbox" id="tut-checkbox">
+    <span>Don't show again</span>
+  </label>
+</div>
+
+<!-- Top Bar Container -->
+<div class="top-actions">
+  <div class="engine-header" onclick="openMenu('mode-menu')">
+    <div class="header-left">
+      <div class="pulse-dot mode-1" id="main-pulse"></div>
+      <div class="header-text">
+        <div class="sys-label">MENU / MODE</div>
+        <div class="sys-mode" id="sys-mode-text">ULALEK STACK ENGINE</div>
+      </div>
+    </div>
+    <svg class="mode-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </div>
+  
+  <button class="circle-btn btn-info" id="top-btn-info" onclick="openInfoModal()">
+    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+  </button>
+  
+  <button class="circle-btn btn-reset" onclick="resetCurrentMode()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+  </button>
+</div>
+
+<!-- Mode Switcher -->
+<div id="mode-menu" class="mode-menu-overlay" onclick="closeMenu(event, 'mode-menu')">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h2 class="menu-title">MODE SELECT</h2>
+    <div class="mode-card active" id="mc-1" onclick="switchMode(1, 'ULALEK STACK ENGINE')">
+      <h2>Ulalek Stack Engine</h2>
+      <p>The core stack calculator. Track lethal ETB damage and infinite loop requirements.</p>
+    </div>
+    <div class="mode-card" id="mc-2" onclick="switchMode(2, 'CAST FEASIBILITY')">
+      <h2>Cast Feasibility</h2>
+      <p>Calculate optimal play lines to ensure you have enough resources left for a second spell.</p>
+    </div>
+    <div class="mode-card" id="mc-3" onclick="switchMode(3, 'KOZILEK OPTIMIZER')">
+      <h2>Kozilek Optimizer</h2>
+      <p>Optimize {X} value against available mana, factoring in Spawns generated mid-resolution.</p>
+    </div>
+
+    <!-- Utilities -->
+    <div class="utilities-row">
+      <div class="toggle-box" onclick="toggleTheme()">
+        <div class="toggle-pill" id="theme-pill"></div>
+        <div class="toggle-option active" id="t-nexus">NEXUS</div>
+        <div class="toggle-option" id="t-stealth">STEALTH</div>
+      </div>
+      <div class="toggle-box" onclick="toggleHaptics()">
+        <div class="toggle-pill" id="haptics-pill"></div>
+        <div class="toggle-option active" id="h-on">HAPTICS</div>
+        <div class="toggle-option" id="h-off">OFF</div>
+      </div>
+    </div>
+    <div class="install-bubble" id="install-btn-container" onclick="openMenu('install-modal'); closeMenu(null, 'mode-menu');">
+      <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      INSTALL ON PHONE
+    </div>
+  </div>
+</div>
+
+<!-- Info Guide Modal (Dynamic Mode-Matching Content) -->
+<div id="info-modal" class="mode-menu-overlay" onclick="closeMenu(event, 'info-modal')">
+  <div class="mode-card modal-content" id="info-card-container" style="border-color: #10b981; box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);" onclick="event.stopPropagation()">
+    <h2 id="guide-title" style="color: #10b981; justify-content: center; margin-bottom: 4px; text-align: center;">GUIDE</h2>
+    <div id="dynamic-info"></div>
+    <button class="btn" id="guide-close-btn" style="width: 100%; margin-top: 10px; background: #10b981; color: #fff; font-size: 1.1rem; font-family: 'Outfit'; height:50px;" onclick="closeMenu(null, 'info-modal')">CLOSE</button>
+  </div>
+</div>
+
+<!-- Install Modal -->
+<div id="install-modal" class="mode-menu-overlay" onclick="closeMenu(event, 'install-modal')">
+  <div class="mode-card modal-content" style="border-color: #10b981; box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);" onclick="event.stopPropagation()">
+    <h2 style="color: #10b981; justify-content: center; margin-bottom: 12px; text-align: center;">INSTALL APP</h2>
+    <p style="color: #fff; font-size: 1rem; margin-bottom: 12px; text-align: center;">To install as a Full-Screen App on Android:</p>
+    <p>1. Tap the <b>3-dot menu icon (⋮)</b> in the top right corner of Chrome.</p>
+    <p>2. Select <b>"Install and create shortcut"</b>.</p>
+    <p>3. Launch the app directly from your home screen icon.</p>
+    <button class="btn" style="width: 100%; margin-top: 16px; background: #10b981; color: #fff; font-size: 1.1rem; font-family: 'Outfit'; height:50px;" onclick="closeMenu(null, 'install-modal')">GOT IT</button>
+  </div>
+</div>
+
+<div class="app-content" id="swipe-area">
+  
+  <!-- MODE 1 -->
+  <div id="mode1" class="mode-container active">
+    
+    <div class="outputs-area">
+      <div class="hero">
+        <div class="hero-label">Max Copies</div>
+        <h1 id="out-spells"><span class="val">1</span></h1>
+      </div>
+      <div class="metrics">
+        <div class="metric-box">Payments <strong id="out-payments">0</strong></div>
+        <div class="metric-box" style="user-select:none; -webkit-user-select:none; cursor:pointer;" onpointerdown="showBreakdown(true)" onpointerup="showBreakdown(false)" onpointerleave="showBreakdown(false)" oncontextmenu="event.preventDefault()">
+          REMAINING <script>document.write(symC);</script>
+          <strong id="out-leftover">0</strong>
+        </div>
+        <div class="metric-box" id="damage-box" style="display:none;">ETB Damage <strong id="out-damage">0</strong></div>
+      </div>
+      <div class="smooth-accordion" id="acc1">
+        <div class="acc-header" onclick="toggleAccordion('acc1')">
+          Stack Execution (The Proof) 
+          <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="acc-content-wrapper">
+          <div class="acc-content-inner">
+            <div class="proof-container" id="m1-proof"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid">
+      <div class="card echoes" id="c1-echoes">
+        <h3>Echoes of Eternity</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'echoes', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val1-echoes">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'echoes', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card fleshraker" id="c1-fleshraker">
+        <h3>Glaring Fleshraker</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'fleshraker', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val1-fleshraker">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'fleshraker', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card throne" id="c1-throne">
+        <h3>Roaming Throne</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'throne', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val1-throne">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'throne', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card unsealing" id="c1-unsealing">
+        <h3>Kozilek's Unsealing</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'unsealing', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val1-unsealing">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'unsealing', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card cast" id="c1-cast">
+        <h3>Spawns on Cast</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'cast', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val1-cast">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'cast', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card colorless" id="c1-mana">
+        <h3><script>document.write(symC);</script> Pool</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'mana', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val1-mana">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 1, 'mana', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE 2 -->
+  <div id="mode2" class="mode-container">
+    <div class="dash-container" id="m2-result-container"></div>
+    <div class="grid">
+      <div class="card cast" id="c2-spawns">
+        <h3>Spawns on Cast</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'spawns', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val2-spawns">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'spawns', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card colorless" id="c2-colorless">
+        <h3><script>document.write(symC);</script> Pool</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'colorless', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val2-colorless">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'colorless', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card spellcost" id="c2-spellcost">
+        <h3>New Spell MV</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'spellcost', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val2-spellcost">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'spellcost', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card colored" id="c2-colored">
+        <h3>Colored Mana</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'colored', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val2-colored">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'colored', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card leftover grid-full" id="c2-leftover">
+        <h3>Target Leftover <script>document.write(symC);</script></h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'leftover', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val2-leftover">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 2, 'leftover', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE 3 -->
+  <div id="mode3" class="mode-container">
+    <div class="dash-container" id="m3-result-container"></div>
+    <div class="grid">
+      <div class="card cast" id="c3-spawns">
+        <h3>Spawns on Cast</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 3, 'spawns', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val3-spawns">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 3, 'spawns', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card colorless" id="c3-colorless">
+        <h3><script>document.write(symC);</script> Pool</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 3, 'colorless', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val3-colorless">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 3, 'colorless', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card targetmv" id="c3-targetmv">
+        <h3>Target MV (Min X)</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 3, 'targetmv', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val3-targetmv">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 3, 'targetmv', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+      <div class="card colored" id="c3-colored">
+        <h3>Colored Mana</h3>
+        <div class="stepper">
+          <button class="btn" onpointerdown="startUpdate(event, 3, 'colored', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button>
+          <div class="val-wrapper"><span class="val" id="val3-colored">0</span></div>
+          <button class="btn" onpointerdown="startUpdate(event, 3, 'colored', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentMode = 1;
+  let isStealth = false;
+  let hapticsEnabled = true;
+
+  const state1 = { echoes: 0, fleshraker: 0, throne: 0, unsealing: 0, cast: 0, mana: 0 };
+  const state2 = { colored: 0, colorless: 0, spellcost: 0, spawns: 0, leftover: 0 };
+  const state3 = { colored: 0, colorless: 0, spawns: 0, targetmv: 0 };
+
+  // Breakdown Logic
+  let finalSpawns = 0;
+  let finalMana = 0;
+  let isInfCurrent = false;
+
+  function showBreakdown(state) {
+    if(currentMode !== 1 || isInfCurrent) return;
+    const el = document.getElementById('out-leftover');
+    if(state) {
+      el.innerHTML = `<span style="color:#10b981">${finalSpawns}</span><span style="color:#94a3b8; font-size:0.8em; margin:0 6px;">/</span><span style="color:#8b5cf6">${finalMana}</span>`;
+    } else {
+      el.innerHTML = (finalSpawns + finalMana).toString();
+    }
+  }
+
+  // PWA Install Check (Hides button if already installed)
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone) {
+      const installBtn = document.getElementById('install-btn-container');
+      if(installBtn) installBtn.style.display = 'none';
+    }
+
+    if(localStorage.getItem('hideSwipeTut') !== 'true') {
+      const tut = document.getElementById('swipe-tut');
+      tut.style.display = 'flex';
+      setTimeout(() => { tut.style.opacity = '1'; }, 100);
+    }
+  });
+
+  function dismissTut() {
+    const tut = document.getElementById('swipe-tut');
+    if(!tut || tut.style.opacity === '0') return;
+    
+    if(document.getElementById('tut-checkbox').checked) {
+      localStorage.setItem('hideSwipeTut', 'true');
+    }
+    
+    tut.style.opacity = '0';
+    setTimeout(() => { tut.style.display = 'none'; }, 400);
+  }
+
+  document.addEventListener('pointerdown', dismissTut, {passive: true});
+  document.addEventListener('touchstart', dismissTut, {passive: true});
+
+  // Swipe Gesture Engine
+  let touchStartX = 0;
+  let touchEndX = 0;
+  document.getElementById('swipe-area').addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+  document.getElementById('swipe-area').addEventListener('touchend', e => {
+    if (e.target.tagName.toLowerCase() === 'button') return;
+    touchEndX = e.changedTouches[0].screenX;
+    if (touchEndX < touchStartX - 70) {
+      let nextMode = currentMode === 1 ? 2 : currentMode === 2 ? 3 : 1;
+      let title = nextMode === 1 ? "ULALEK STACK ENGINE" : nextMode === 2 ? "CAST FEASIBILITY" : "KOZILEK OPTIMIZER";
+      switchMode(nextMode, title);
+    }
+    if (touchEndX > touchStartX + 70) {
+      let prevMode = currentMode === 1 ? 3 : currentMode === 2 ? 1 : 2;
+      let title = prevMode === 1 ? "ULALEK STACK ENGINE" : prevMode === 2 ? "CAST FEASIBILITY" : "KOZILEK OPTIMIZER";
+      switchMode(prevMode, title);
+    }
+  }, {passive: true});
+
+  // Restore Preferences
+  if(localStorage.getItem('ulalekTheme') === 'stealth') { toggleTheme(); }
+  if(localStorage.getItem('ulalekHaptics') === 'off') { toggleHaptics(); }
+
+  function vibrate() {
+    if (hapticsEnabled && navigator.vibrate) { navigator.vibrate(2); }
+  }
+
+  function toggleTheme() {
+    isStealth = !isStealth;
+    vibrate();
+    const body = document.body;
+    const nexusOpt = document.getElementById('t-nexus');
+    const stealthOpt = document.getElementById('t-stealth');
+    const metaTheme = document.getElementById('meta-theme-color');
+    
+    if (isStealth) {
+      body.classList.add('theme-stealth');
+      nexusOpt.classList.remove('active');
+      stealthOpt.classList.add('active');
+      metaTheme.setAttribute("content", "#050505");
+      localStorage.setItem('ulalekTheme', 'stealth');
+    } else {
+      body.classList.remove('theme-stealth');
+      stealthOpt.classList.remove('active');
+      nexusOpt.classList.add('active');
+      metaTheme.setAttribute("content", "#0d1424");
+      localStorage.setItem('ulalekTheme', 'nexus');
+    }
+  }
+
+  function toggleHaptics() {
+    hapticsEnabled = !hapticsEnabled;
+    if(hapticsEnabled) vibrate();
+    const body = document.body;
+    const onOpt = document.getElementById('h-on');
+    const offOpt = document.getElementById('h-off');
+    
+    if (!hapticsEnabled) {
+      body.classList.add('haptics-off');
+      onOpt.classList.remove('active');
+      offOpt.classList.add('active');
+      localStorage.setItem('ulalekHaptics', 'off');
+    } else {
+      body.classList.remove('haptics-off');
+      offOpt.classList.remove('active');
+      onOpt.classList.add('active');
+      localStorage.setItem('ulalekHaptics', 'on');
+    }
+  }
+
+  function openMenu(id) {
+    vibrate();
+    document.getElementById(id).classList.add('active');
+  }
+
+  function closeMenu(e, id) {
+    if (e && e.target !== e.currentTarget) return;
+    vibrate();
+    document.getElementById(id).classList.remove('active');
+  }
+
+  function toggleAccordion(id) {
+    vibrate();
+    const acc = document.getElementById(id);
+    acc.classList.toggle('open');
+  }
+
+  function openInfoModal() {
+    vibrate();
+    let title = currentMode === 1 ? "ULALEK STACK ENGINE" : currentMode === 2 ? "CAST FEASIBILITY" : "KOZILEK OPTIMIZER";
+    let themeColor = currentMode === 1 ? "#10b981" : currentMode === 2 ? "#06b6d4" : "#f43f5e";
+    let glowColor = currentMode === 1 ? "rgba(16, 185, 129, 0.2)" : currentMode === 2 ? "rgba(6, 182, 212, 0.2)" : "rgba(244, 63, 94, 0.2)";
+
+    const guideCard = document.getElementById('info-card-container');
+    const guideTitle = document.getElementById('guide-title');
+    const guideBtn = document.getElementById('guide-close-btn');
+
+    guideCard.style.borderColor = themeColor;
+    guideCard.style.boxShadow = `0 0 30px ${glowColor}`;
+    guideTitle.style.color = themeColor;
+    guideTitle.innerText = title + " GUIDE";
+    guideBtn.style.background = themeColor;
+
+    let dynamicHTML = "";
+    if (currentMode === 1) {
+      dynamicHTML = `
+        <div class="guide-header-text">Tracks lethal ETB damage, infinite loop requirements, and exact stack mathematics.</div>
+        <div class="glossary-item">
+          <div class="glossary-title">Permanents on Board</div>
+          <div class="glossary-desc">For <b>Echoes</b>, <b>Fleshraker</b>, <b>Throne</b>, and <b>Unsealing</b>: Input the exact number of these permanents currently under your control on the battlefield.</div>
+        </div>
+        <div class="glossary-item">
+          <div class="glossary-title">Spawns on Cast</div>
+          <div class="glossary-desc">The <b>TOTAL</b> number of Eldrazi Spawns/Scions generated the moment you cast the spell. This includes the spell's own effect AND any triggered abilities from your permanents.</div>
+        </div>
+        <div class="glossary-item">
+          <div class="glossary-title">${symC} Pool</div>
+          <div class="glossary-desc">Your floating colorless mana available <b>before</b> jumping into the loop.</div>
+        </div>
+        <div class="glossary-item">
+          <div class="glossary-title">Payments</div>
+          <div class="glossary-desc">Tracks the total number of times you pay the ${symC}${symC} Ulalek copy tax during the loop.</div>
+        </div>
+        <div class="glossary-item" style="border:none; padding:0; margin:0;">
+          <div class="glossary-title">Remaining ${symC}</div>
+          <div class="glossary-desc">The total liquid resources (Spawns + Floating Mana) remaining after the stack resolves.<br><b>Hold down</b> the number to see the exact breakdown of Spawns / Mana.</div>
+        </div>`;
+    } else if (currentMode === 2) {
+      dynamicHTML = `
+        <div class="guide-header-text">Calculates if you can afford to cast and copy a spell while retaining enough mana for a specific follow-up play.</div>
+        <div class="glossary-item">
+          <div class="glossary-title">New Spell MV</div>
+          <div class="glossary-desc">The total Mana Value (or casting cost) of the spell you are attempting to cast and copy.</div>
+        </div>
+        <div class="glossary-item">
+          <div class="glossary-title">Colored / ${symC} Pool</div>
+          <div class="glossary-desc">The engine assumes you will spend <b>Colored Mana</b> first to cast the spell, intentionally preserving your ${symC} for the Ulalek copy tax.</div>
+        </div>
+        <div class="glossary-item">
+          <div class="glossary-title">Spawns on Cast</div>
+          <div class="glossary-desc">The <b>TOTAL</b> number of Eldrazi Spawns/Scions generated the moment you cast the spell. This includes the spell's own effect AND any triggered abilities from your permanents.</div>
+        </div>
+        <div class="glossary-item" style="border:none; padding:0; margin:0;">
+          <div class="glossary-title">Target Leftover ${symC}</div>
+          <div class="glossary-desc">The exact amount of liquid mana you want to remain in your pool AFTER this entire stack fully resolves so you can cast a second spell.</div>
+        </div>`;
+    } else if (currentMode === 3) {
+      dynamicHTML = `
+        <div class="guide-header-text">Optimizes Kozilek's Command X value against your mana pool while managing the Ulalek copy tax.</div>
+        <div class="glossary-item">
+          <div class="glossary-title">Target MV (Min X)</div>
+          <div class="glossary-desc">The minimum value of X required to successfully exile your opponent's target threat.</div>
+        </div>
+        <div class="glossary-item">
+          <div class="glossary-title">Colored / ${symC} Pool</div>
+          <div class="glossary-desc">Colored mana is dumped efficiently directly into X. The engine calculates if you have enough ${symC} to cast it AND copy it.</div>
+        </div>
+        <div class="glossary-item" style="border:none; padding:0; margin:0;">
+          <div class="glossary-title">Spawns on Cast</div>
+          <div class="glossary-desc">The <b>TOTAL</b> number of Eldrazi Spawns/Scions generated the moment you cast the spell. This includes the spell's own effect AND any triggered abilities from your permanents.</div>
+        </div>`;
+    }
+    document.getElementById('dynamic-info').innerHTML = dynamicHTML;
+    document.getElementById('info-modal').classList.add('active');
+  }
+
+  function triggerPop(elementId, isExtreme = false) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const target = el.tagName === 'H1' ? el.querySelector('span') || el : el;
+    target.classList.remove('pop', 'pop-extreme');
+    void target.offsetWidth; 
+    target.classList.add(isExtreme ? 'pop-extreme' : 'pop');
+  }
+
+  function applyInfiniteClasses(isInf) {
+    const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
+    const paymentsEl = document.getElementById('out-payments');
+    const leftoverEl = document.getElementById('out-leftover');
+    
+    if (isInf) {
+      spellsEl.classList.add('hero-infinite');
+      paymentsEl.classList.add('symbol-infinite');
+      leftoverEl.classList.add('symbol-infinite');
+    } else {
+      spellsEl.classList.remove('hero-infinite');
+      paymentsEl.classList.remove('symbol-infinite');
+      leftoverEl.classList.remove('symbol-infinite');
+    }
+  }
+
+  function switchMode(mode, title) {
+    currentMode = mode;
+    document.getElementById('sys-mode-text').innerText = title;
+    
+    const pulse = document.getElementById('main-pulse');
+    pulse.className = 'pulse-dot mode-' + mode;
+
+    document.getElementById('mode-menu').classList.remove('active');
+    document.querySelectorAll('.mode-container').forEach(c => c.classList.remove('active'));
+    document.getElementById('mode' + mode).classList.add('active');
+    document.querySelectorAll('.mode-card').forEach((c, i) => {
+      if(i === mode - 1) c.classList.add('active'); else c.classList.remove('active');
+    });
+    vibrate();
+    calcCurrent();
+  }
+
+  function resetCurrentMode() {
+    vibrate();
+    let s = currentMode === 1 ? state1 : currentMode === 2 ? state2 : state3;
+    let changedKeys = [];
+    for (let k in s) {
+      if (s[k] > 0) changedKeys.push(k);
+      s[k] = 0;
+    }
+    changedKeys.forEach(k => {
+      let card = document.getElementById(`c${currentMode}-${k}`);
+      if (card) {
+        card.classList.remove('flash-reset');
+        void card.offsetWidth;
+        card.classList.add('flash-reset');
+      }
+    });
+    updateAllDisplays();
+    calcCurrent();
+  }
+
+  let holdTimer, holdInterval;
+  function startUpdate(e, mode, key, delta) {
+    if (e.button !== 0 && e.type !== 'touchstart') return;
+    stopUpdate();
+    let s = mode === 1 ? state1 : mode === 2 ? state2 : state3;
+    let val = Math.max(0, parseInt(s[key] || 0) + delta);
+    s[key] = val;
+    document.getElementById(`val${mode}-${key}`).innerText = val;
+    triggerPop(`val${mode}-${key}`, false);
+    vibrate();
+    calcCurrent();
+
+    holdTimer = setTimeout(() => { 
+      holdInterval = setInterval(() => {
+        let val = Math.max(0, parseInt(s[key] || 0) + delta);
+        s[key] = val;
+        document.getElementById(`val${mode}-${key}`).innerText = val;
+        triggerPop(`val${mode}-${key}`, false);
+        vibrate();
+        calcCurrent();
+      }, 80); 
+    }, 400);
+  }
+
+  function stopUpdate() { clearTimeout(holdTimer); clearInterval(holdInterval); }
+
+  function updateAllDisplays() {
+    Object.keys(state1).forEach(k => document.getElementById(`val1-${k}`).innerText = state1[k]);
+    Object.keys(state2).forEach(k => document.getElementById(`val2-${k}`).innerText = state2[k]);
+    Object.keys(state3).forEach(k => document.getElementById(`val3-${k}`).innerText = state3[k]);
+  }
+
+  function calcCurrent() {
+    if (currentMode === 1) calcMode1();
+    else if (currentMode === 2) calcMode2();
+    else if (currentMode === 3) calcMode3();
+  }
+
+  function calcMode1() {
+    const { echoes: E, fleshraker: F, throne: R, unsealing: K, cast: C, mana: M } = state1;
+    const U = 1 + E + R;
+    const S = (C * (1 + E)) + (F * (1 + E + R)) + (K * 2 * (1 + E));
+    isInfCurrent = (U >= 2 && S >= 2 && (M + S >= 4));
+    let P = 0, currentSpells = 1 + E, totalSpawnsGen = S, damage = 0;
+    
+    finalSpawns = S;
+    finalMana = M;
+
+    if (!isInfCurrent) {
+      let currentM = M, currentS = S, currentU = U, failsafe = 0;
+      while (currentU > 0 && (currentM + currentS >= 2)) {
+        let manaUsed = Math.min(currentM, 2);
+        currentM -= manaUsed;
+        let spawnsUsed = 2 - manaUsed;
+        currentS -= spawnsUsed;
+        P++; currentU--; currentSpells *= 2; currentU *= 2;
+        let copiedSpawns = currentS;
+        currentS += copiedSpawns;
+        totalSpawnsGen += copiedSpawns;
+        failsafe++; if(failsafe > 1000) break;
+      }
+      finalSpawns = currentS;
+      finalMana = currentM;
+      damage = (currentSpells + totalSpawnsGen) * (F * (1 + E + R));
+    } else {
+      damage = Infinity; 
+    }
+    
+    applyInfiniteClasses(isInfCurrent);
+    
+    const damageBox = document.getElementById('damage-box');
+    if (F > 0) {
+      damageBox.style.display = 'block';
+      damageBox.className = 'metric-box';
+      void damageBox.offsetWidth; 
+      if (isInfCurrent) {
+        damageBox.classList.add('real-fire', 'shake-infinite');
+      } else if (damage >= 40) {
+        damageBox.classList.add('real-fire', 'shake-lethal');
+      }
+      
+      const newDamageText = isInfCurrent ? symInf : damage.toString();
+      if (document.getElementById('out-damage').innerHTML !== newDamageText) {
+        document.getElementById('out-damage').innerHTML = newDamageText;
+        triggerPop('out-damage', isInfCurrent);
+      }
+    } else {
+      damageBox.style.display = 'none';
+      damageBox.className = 'metric-box';
+    }
+    
+    const newSpellsText = isInfCurrent ? "INFINITE" : currentSpells.toString();
+    const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
+    if (spellsEl.innerHTML !== newSpellsText) { spellsEl.innerHTML = newSpellsText; triggerPop('out-spells', isInfCurrent); }
+    
+    const newPaymentsText = isInfCurrent ? symInf : P.toString();
+    if (document.getElementById('out-payments').innerHTML !== newPaymentsText) { document.getElementById('out-payments').innerHTML = newPaymentsText; triggerPop('out-payments', isInfCurrent); }
+    
+    const newLeftoverText = isInfCurrent ? symInf : (finalSpawns + finalMana).toString();
+    if (document.getElementById('out-leftover').innerHTML !== newLeftoverText) { document.getElementById('out-leftover').innerHTML = newLeftoverText; triggerPop('out-leftover', isInfCurrent); }
+    
+    let proof = ``;
+    let spawnsNeeded = Math.max(0, 2 - M);
+    
+    if (isInfCurrent || P > 0) {
+      let step = 1;
+      if (M >= 2) {
+        proof += `<span>${step++}.</span> Put 1 Ulalek trigger on TOP.\n`;
+        if (S > 0) proof += `<span>${step++}.</span> Put ALL ${S} Spawn trigger(s) BELOW it.\n`;
+        if (U > 1) proof += `<span>${step++}.</span> Put the remaining ${U - 1} Ulalek trigger(s) at the bottom.\n`;
+        proof += `<span>${step++}.</span> Pay ${symC}${symC} using floating mana for the top Ulalek.\n`;
+        proof += `<span>${step++}.</span> It copies the stack below it!\n`;
+      } else {
+        proof += `<span>${step++}.</span> Put ${spawnsNeeded} Spawn trigger(s) on TOP.\n`;
+        proof += `<span>${step++}.</span> Put 1 Ulalek trigger NEXT.\n`;
+        let remainingSpawns = S - spawnsNeeded;
+        if (remainingSpawns > 0 || U > 1) {
+          let textArr = [];
+          if (remainingSpawns > 0) textArr.push(`${remainingSpawns} Spawn trigger(s)`);
+          if (U > 1) textArr.push(`${U - 1} Ulalek trigger(s)`);
+          proof += `<span>${step++}.</span> Put the remaining ${textArr.join(' and ')} BELOW it.\n`;
+        }
+        proof += `<span>${step++}.</span> Resolve the top Spawns and sacrifice them to generate ${symC}${symC}.\n`;
+        proof += `<span>${step++}.</span> Pay ${symC}${symC} for the Ulalek trigger just below them.\n`;
+        proof += `<span>${step++}.</span> It copies the stack below it!\n`;
+      }
+      if (isInfCurrent) proof += `<span>${step++}.</span> Reorder the newly copied Spawns to the very top of the new stack to pay for the next copied Ulalek. Repeat infinitely.`;
+      else if (P > 1) proof += `<span>${step++}.</span> Reorder the newly copied Spawns to the top to make the remaining ${P - 1} payment(s).`;
+      else proof += `<span>${step++}.</span> You are out of mana. Let the stack fully resolve.`;
+    } else {
+      proof = `Not enough mana to pay ${symC}${symC}. Spell resolves normally.`;
+      let missing = [];
+      if (U < 2) missing.push(`${2 - U} more copy trigger(s)`);
+      if (S < 2 && (M+S) < 4) missing.push(`Spawn generation or floating mana`);
+      if (missing.length > 0) proof += `<div class="missing-note">⚠️ <b>Missing to jumpstart loop:</b><br/>${missing.join('<br/>')}</div>`;
+    }
+    document.getElementById('m1-proof').innerHTML = proof;
+  }
+
+  function calcMode2() {
+    const { colored: Col, colorless: C, spellcost: Cost, spawns: SS, leftover: L } = state2;
+    const Total = Col + C;
+    let res = "";
+
+    if (Total < Cost) {
+      res = `
+        <div class="dash">
+          <div class="dash-header" style="cursor:default;">
+            <div class="dash-sum-header"><span style="color:#ef4444;">CANNOT CAST</span></div>
+            <div class="stat-val red">Need ${Cost} mana (Have ${Total})</div>
+          </div>
+        </div>`;
+    } else {
+      const RemTotal = Total - Cost;
+      const RemC = C - Math.max(0, Cost - Col); 
+      let copyHTML = "";
+      
+      if (RemC >= 2) {
+        const Net = RemTotal - 2 + (SS * 2);
+        const MaxAffordable = Math.max(0, Total - 2 + (SS * 2) - L);
+        const diff = Net - L;
+        const badge = diff >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${diff} SHORT</span>`;
+        copyHTML = `
+        <div class="dash highlight smooth-accordion" id="d2a">
+          <div class="dash-header acc-header" onclick="toggleAccordion('d2a')">
+            <div style="display:flex; flex-direction:column; gap:14px; width:100%;">
+              <div class="dash-sum-header">COPIED CAST <span style="display:flex; align-items:center; gap:6px;">${symC}${symC} PAID (UNDER) <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+              <div class="dash-sum-stats">
+                <div class="stat-col"><div class="stat-label">Net Remaining</div><div class="stat-val">${Net} ${badge}</div></div>
+                <div class="stat-col right"><div class="stat-label">Max Allowed MV</div><div class="stat-val blue">${MaxAffordable}</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="acc-content-wrapper">
+            <div class="acc-content-inner">
+              <div class="dash-body">
+                <div class="mini-proof"><b>Proof:</b> You hold back 2 ${symC} upfront. Stack the Cast Triggers BELOW Ulalek. Pay the 2 ${symC} tax immediately. Ulalek copies the spell <b>AND doubles the cast triggers!</b></div>
+                <div class="yield-breakdown">Result: +${SS*2} Spawns generated.</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      } 
+      else if (RemC + SS >= 2) {
+        const Net = RemTotal + SS - 2;
+        const MaxAffordable = Math.max(0, Total + SS - 2 - L);
+        const diff = Net - L;
+        const badge = diff >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${diff} SHORT</span>`;
+        copyHTML = `
+        <div class="dash highlight smooth-accordion" id="d2b">
+          <div class="dash-header acc-header" onclick="toggleAccordion('d2b')">
+            <div style="display:flex; flex-direction:column; gap:14px; width:100%;">
+              <div class="dash-sum-header">COPIED CAST <span style="display:flex; align-items:center; gap:6px;">${symC}${symC} PAID (OVER) <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+              <div class="dash-sum-stats">
+                <div class="stat-col"><div class="stat-label">Net Remaining</div><div class="stat-val">${Net} ${badge}</div></div>
+                <div class="stat-col right"><div class="stat-label">Max Allowed MV</div><div class="stat-val blue">${MaxAffordable}</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="acc-content-wrapper">
+            <div class="acc-content-inner">
+              <div class="dash-body">
+                <div class="mini-proof"><b>Proof:</b> Stack the Cast Triggers ABOVE Ulalek. Let them resolve, giving you ${SS} Spawns. You sacrifice them combined with your floating ${symC} to pay the tax mid-resolution.</div>
+                <div class="yield-breakdown">Result: Spawns are consumed for the tax and NOT doubled.</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      } else {
+        copyHTML = `
+        <div class="dash">
+          <div class="dash-header" style="cursor:default;">
+            <div class="dash-sum-header"><span style="color:#fca5a5;">CANNOT AFFORD ${symC}${symC} COPY</span></div>
+            <div class="stat-val red">Short on resources mid-resolution</div>
+          </div>
+        </div>`;
+      }
+      
+      const NetNoCopy = RemTotal + SS;
+      const MaxAffordableNoCopy = Math.max(0, Total + SS - L);
+      const diffNoCopy = NetNoCopy - L;
+      const badgeNoCopy = diffNoCopy >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${diffNoCopy} SHORT</span>`;
+      
+      const noCopyHTML = `
+        <div class="dash smooth-accordion" id="d2c">
+          <div class="dash-header acc-header" onclick="toggleAccordion('d2c')">
+             <div style="display:flex; flex-direction:column; gap:14px; width:100%;">
+              <div class="dash-sum-header">SINGLE CAST <span style="display:flex; align-items:center; gap:6px;">NO COPY <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+              <div class="dash-sum-stats">
+                <div class="stat-col"><div class="stat-label">Net Remaining</div><div class="stat-val">${NetNoCopy} ${badgeNoCopy}</div></div>
+                <div class="stat-col right"><div class="stat-label">Max Allowed MV</div><div class="stat-val blue">${MaxAffordableNoCopy}</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="acc-content-wrapper">
+            <div class="acc-content-inner">
+              <div class="dash-body">
+                <div class="mini-proof"><b>Proof:</b> Cast spell normally. Ignore the Ulalek tax to save remaining mana. The Cast Triggers resolve normally.</div>
+                <div class="yield-breakdown">Result: +${SS} Spawns generated.</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      res = copyHTML + noCopyHTML;
+    }
+    document.getElementById('m2-result-container').innerHTML = res;
+  }
+
+  function calcMode3() {
+    const { colored: Col, colorless: C, spawns: SC, targetmv: MV } = state3;
+    let res = "";
+
+    if (C < 2) {
+       res = `
+       <div class="dash">
+          <div class="dash-header" style="cursor:default;">
+            <div class="dash-sum-header"><span style="color:#ef4444;">CANNOT CAST</span></div>
+            <div class="stat-val red">Requires ${symC}${symC} base cost</div>
+          </div>
+        </div>`;
+       document.getElementById('m3-result-container').innerHTML = res;
+       return;
+    }
+
+    const upfrontCAvailForX = C - 2; 
+    const cToReserveForTax = Math.max(0, 2 - SC);
+
+    let validA1 = false; let xA1 = 0, yieldA1 = 0, strA1 = "";
+    if (C >= 4) {
+        xA1 = Col + (C - 4);
+        if (xA1 >= MV) {
+            validA1 = true;
+            yieldA1 = (xA1 * 2) + (SC * 2); 
+            strA1 = `
+            <div class="dash highlight smooth-accordion" id="d3a">
+              <div class="dash-header acc-header" onclick="toggleAccordion('d3a')">
+                <div style="display:flex; flex-direction:column; gap:14px; width:100%;">
+                  <div class="dash-sum-header">OPTIMAL COPIED YIELD <span style="display:flex; align-items:center; gap:6px;">STACK UNDER <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+                  <div class="dash-sum-stats">
+                    <div class="stat-col"><div class="stat-label">Total Tokens</div><div class="stat-val">${yieldA1}</div></div>
+                    <div class="stat-col right"><div class="stat-label">Cast For</div><div class="stat-val blue">X=${xA1}</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="acc-content-wrapper">
+                <div class="acc-content-inner">
+                  <div class="dash-body">
+                    <div class="mini-proof"><b>Proof:</b> Reserve 2 ${symC} upfront. Stack the ${SC} Cast Triggers BELOW Ulalek. Pay the 2 ${symC} tax immediately. Ulalek copies the spell AND doubles the cast triggers!</div>
+                    <div class="yield-breakdown">Breakdown: ${xA1*2} Scions + ${SC*2} Spawns + 2 Exiles.<br/>Resources leftover: ${cToReserveForTax + SC - 2} ${symC}</div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
+    }
+
+    let validA2 = false; let xA2 = 0, yieldA2 = 0, strA2 = "";
+    let holdForTax = Math.max(0, 2 - SC); 
+    let upfrontLeft = (C - 2) - holdForTax;
+    
+    if (upfrontLeft >= 0) {
+        xA2 = Col + upfrontLeft;
+        if (xA2 >= MV) {
+            validA2 = true;
+            yieldA2 = (xA2 * 2) + SC - 2; 
+            strA2 = `
+            <div class="dash highlight smooth-accordion" id="d3b">
+              <div class="dash-header acc-header" onclick="toggleAccordion('d3b')">
+                <div style="display:flex; flex-direction:column; gap:14px; width:100%;">
+                  <div class="dash-sum-header">COPIED (MAX X SCALE) <span style="display:flex; align-items:center; gap:6px;">STACK OVER <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+                  <div class="dash-sum-stats">
+                    <div class="stat-col"><div class="stat-label">Total Tokens</div><div class="stat-val">${yieldA2}</div></div>
+                    <div class="stat-col right"><div class="stat-label">Cast For</div><div class="stat-val blue">X=${xA2}</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="acc-content-wrapper">
+                <div class="acc-content-inner">
+                  <div class="dash-body">
+                    <div class="mini-proof"><b>Proof:</b> Put all ${xA2} into X. Stack the ${SC} Cast Triggers ABOVE Ulalek. Let them resolve, then sacrifice them to pay the ${symC}${symC} copy tax mid-resolution.</div>
+                    <div class="yield-breakdown">Breakdown: ${xA2*2} Scions + ${SC} Spawns - 2 Tax + 2 Exiles.</div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
+    }
+
+    let finalPathA = "";
+    if (validA1 && validA2) {
+        if (yieldA2 > yieldA1 || (yieldA2 === yieldA1 && xA2 > xA1)) {
+            finalPathA = strA2; 
+        } else {
+            finalPathA = strA1;
+            if (xA2 > xA1) {
+               finalPathA += `<div class="alt-note" style="margin-top:0;"><b>Need a bigger X?</b> If target MV is higher, you can Stack OVER for X=${xA2} (Yields ${yieldA2} tokens).</div>`;
+            }
+        }
+    } else if (validA1) { finalPathA = strA1; } 
+      else if (validA2) { finalPathA = strA2; } 
+      else { 
+        finalPathA = `
+        <div class="dash">
+          <div class="dash-header" style="cursor:default;">
+            <div class="dash-sum-header"><span style="color:#fca5a5;">CANNOT COPY & EXILE MV ${MV}</span></div>
+            <div class="stat-val red">Short on resources</div>
+          </div>
+        </div>`; 
+      }
+
+    let maxScaleX = Col + (C - 2); 
+    let strB = "";
+    if (maxScaleX >= MV) {
+        let yieldB = maxScaleX + SC;
+        strB = `
+        <div class="dash smooth-accordion" id="d3c">
+          <div class="dash-header acc-header" onclick="toggleAccordion('d3c')">
+            <div style="display:flex; flex-direction:column; gap:14px; width:100%;">
+              <div class="dash-sum-header">SINGLE TARGET <span style="display:flex; align-items:center; gap:6px;">NO COPY <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+              <div class="dash-sum-stats">
+                <div class="stat-col"><div class="stat-label">Total Tokens</div><div class="stat-val">${yieldB}</div></div>
+                <div class="stat-col right"><div class="stat-label">Cast For</div><div class="stat-val blue">X=${maxScaleX}</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="acc-content-wrapper">
+            <div class="acc-content-inner">
+              <div class="dash-body">
+                <div class="mini-proof"><b>Proof:</b> You pay ${maxScaleX} into X upfront and ignore the Ulalek tax. The Cast Triggers resolve normally.</div>
+                <div class="yield-breakdown">Breakdown: ${maxScaleX} Scions + ${SC} Spawns.</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    } else {
+        strB = `
+        <div class="dash">
+          <div class="dash-header" style="cursor:default;">
+            <div class="dash-sum-header"><span style="color:#ef4444;">TARGET TOO LARGE</span></div>
+            <div class="stat-val red">Max possible X=${maxScaleX}</div>
+          </div>
+        </div>`;
+    }
+
+    document.getElementById('m3-result-container').innerHTML = finalPathA + strB;
+  }
+
+  document.querySelectorAll('.btn').forEach(b => {
+    b.addEventListener('contextmenu', e => e.preventDefault());
+  });
+
+  calcCurrent();
+</script>
+</body>
+</html>
