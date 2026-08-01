@@ -115,7 +115,7 @@
   .ss-clear { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 5px 10px; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; z-index: 20; pointer-events: auto;}
   .ss-clear:active { background: #ef4444; color: #fff;}
 
-  /* Search Modal Container (Text Search Only) */
+  /* Search Modal Container */
   #spell-search-modal {
     position: fixed; inset: 0; background: rgba(0, 0, 0, 0.94); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
@@ -140,7 +140,7 @@
   .grid-card { width: 100%; max-width: 320px; aspect-ratio: 2.5/3.5; object-fit: cover; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.15); }
   .grid-card:active { transform: scale(0.96); border-color: #3b82f6; box-shadow: 0 0 40px rgba(59, 130, 246, 0.7); }
 
-  /* Utilities Toggles (Stealth theme toggle removed for Phase 1 Nexus Focus) */
+  /* Utilities Toggles (Stealth theme toggle removed for Phase 1 Focus) */
   .utilities-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
   .toggle-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 4px; display: flex; position: relative; cursor: pointer; align-items: center; }
   .toggle-option { flex: 1; text-align: center; font-size: 0.75rem; font-weight: 800; color: #64748b; z-index: 2; transition: color 0.3s; letter-spacing: 0.05em; padding: 12px 0; }
@@ -255,7 +255,7 @@
   .m-badge-short { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
 
   /* ---------------------------------------------------- */
-  /* THE 100% OVERLAY VISUAL STACK ENGINE (PHASE 1)       */
+  /* THE 100% OVERLAY VISUAL STACK ENGINE                 */
   /* ---------------------------------------------------- */
   .deploy-vis-btn {
       width: 100%; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -298,16 +298,15 @@
   
   .vis-fan-scroll {
       flex: 1; overflow-y: auto; overflow-x: hidden; 
-      padding: 35vh 16px 45vh 16px; /* Huge padding so first/last items can reach screen center */
+      padding: 35vh 16px 45vh 16px; 
       display: flex; flex-direction: column; align-items: flex-start;
       -webkit-overflow-scrolling: touch;
   }
 
   /* The Physics Container */
   .vis-item-wrapper {
-      position: relative; width: 100%; height: 65px; /* Creates the tight overlapping vertical cascade */
+      position: relative; width: 100%; height: 65px; 
       display: flex; align-items: flex-start;
-      /* transforms applied via JS interpolator */
   }
   
   /* Full MTG Card Element */
@@ -317,7 +316,6 @@
       background-size: cover; background-position: center center;
       transform-origin: center left; 
       box-shadow: 0 -4px 10px rgba(0,0,0,0.6);
-      /* transforms & scales applied via JS */
   }
 
   /* The Tactical HUD Explanations */
@@ -328,7 +326,6 @@
       border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       pointer-events: none; opacity: 0; transform-origin: left center;
-      /* opacity & translate applied via JS */
   }
 
   .vis-label { font-family: 'Inter', sans-serif; font-size: 0.55rem; font-weight: 800; letter-spacing: 0.15em; color: var(--hud-color); margin-bottom: 4px; text-transform: uppercase;}
@@ -346,12 +343,55 @@
   .vis-missing-note { padding: 14px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; color: #fbbf24; font-size: 0.85rem; line-height: 1.4; width: 100%; box-sizing: border-box;}
   .vis-missing-note.infinite { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #34d399; }
   .vis-missing-note.lethal { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
+
 </style>
 </head>
 <body class="audio-off">
 
 <!-- WebGL Transparent Overlay Canvas -->
 <canvas id="glcanvas"></canvas>
+
+<!-- WebGL Shader Script -->
+<script type="x-shader/x-fragment" id="fragShader">
+  precision mediump float;
+  uniform vec2 u_res;
+  uniform float u_time;
+  uniform float u_intensity;
+
+  float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+  float noise(vec2 p) {
+      vec2 i = floor(p); vec2 f = fract(p);
+      vec2 u = f*f*(3.0-2.0*f);
+      return mix(mix(hash(i + vec2(0.0,0.0)), hash(i + vec2(1.0,0.0)), u.x),
+                 mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), u.x), u.y);
+  }
+
+  void main() {
+      vec2 st = gl_FragCoord.xy / u_res.xy;
+      st.x *= u_res.x / u_res.y;
+
+      float t = u_time * 0.15;
+      vec2 q = vec2(0.);
+      q.x = noise(st * 3.0 + t);
+      q.y = noise(st * 3.0 - t);
+      float n = noise(st * 2.0 + q * 2.0 + t * 2.0);
+
+      // Colors 
+      vec3 alienPurple = vec3(0.6, 0.2, 1.0);
+      vec3 fireRed = vec3(1.0, 0.3, 0.0);
+      vec3 color = mix(alienPurple, fireRed, u_intensity);
+
+      // Fog Density Alpha Channel
+      float alpha = n * (0.15 + u_intensity * 0.7);
+      gl_FragColor = vec4(color * alpha, alpha);
+  }
+</script>
+
+<!-- SVG Definitions -->
+<script>
+  const symC = `<svg class="sym-c" viewBox="0 0 100 100"><circle cx="48" cy="52" r="44" fill="#000000"/><circle cx="50" cy="48" r="44" fill="#cbc5be"/><path d="M 50 10 Q 50 48 88 48 Q 50 48 50 86 Q 50 48 12 48 Q 50 48 50 10 Z" fill="#181615"/></svg>`;
+  const symInf = `<svg class="sym-inf" viewBox="0 0 100 50"><path d="M 28 40 C 6 40, 6 10, 28 10 C 46 10, 54 40, 72 40 C 94 40, 94 10, 72 10 C 54 10, 46 40, 28 40 Z" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+</script>
 
 <!-- Pre-cached Card Art Dictionary for Flawless Scrolling -->
 <script>
@@ -365,7 +405,12 @@
     Object.values(ART_CACHE).forEach(url => { let img = new Image(); img.src = url; });
 </script>
 
-<!-- Scryfall Eldrazi Search Modal -->
+<!-- Scryfall Live Card Preview Overlay (Tap anywhere to close) -->
+<div id="scryfall-overlay" onclick="hideScryfall()" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(15px); z-index:2000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:all 0.3s ease; cursor:pointer;">
+  <img id="scryfall-img" src="" alt="MTG Card" style="max-width:85%; max-height:80vh; border-radius:4.75% / 3.5%; box-shadow:0 20px 60px rgba(0,0,0,0.8); transform:scale(0.9); transition:transform 0.3s; display:none;" />
+</div>
+
+<!-- Scryfall Eldrazi Search Modal (1-Card Vertical Scroll) -->
 <div id="spell-search-modal" onclick="closeSpellSearch(event)">
   <div class="search-card-box" onclick="event.stopPropagation()">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
@@ -382,6 +427,19 @@
   </div>
 </div>
 
+<!-- Glass Swipe Tutorial Overlay -->
+<div id="swipe-tut" class="swipe-tut" style="opacity: 0; display:none;">
+  <div class="swipe-anim-container">
+    <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    <svg viewBox="0 0 24 24" width="54" height="54" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg>
+    <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </div>
+  <div class="tut-text">SWIPE TO CHANGE MODE</div>
+  <label class="tut-check-container" onclick="event.stopPropagation()">
+    <input type="checkbox" id="tut-checkbox"><span>Don't show again</span>
+  </label>
+</div>
+
 <!-- Top Bar Container -->
 <div class="top-actions">
   <div class="engine-header" onclick="openMenu('mode-menu')">
@@ -395,7 +453,7 @@
   <button class="circle-btn btn-reset" onclick="resetCurrentMode()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
 </div>
 
-<!-- Mode Switcher Menu (Stealth Removed for Phase 1 Focus) -->
+<!-- Mode Switcher Menu -->
 <div id="mode-menu" class="mode-menu-overlay" onclick="closeMenu(event, 'mode-menu')">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="menu-title">MODE SELECT</h2>
@@ -426,7 +484,7 @@
   <!-- MODE 1 -->
   <div id="mode1" class="mode-container active">
     
-    <div class="spell-selector-bar" id="spell-bar" onclick="openSpellSearch()">
+    <div class="spell-selector-bar" id="spell-bar" onpointerdown="onSpellBarDown(event)" onpointerup="onSpellBarUp(event)" onpointercancel="onSpellBarCancel(event)" oncontextmenu="event.preventDefault()">
       <div class="ss-left">
         <div class="ss-icon" id="ss-icon-container"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="8" x2="20" y2="8"></line></svg></div>
         <div class="ss-info">
@@ -509,7 +567,7 @@
   const state3 = { colored: 0, colorless: 0, spawns: 0, targetmv: 0 };
 
   // ==========================================
-  // WEBGL BACKGROUND ENGINE & AUDIO 
+  // WEBGL BACKGROUND ENGINE
   // ==========================================
   const canvas = document.getElementById("glcanvas");
   const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
@@ -543,6 +601,9 @@
   }
   initWebGL();
 
+  // ==========================================
+  // WEBAUDIO SYNTHESIZER
+  // ==========================================
   let audioCtx;
   function initAudioCtx() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); }
   document.addEventListener('pointerdown', initAudioCtx, {once:true}); document.addEventListener('touchstart', initAudioCtx, {once:true});
@@ -595,7 +656,6 @@
       const dockSource = document.getElementById('m1-metrics-dock-source');
       const dockTarget = document.getElementById('m1-metrics-dock-target');
       
-      // Move metrics to top dock
       dockTarget.appendChild(dockSource.querySelector('.hero'));
       dockTarget.appendChild(dockSource.querySelector('.metrics'));
       
@@ -611,7 +671,6 @@
       const dockSource = document.getElementById('m1-metrics-dock-source');
       const dockTarget = document.getElementById('m1-metrics-dock-target');
       
-      // Return metrics to standard grid
       dockSource.insertBefore(dockTarget.querySelector('.metrics'), dockSource.firstChild);
       dockSource.insertBefore(dockTarget.querySelector('.hero'), dockSource.firstChild);
       
@@ -630,7 +689,7 @@
   function updateWave() {
       if(!visIsOpen) return;
       const container = document.getElementById('vis-fan-scroll');
-      const centerY = container.scrollTop + (container.clientHeight / 2) + 40; // Offset slightly for top dock
+      const centerY = container.scrollTop + (container.clientHeight / 2) + 40; 
       
       let closestIdx = -1;
       let minDist = Infinity;
@@ -640,7 +699,6 @@
           if(dist < minDist) { minDist = dist; closestIdx = i; }
       });
 
-      // Fire haptics and audio only when the focused card changes
       if(closestIdx !== focusedIndex && closestIdx !== -1) {
           focusedIndex = closestIdx;
           vibrate(2); playPaperSlide();
@@ -648,22 +706,20 @@
 
       const items = document.querySelectorAll('.vis-item-wrapper');
       items.forEach((item, i) => {
-          if(item.classList.contains('vis-note-wrapper')) return; // Skip calculation for simple notes
+          if(item.classList.contains('vis-note-wrapper')) return; 
 
           const dist = Math.abs(centerY - visItemPositions[i]);
           const maxDist = 200; 
           let ratio = Math.max(0, 1 - (dist / maxDist));
-          ratio = ratio * ratio * (3 - 2 * ratio); // Smoothstep ease in-out
+          ratio = ratio * ratio * (3 - 2 * ratio); 
 
           const card = item.querySelector('.vis-card');
           const info = item.querySelector('.vis-info');
           const conn = item.querySelector('.vis-connector');
           
-          // Reverse Z-Index (Top of Stack is visually highest)
           const baseZ = items.length - i;
           item.style.zIndex = i === focusedIndex ? 1000 : baseZ;
 
-          // Physics Interpolations
           const scale = 1 + (0.12 * ratio);
           const xOffset = ratio * 16; 
           
@@ -680,7 +736,6 @@
       });
   }
 
-  // Attach scroll listener
   document.getElementById('vis-fan-scroll').addEventListener('scroll', () => {
       cancelAnimationFrame(visScrollRAF);
       visScrollRAF = requestAnimationFrame(updateWave);
@@ -712,14 +767,39 @@
           </div>`;
       });
       container.innerHTML = html;
-      
-      // Wait for DOM paint then map positions
       setTimeout(initWavePositions, 100);
   }
 
   // ==========================================
   // SCRYFALL SPELL SELECTOR ENGINE
   // ==========================================
+  let barHoldTimer;
+  let barIsHolding = false;
+
+  function onSpellBarDown(e) {
+      if(e.button !== 0 && e.type !== 'touchstart') return;
+      barIsHolding = false; if(!selectedSpellCard) return; 
+      barHoldTimer = setTimeout(() => {
+          barIsHolding = true; vibrate(); playSnap();
+          const imgUrl = selectedSpellCard.image_uris?.normal || selectedSpellCard.card_faces?.[0]?.image_uris?.normal;
+          if(imgUrl) {
+              const overlay = document.getElementById('scryfall-overlay');
+              document.getElementById('scryfall-img').src = imgUrl;
+              document.getElementById('scryfall-img').style.display = 'block';
+              document.getElementById('scryfall-loading').style.display = 'none';
+              overlay.classList.add('active');
+          }
+      }, 400); 
+  }
+
+  function onSpellBarUp(e) {
+      clearTimeout(barHoldTimer);
+      if(!barIsHolding && !e.target.closest('.ss-clear')) openSpellSearch();
+      barIsHolding = false;
+  }
+
+  function onSpellBarCancel(e) { clearTimeout(barHoldTimer); if(barIsHolding) hideScryfall(); }
+
   function parseSpellData(card) {
       spellCastSpawns = 0; spellResoSpawns = 0; spellTriggersUnsealing = false; spellDrawsCards = false;
       if(!card) { spellTriggersUnsealing = true; return; }
@@ -787,9 +867,11 @@
       document.getElementById('ss-icon-container').innerHTML = imgUrl ? `<img src="${imgUrl}" style="width:34px; height:34px; object-fit:cover; border-radius:50%; border:1px solid rgba(255,255,255,0.2);">` : `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="8" x2="20" y2="8"></line></svg>`;
       document.getElementById('ss-selected-title').innerText = card.name; document.getElementById('ss-clear-btn').style.display = 'block';
       updateSpellBadge();
+      
       let totalNativeSpawns = spellCastSpawns + spellResoSpawns;
       state2.spawns = totalNativeSpawns; state3.spawns = totalNativeSpawns;
       if(card.cmc) state2.spellcost = Math.floor(card.cmc);
+      
       updateAllDisplays(); calcCurrent(); saveState();
   }
 
@@ -800,12 +882,29 @@
       updateSpellBadge(); calcCurrent(); saveState();
   }
 
+  let scryTimer;
+  function startScryfall(cardName) {
+      scryTimer = setTimeout(() => {
+          vibrate(); playSnap();
+          const overlay = document.getElementById('scryfall-overlay');
+          const img = document.getElementById('scryfall-img');
+          const ring = document.getElementById('scryfall-loading');
+          overlay.classList.add('active'); img.style.display = 'none'; ring.style.display = 'block';
+          fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(cardName)}`)
+          .then(r => r.json()).then(data => {
+              if(data.image_uris && data.image_uris.normal) { img.src = data.image_uris.normal; img.style.display = 'block'; ring.style.display = 'none'; }
+          }).catch(() => { hideScryfall(); });
+      }, 400);
+  }
+  function cancelScryfall() { clearTimeout(scryTimer); }
+  function hideScryfall() { document.getElementById('scryfall-overlay').classList.remove('active'); }
+
   // ==========================================
   // LOCALSTORAGE PERSISTENCE
   // ==========================================
-  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v10', JSON.stringify(data)); }
+  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v12', JSON.stringify(data)); }
   function loadState() {
-      const saved = localStorage.getItem('ulalek_save_v10');
+      const saved = localStorage.getItem('ulalek_save_v12');
       if(saved) {
           try {
               const parsed = JSON.parse(saved); Object.assign(state1, parsed.state1); Object.assign(state2, parsed.state2); Object.assign(state3, parsed.state3);
@@ -850,12 +949,22 @@
   }
   document.addEventListener('pointerdown', dismissTut, {passive: true}); document.addEventListener('touchstart', dismissTut, {passive: true});
 
+  let touchStartX = 0; let touchEndX = 0;
+  document.getElementById('swipe-area').addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+  document.getElementById('swipe-area').addEventListener('touchend', e => {
+    if (e.target.tagName.toLowerCase() === 'button') return; touchEndX = e.changedTouches[0].screenX;
+    if (touchEndX < touchStartX - 70) { switchMode(currentMode === 1 ? 2 : currentMode === 2 ? 3 : 1, currentMode === 1 ? "CAST FEASIBILITY" : currentMode === 2 ? "KOZILEK OPTIMIZER" : "ULALEK STACK ENGINE"); }
+    if (touchEndX > touchStartX + 70) { switchMode(currentMode === 1 ? 3 : currentMode === 2 ? 1 : 2, currentMode === 1 ? "KOZILEK OPTIMIZER" : currentMode === 2 ? "ULALEK STACK ENGINE" : "CAST FEASIBILITY"); }
+  }, {passive: true});
+
   function vibrate(ms=2) { if (hapticsEnabled && navigator.vibrate) navigator.vibrate(ms); }
+  
   function toggleHaptics() {
     hapticsEnabled = !hapticsEnabled; if(hapticsEnabled) vibrate(); playSnap();
     if (!hapticsEnabled) { document.body.classList.add('haptics-off'); localStorage.setItem('ulalekHaptics', 'off'); } 
     else { document.body.classList.remove('haptics-off'); localStorage.setItem('ulalekHaptics', 'on'); }
   }
+  
   function toggleAudio() {
     audioEnabled = !audioEnabled; initAudioCtx(); if(audioEnabled) playSnap(); vibrate();
     if (!audioEnabled) { document.body.classList.add('audio-off'); localStorage.setItem('ulalekAudio', 'off'); } 
@@ -1013,7 +1122,7 @@
     if (canJumpstart && U > 0) {
       if (spawnsPaid > 0) {
         if(usedSpellCast > 0 && spellCastSpawns > 0) currentVisualStack.push({ color: '#34d399', label: 'RESOLVE FIRST', title: `${usedSpellCast}x ${spellName} Cast Trigger`, desc: `Yields ${usedSpellCast * spellCastSpawns} Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: spellImg || ART_CACHE['Spawn'] });
-        if(usedMiscCast > 0 && C > 0) currentVisualStack.push({ color: '#34d399', label: 'RESOLVE FIRST', title: `${usedMiscCast}x Misc Cast Trigger`, desc: `Yields ${usedMiscCast * C} Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: ART_CACHE['Spawn'] });
+        if(usedMiscCast > 0 && C > 0) currentVisualStack.push({ color: '#34d399', label: 'RESOLVE FIRST', title: `${usedMiscCast}x Misc Extra Cast Trigger`, desc: `Yields ${usedMiscCast * C} Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: ART_CACHE['Spawn'] });
         if(usedUnseal > 0 && unsealCastYield > 0) currentVisualStack.push({ color: '#34d399', label: 'RESOLVE FIRST', title: `${usedUnseal}x Unsealing Trigger`, desc: `Yields ${usedUnseal * unsealCastYield} Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: ART_CACHE['Unsealing'] });
         if(usedEchoes > 0 && spellResoSpawns > 0) currentVisualStack.push({ color: '#34d399', label: 'RESOLVE FIRST', title: `${usedEchoes}x Echoes Copy of ${spellName}`, desc: `Yields ${usedEchoes * spellResoSpawns} Reso Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: ART_CACHE['Echoes'] });
       }
@@ -1021,7 +1130,7 @@
       currentVisualStack.push({ color: '#c084fc', label: 'COPY TRIGGER (TAX PAID)', title: `1x Ulalek Copy Trigger`, desc: `Paid via ${taxString}. Copies all remaining triggers & spells below it!`, img: ART_CACHE['Ulalek'] });
 
       if(remSpellCast > 0 && spellCastSpawns > 0) currentVisualStack.push({ color: '#60a5fa', label: 'WAITING TO BE COPIED', title: `${remSpellCast}x ${spellName} Cast Trigger`, desc: `Yields ${remSpellCast * spellCastSpawns} Spawns.`, img: spellImg || ART_CACHE['Spawn'] });
-      if(remMiscCast > 0 && C > 0) currentVisualStack.push({ color: '#60a5fa', label: 'WAITING TO BE COPIED', title: `${remMiscCast}x Misc Cast Trigger`, desc: `Yields ${remMiscCast * C} Spawns.`, img: ART_CACHE['Spawn'] });
+      if(remMiscCast > 0 && C > 0) currentVisualStack.push({ color: '#60a5fa', label: 'WAITING TO BE COPIED', title: `${remMiscCast}x Misc Extra Cast Trigger`, desc: `Yields ${remMiscCast * C} Spawns.`, img: ART_CACHE['Spawn'] });
       if(F > 0) currentVisualStack.push({ color: '#60a5fa', label: 'WAITING TO BE COPIED', title: `${F*(1+E+R)}x Fleshraker Trigger`, desc: `Deals 1 damage to each opponent per trigger.`, img: ART_CACHE['Fleshraker'] });
       if(remUnseal > 0 && unsealCastYield > 0) currentVisualStack.push({ color: '#60a5fa', label: 'WAITING TO BE COPIED', title: `${remUnseal}x Unsealing Trigger`, desc: `Yields ${remUnseal * unsealCastYield} Spawns.`, img: ART_CACHE['Unsealing'] });
       if(unsealDraws > 0) currentVisualStack.push({ color: '#60a5fa', label: 'WAITING TO BE COPIED', title: `${unsealDraws / 3}x Unsealing Trigger`, desc: `Draws ${unsealDraws} cards.`, img: ART_CACHE['Unsealing'] });
@@ -1037,7 +1146,7 @@
       if(U > 0) currentVisualStack.push({ color: '#ef4444', label: 'TAX UNPAID (FIZZLES)', title: `${U}x Ulalek Trigger`, desc: `Cannot pay ${symC}${symC} tax. Triggers will resolve without copying anything.`, img: ART_CACHE['Ulalek'] });
       
       if(spellCastSpawns > 0) currentVisualStack.push({ color: '#60a5fa', label: 'NORMAL RESOLUTION', title: `${1+E}x ${spellName} Cast Trigger`, desc: `Yields ${(1+E) * spellCastSpawns} Spawns.`, img: spellImg || ART_CACHE['Spawn'] });
-      if(C > 0) currentVisualStack.push({ color: '#60a5fa', label: 'NORMAL RESOLUTION', title: `${1+E}x Misc Cast Trigger`, desc: `Yields ${(1+E) * C} Spawns.`, img: ART_CACHE['Spawn'] });
+      if(C > 0) currentVisualStack.push({ color: '#60a5fa', label: 'NORMAL RESOLUTION', title: `${1+E}x Misc Extra Cast Trigger`, desc: `Yields ${(1+E) * C} Spawns.`, img: ART_CACHE['Spawn'] });
       if(F > 0) currentVisualStack.push({ color: '#60a5fa', label: 'NORMAL RESOLUTION', title: `${F*(1+E+R)}x Fleshraker Trigger`, desc: `Deals 1 damage per trigger.`, img: ART_CACHE['Fleshraker'] });
       if(unsealCastYield > 0) currentVisualStack.push({ color: '#60a5fa', label: 'NORMAL RESOLUTION', title: `${K*(1+E)}x Unsealing Trigger`, desc: `Yields ${K*(1+E) * unsealCastYield} Spawns.`, img: ART_CACHE['Unsealing'] });
       if(unsealDraws > 0) currentVisualStack.push({ color: '#60a5fa', label: 'NORMAL RESOLUTION', title: `${unsealDraws / 3}x Unsealing Trigger`, desc: `Draws ${unsealDraws} cards.`, img: ART_CACHE['Unsealing'] });
@@ -1050,10 +1159,84 @@
     if(visIsOpen) renderVisualizer();
   }
 
-  function calcMode2() {} // Functionality preserved but code shortened for clarity
-  function calcMode3() {} // Functionality preserved but code shortened for clarity
+  // ==========================================
+  // DASHBOARD CALCULATORS
+  // ==========================================
+  function calcMode2() {
+    targetIntensity = 0.0;
+    const { colored: Col, colorless: C, spellcost: Cost, spawns: SS, leftover: L } = state2;
+    const Total = Col + C; let res = "";
 
-  // Initialize
+    if (Total < Cost) {
+      res = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div class="dash-sum-header"><span style="color:#ef4444; font-family:'Outfit'; font-size:1.1rem; letter-spacing:0.05em;">CANNOT CAST</span></div><div class="stat-val red" style="font-family:'Outfit'; font-size:1.3rem;">Need ${Cost} mana (Have ${Total})</div></div></div>`;
+    } else {
+      const RemTotal = Total - Cost; const RemC = C - Math.max(0, Cost - Col); let copyHTML = "";
+      
+      if (RemC >= 2) {
+        const Net = RemTotal - 2 + (SS * 2); const MaxAffordable = Math.max(0, Total - 2 + (SS * 2) - L);
+        const badge = Net - L >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${Net - L} SHORT</span>`;
+        copyHTML = `<div class="dash highlight smooth-accordion" id="d2a"><div class="dash-header acc-header" onclick="toggleAccordion('d2a')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">COPIED (STACK UNDER)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Net Remaining</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${Net} ${badge}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Max Allowed MV</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">${MaxAffordable}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Optimal Path:</b> Ulalek tax paid via floating mana. Spell & Cast Triggers are copied safely. (+${SS*2} Spawns generated).</div></div></div></div>`;
+      } else if (RemC + SS >= 2) {
+        const Net = RemTotal + SS - 2; const MaxAffordable = Math.max(0, Total + SS - 2 - L);
+        const badge = Net - L >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${Net - L} SHORT</span>`;
+        copyHTML = `<div class="dash highlight smooth-accordion" id="d2b"><div class="dash-header acc-header" onclick="toggleAccordion('d2b')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">COPIED (STACK OVER)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Net Remaining</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${Net} ${badge}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Max Allowed MV</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">${MaxAffordable}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Sacrifice Path:</b> Spawns are consumed to pay tax. Only the original Spell is copied.</div></div></div></div>`;
+      } else {
+        copyHTML = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div style="font-family:'Outfit'; font-size:1.05rem; color:#fca5a5; letter-spacing:0.05em; margin-bottom:4px;">CANNOT AFFORD ${symC}${symC} COPY</div><div style="color:#ef4444; font-size:0.85rem;">Short on resources mid-resolution</div></div></div>`;
+      }
+      
+      const NetNoCopy = RemTotal + SS; const MaxAffordableNoCopy = Math.max(0, Total + SS - L);
+      const badgeNoCopy = NetNoCopy - L >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${NetNoCopy - L} SHORT</span>`;
+      const noCopyHTML = `<div class="dash smooth-accordion" id="d2c"><div class="dash-header acc-header" onclick="toggleAccordion('d2c')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">SINGLE CAST (NO COPY)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Net Remaining</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${NetNoCopy} ${badgeNoCopy}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Max Allowed MV</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">${MaxAffordableNoCopy}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Bypass Path:</b> Cast spell normally. Ignore the Ulalek tax to save remaining mana.</div></div></div></div>`;
+      res = copyHTML + noCopyHTML;
+    }
+    document.getElementById('m2-result-container').innerHTML = res;
+  }
+
+  function calcMode3() {
+    targetIntensity = 0.0;
+    const { colored: Col, colorless: C, spawns: SC, targetmv: MV } = state3; let res = "";
+
+    if (C < 2) { document.getElementById('m3-result-container').innerHTML = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div style="font-family:'Outfit'; font-size:1.05rem; color:#fca5a5; letter-spacing:0.05em; margin-bottom:4px;">CANNOT CAST</div><div style="color:#ef4444; font-size:0.85rem;">Requires ${symC}${symC} base cost</div></div></div>`; return; }
+
+    const cToReserveForTax = Math.max(0, 2 - SC); let validA1 = false; let xA1 = 0, yieldA1 = 0, strA1 = "";
+    if (C >= 4) {
+        xA1 = Col + (C - 4);
+        if (xA1 >= MV) {
+            validA1 = true; yieldA1 = (xA1 * 2) + (SC * 2); 
+            strA1 = `<div class="dash highlight smooth-accordion" id="d3a"><div class="dash-header acc-header" onclick="toggleAccordion('d3a')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">OPTIMAL YIELD (STACK UNDER)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Total Tokens</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${yieldA1}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Cast For</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">X=${xA1}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Breakdown:</b> ${xA1*2} Scions + ${SC*2} Spawns + 2 Exiles. Leftovers: ${cToReserveForTax + SC - 2} ${symC}.</div></div></div></div>`;
+        }
+    }
+
+    let validA2 = false; let xA2 = 0, yieldA2 = 0, strA2 = "";
+    let holdForTax = Math.max(0, 2 - SC); let upfrontLeft = (C - 2) - holdForTax;
+    if (upfrontLeft >= 0) {
+        xA2 = Col + upfrontLeft;
+        if (xA2 >= MV) {
+            validA2 = true; yieldA2 = (xA2 * 2) + SC - 2; 
+            strA2 = `<div class="dash highlight smooth-accordion" id="d3b"><div class="dash-header acc-header" onclick="toggleAccordion('d3b')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">MAX X SCALE (STACK OVER)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Total Tokens</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${yieldA2}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Cast For</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">X=${xA2}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Breakdown:</b> ${xA2*2} Scions + ${SC} Spawns - 2 Tax + 2 Exiles.</div></div></div></div>`;
+        }
+    }
+
+    let finalPathA = "";
+    if (validA1 && validA2) {
+        if (yieldA2 > yieldA1 || (yieldA2 === yieldA1 && xA2 > xA1)) finalPathA = strA2; 
+        else { finalPathA = strA1; if (xA2 > xA1) finalPathA += `<div style="font-size:0.8rem; color:#94a3b8; padding:0 10px 10px 10px;"><b>Need a bigger X?</b> Expand MAX X SCALE instead for X=${xA2} (Yields ${yieldA2} tokens).</div>`; }
+    } else if (validA1) finalPathA = strA1; else if (validA2) finalPathA = strA2; 
+      else { finalPathA = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div style="font-family:'Outfit'; font-size:1.05rem; color:#fca5a5; letter-spacing:0.05em; margin-bottom:4px;">CANNOT COPY & EXILE MV ${MV}</div><div style="color:#ef4444; font-size:0.85rem;">Short on resources</div></div></div>`; }
+
+    let maxScaleX = Col + (C - 2); let strB = "";
+    if (maxScaleX >= MV) {
+        let yieldB = maxScaleX + SC;
+        strB = `<div class="dash smooth-accordion" id="d3c"><div class="dash-header acc-header" onclick="toggleAccordion('d3c')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">SINGLE TARGET (NO COPY)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Total Tokens</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${yieldB}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Cast For</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">X=${maxScaleX}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Breakdown:</b> ${maxScaleX} Scions + ${SC} Spawns. (Tax ignored).</div></div></div></div>`;
+    } else {
+        strB = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div style="font-family:'Outfit'; font-size:1.05rem; color:#fca5a5; letter-spacing:0.05em; margin-bottom:4px;">TARGET TOO LARGE</div><div style="color:#ef4444; font-size:0.85rem;">Max possible X=${maxScaleX}</div></div></div>`;
+    }
+
+    document.getElementById('m3-result-container').innerHTML = finalPathA + strB;
+  }
+
+  // Final initializations
+  document.querySelectorAll('.btn').forEach(b => { b.addEventListener('contextmenu', e => e.preventDefault()); });
 </script>
 </body>
 </html>
