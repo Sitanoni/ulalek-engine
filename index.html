@@ -1,307 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" id="meta-theme-color" content="#080b12">
-<title>Ulalek Engine</title>
-
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" id="meta-theme-color" content="#080b12"><title>Ulalek Engine</title>
 <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Ulalek%22%2C%22short_name%22%3A%22Ulalek%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23080b12%22%2C%22theme_color%22%3A%22%23080b12%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22icon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@700;800&display=swap');
-
-  :root {
-    --bg-overlay: rgba(8, 11, 18, 0.85);
-    --bg-image: url('bg.jpg');
-    --panel-bg: rgba(18, 26, 41, 0.85);
-    --panel-border: rgba(255, 255, 255, 0.08);
-    --hero-grad: radial-gradient(110% 110% at 50% 0%, rgba(30, 64, 175, 0.85) 0%, rgba(15, 23, 42, 0.85) 100%);
-    --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.6);
-    --header-bg: rgba(15, 23, 42, 0.9);
-    --accent: #3b82f6;
-    --card-glow-opacity: 0.9;
-  }
-
+  :root { --bg-overlay: rgba(8, 11, 18, 0.82); --bg-image: url('bg.jpg'); --panel-bg: rgba(18, 26, 41, 0.88); --panel-border: rgba(255, 255, 255, 0.08); --hero-grad: radial-gradient(110% 110% at 50% 0%, rgba(30, 64, 175, 0.85) 0%, rgba(15, 23, 42, 0.85) 100%); --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.6); --header-bg: rgba(15, 23, 42, 0.9); --accent: #3b82f6; --card-glow-opacity: 0.9; }
   html { background-color: #080b12; height: 100dvh; width: 100%; overflow: hidden; }
-  body { 
-    height: 100dvh; width: 100%; margin: 0; padding: 0; overflow: hidden;
-    font-family: 'Inter', sans-serif; 
-    background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), var(--bg-image);
-    background-size: cover; background-position: center center; background-repeat: no-repeat;
-    color: #f8fafc; user-select: none; -webkit-tap-highlight-color: transparent;
-    box-sizing: border-box; display: flex; flex-direction: column;
-  }
-
-  /* WebGL Screen Overlay */
-  #glcanvas { 
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; 
-    z-index: 1; pointer-events: none; mix-blend-mode: screen; 
-  }
+  body { height: 100dvh; width: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Inter', sans-serif; background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), var(--bg-image); background-size: cover; background-position: center center; background-repeat: no-repeat; color: #f8fafc; user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; display: flex; flex-direction: column; transition: background-image 0.4s ease; }
   
   .app-content, .top-actions { position: relative; z-index: 10; }
-
-  .sym-c { width: 1.15em; height: 1.15em; vertical-align: -0.18em; display: inline-block; }
-  .sym-inf { width: 1.25em; height: 0.65em; display: inline-block; vertical-align: middle; }
-
+  .sym-c { width: 1.15em; height: 1.15em; vertical-align: -0.18em; display: inline-block; } .sym-inf { width: 1.25em; height: 0.65em; display: inline-block; vertical-align: middle; }
+  
   /* Top Actions Row */
-  .top-actions {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: max(16px, env(safe-area-inset-top, 16px)) 16px 12px 16px;
-    flex-shrink: 0; width: 100%; box-sizing: border-box;
-  }
+  .top-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: max(16px, env(safe-area-inset-top, 16px)) 16px 12px 16px; flex-shrink: 0; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
+  .engine-header { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--header-bg); backdrop-filter: blur(20px); border: 1px solid var(--panel-border); border-radius: 100px; box-shadow: var(--shadow-soft); cursor: pointer; transition: all 0.2s ease; }
+  .engine-header:active { transform: scale(0.98); } .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+  .pulse-dot { flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; transition: all 0.4s ease; } .pulse-dot.mode-1 { background: #10b981; box-shadow: 0 0 12px #10b981; animation: pulse1 2s infinite; } .pulse-dot.mode-2 { background: #06b6d4; box-shadow: 0 0 12px #06b6d4; animation: pulse2 2s infinite; } .pulse-dot.mode-3 { background: #f43f5e; box-shadow: 0 0 12px #f43f5e; animation: pulse3 2s infinite; }
+  @keyframes pulse1 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #10b981; } } @keyframes pulse2 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #06b6d4; } } @keyframes pulse3 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #f43f5e; } }
+  .header-text { display: flex; flex-direction: column; min-width: 0; flex: 1; } .sys-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; font-weight: 700; margin-bottom: 2px; } .sys-mode { font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #fff; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .mode-arrow { flex-shrink: 0; color: var(--accent); transition: color 0.4s; margin-left: 6px; }
+  .circle-btn { width: 46px; height: 46px; border-radius: 16px; background: var(--header-bg); backdrop-filter: blur(20px); border: 1px solid var(--panel-border); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink: 0; outline: none; color: #94a3b8; } .circle-btn:active { transform: scale(0.92); } .btn-info { color: #60a5fa; border-color: rgba(96, 165, 250, 0.25); } .btn-info:active { background: #3b82f6; color: #fff; border-color: #3b82f6; } .btn-reset { color: #fca5a5; border-color: rgba(239, 68, 68, 0.25); } .btn-reset svg { transition: transform 0.4s ease; } .btn-reset:active { background: #ef4444; color: #fff; border-color: #ef4444; } .btn-reset:active svg { transform: rotate(-180deg); }
 
-  .engine-header {
-    flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px; background: var(--header-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--panel-border); border-radius: 100px;
-    box-shadow: var(--shadow-soft); cursor: pointer; transition: all 0.2s ease;
-  }
-  .engine-header:active { transform: scale(0.98); }
-  .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+  /* Selector Bar */
+  .spell-selector-bar { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px dashed rgba(59, 130, 246, 0.5); border-radius: 16px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.3s ease; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); } .spell-selector-bar:active { transform: scale(0.98); background: rgba(59, 130, 246, 0.2); }
+  .ss-left { display: flex; align-items: center; gap: 12px; min-width: 0; pointer-events: none;} .ss-icon { color: #60a5fa; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width:34px; height:34px; } .ss-info { display: flex; flex-direction: column; min-width: 0; }
+  .ss-tag { display:flex; gap:8px; align-items:center; margin-bottom: 2px; } .ss-tag-text { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #93c5fd; }
+  .ss-spawns-badge { background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 0.55rem; padding: 2px 6px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.3); display: none; } .ss-reso-badge { background: rgba(244, 63, 94, 0.15); color: #fb7185; font-size: 0.55rem; padding: 2px 6px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(244, 63, 94, 0.3); display: none; }
+  .ss-name { font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ss-clear { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 5px 10px; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; z-index: 20; pointer-events: auto;} .ss-clear:active { background: #ef4444; color: #fff;}
+
+  /* Search Modal & Card Overlay */
+  #spell-search-modal, #scryfall-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.94); backdrop-filter: blur(24px); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: max(50px, env(safe-area-inset-top, 50px)) 16px 16px 16px; box-sizing: border-box; }
+  #spell-search-modal.active, #scryfall-overlay.active { opacity: 1; visibility: visible; }
+  #scryfall-overlay { justify-content: center; cursor: pointer; z-index: 2000; } #scryfall-img { max-width: 85%; max-height: 80vh; border-radius: 4.75% / 3.5%; box-shadow: 0 20px 60px rgba(0,0,0,0.8); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: none; } #scryfall-overlay.active #scryfall-img { transform: scale(1); }
+  .search-card-box { background: var(--header-bg); border: 1px solid var(--panel-border); border-radius: 24px; width: 100%; max-width: 440px; display: flex; flex-direction: column; height: 88vh; padding: 20px; box-sizing: border-box; gap: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.9); }
+  .search-controls { display: flex; width: 100%; flex-shrink: 0;} .search-input-wrap { display: flex; align-items: center; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 12px 14px; gap: 10px; flex: 1; } .search-input-wrap input { background: transparent; border: none; outline: none; color: #fff; font-size: 1rem; font-family: 'Inter', sans-serif; width: 100%; } .search-input-wrap input::placeholder { color: #64748b; }
+  .search-results-grid { display: flex; flex-direction: column; gap: 24px; overflow-y: auto; flex: 1; padding: 10px 4px 30px 4px; align-items: center; } .grid-card { width: 100%; max-width: 320px; aspect-ratio: 2.5/3.5; object-fit: cover; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.15); } .grid-card:active { transform: scale(0.96); border-color: #3b82f6; box-shadow: 0 0 40px rgba(59, 130, 246, 0.7); }
   
-  .pulse-dot { flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; transition: all 0.4s ease; }
-  .pulse-dot.mode-1 { background: #10b981; box-shadow: 0 0 12px #10b981; animation: pulse1 2s infinite; }
-  .pulse-dot.mode-2 { background: #06b6d4; box-shadow: 0 0 12px #06b6d4; animation: pulse2 2s infinite; }
-  .pulse-dot.mode-3 { background: #f43f5e; box-shadow: 0 0 12px #f43f5e; animation: pulse3 2s infinite; }
-  
-  @keyframes pulse1 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #10b981; } }
-  @keyframes pulse2 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #06b6d4; } }
-  @keyframes pulse3 { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; box-shadow: 0 0 18px #f43f5e; } }
+  /* Menus & Toggles */
+  .mode-menu-overlay { position: fixed; inset: 0; background: rgba(4, 6, 10, 0.94); backdrop-filter: blur(28px); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.4s; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: max(80px, env(safe-area-inset-top, 80px)) 24px 24px 24px; } .mode-menu-overlay.active { opacity: 1; visibility: visible; } .modal-content { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 500px; transform: translateY(-40px); opacity: 0; transition: all 0.5s ease; } .mode-menu-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
+  .menu-title { font-family: 'Outfit', sans-serif; color: #fff; font-size: 1.8rem; text-align: center; margin-bottom: 8px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); } .mode-card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 18px; border-radius: 20px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: all 0.2s; } .mode-card:active { transform: scale(0.95); } .mode-card.active { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); } .mode-card h2 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #fff; } .mode-card p { margin: 0; font-size: 0.85rem; color: #94a3b8; line-height: 1.4; } #info-modal { justify-content: center; padding-top: 24px; }
+  .utilities-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; } .toggle-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 4px; display: flex; position: relative; cursor: pointer; align-items: center; } .toggle-option { flex: 1; text-align: center; font-size: 0.75rem; font-weight: 800; color: #64748b; z-index: 2; transition: color 0.3s; letter-spacing: 0.05em; padding: 12px 0; } .toggle-pill { position: absolute; top: 4px; bottom: 4px; width: calc(50% - 4px); background: #3b82f6; border-radius: 18px; z-index: 1; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+  .toggle-box.haptics .toggle-pill { background: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); } body.haptics-off .toggle-box.haptics .toggle-pill { transform: translateX(100%); background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); } body:not(.haptics-off) #h-on { color: #fff; } body.haptics-off #h-off { color: #fff; }
+  .toggle-box.audio .toggle-pill { background: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } body.audio-off .toggle-box.audio .toggle-pill { transform: translateX(100%); background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); } body:not(.audio-off) #a-on { color: #fff; } body.audio-off #a-off { color: #fff; }
 
-  .header-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-  .sys-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; font-weight: 700; margin-bottom: 2px; }
-  .sys-mode { font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #fff; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mode-arrow { flex-shrink: 0; color: var(--accent); transition: color 0.4s; margin-left: 6px; }
-
-  .circle-btn {
-    width: 46px; height: 46px; border-radius: 16px; background: var(--header-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--panel-border); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
-    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    flex-shrink: 0; outline: none; color: #94a3b8;
-  }
-  .circle-btn:active { transform: scale(0.92); }
-  .btn-info { color: #60a5fa; border-color: rgba(96, 165, 250, 0.25); }
-  .btn-info:active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
-  .btn-reset { color: #fca5a5; border-color: rgba(239, 68, 68, 0.25); }
-  .btn-reset svg { transition: transform 0.4s ease; }
-  .btn-reset:active { background: #ef4444; color: #fff; border-color: #ef4444; }
-  .btn-reset:active svg { transform: rotate(-180deg); }
-
-  /* Spell Selector Bar */
-  .spell-selector-bar {
-    background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px dashed rgba(59, 130, 246, 0.5); border-radius: 16px;
-    padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; transition: all 0.2s ease; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  }
-  .spell-selector-bar:active { transform: scale(0.98); background: rgba(59, 130, 246, 0.2); }
-  .ss-left { display: flex; align-items: center; gap: 12px; min-width: 0; pointer-events: none;}
-  .ss-icon { color: #60a5fa; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width:34px; height:34px; }
-  .ss-info { display: flex; flex-direction: column; min-width: 0; }
-  
-  .ss-tag { display:flex; gap:8px; align-items:center; margin-bottom: 2px; }
-  .ss-tag-text { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #93c5fd; }
-  .ss-spawns-badge { background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 0.55rem; padding: 2px 6px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.3); display: none; }
-  .ss-reso-badge { background: rgba(244, 63, 94, 0.15); color: #fb7185; font-size: 0.55rem; padding: 2px 6px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(244, 63, 94, 0.3); display: none; }
-
-  .ss-name { font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ss-clear { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 5px 10px; font-size: 0.75rem; font-weight: 700; transition: all 0.2s; z-index: 20; pointer-events: auto;}
-  .ss-clear:active { background: #ef4444; color: #fff;}
-
-  /* Search Modal Container (Text Search Only) */
-  #spell-search-modal {
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.94); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-    opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: max(50px, env(safe-area-inset-top, 50px)) 16px 16px 16px; box-sizing: border-box;
-  }
-  #spell-search-modal.active { opacity: 1; visibility: visible; }
-  
-  .search-card-box {
-    background: var(--header-bg); border: 1px solid var(--panel-border); border-radius: 24px;
-    width: 100%; max-width: 440px; display: flex; flex-direction: column; height: 88vh;
-    padding: 20px; box-sizing: border-box; gap: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.9);
-  }
-  
-  .search-controls { display: flex; width: 100%; flex-shrink: 0;}
-  .search-input-wrap { display: flex; align-items: center; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 12px 14px; gap: 10px; flex: 1; }
-  .search-input-wrap input { background: transparent; border: none; outline: none; color: #fff; font-size: 1rem; font-family: 'Inter', sans-serif; width: 100%; }
-  .search-input-wrap input::placeholder { color: #64748b; }
-  
-  .search-results-grid { 
-      display: flex; flex-direction: column; gap: 24px; overflow-y: auto; flex: 1; padding: 10px 4px 30px 4px; align-items: center;
-  }
-  .grid-card { width: 100%; max-width: 320px; aspect-ratio: 2.5/3.5; object-fit: cover; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.15); }
-  .grid-card:active { transform: scale(0.96); border-color: #3b82f6; box-shadow: 0 0 40px rgba(59, 130, 246, 0.7); }
-
-  /* Utilities Toggles (Stealth Disabled for Phase 1) */
-  .utilities-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
-  .toggle-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 4px; display: flex; position: relative; cursor: pointer; align-items: center; }
-  .toggle-option { flex: 1; text-align: center; font-size: 0.75rem; font-weight: 800; color: #64748b; z-index: 2; transition: color 0.3s; letter-spacing: 0.05em; padding: 12px 0; }
-  .toggle-pill { position: absolute; top: 4px; bottom: 4px; width: calc(50% - 4px); background: #3b82f6; border-radius: 18px; z-index: 1; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-  
-  .toggle-box.haptics .toggle-pill { background: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
-  body:not(.haptics-off) #h-on { color: #fff; }
-  body.haptics-off #h-off { color: #fff; }
-  body.haptics-off .toggle-box.haptics .toggle-pill { transform: translateX(100%); background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-
-  .toggle-box.audio .toggle-pill { background: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
-  body:not(.audio-off) #a-on { color: #fff; }
-  body.audio-off #a-off { color: #fff; }
-  body.audio-off .toggle-box.audio .toggle-pill { transform: translateX(100%); background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-
-  .install-bubble { background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #34d399; border-radius: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px; color: #fff; font-weight: 800; font-family: 'Outfit', sans-serif; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); margin-top: 4px; }
-  .install-bubble:active { transform: scale(0.95); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
-
-  /* Modals */
-  .mode-menu-overlay {
-    position: fixed; inset: 0; background: rgba(4, 6, 10, 0.94); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
-    z-index: 200; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
-    padding: max(80px, env(safe-area-inset-top, 80px)) 24px 24px 24px;
-  }
-  .mode-menu-overlay.active { opacity: 1; visibility: visible; }
-  .modal-content { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 500px; transform: translateY(-40px); opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  .mode-menu-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
-  #info-modal, #install-modal { justify-content: center; padding-top: 24px; }
-  .menu-title { font-family: 'Outfit', sans-serif; color: #fff; font-size: 1.8rem; text-align: center; margin-bottom: 8px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
-  .mode-card { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 18px; border-radius: 20px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: all 0.2s; }
-  .mode-card:active { transform: scale(0.95); }
-  .mode-card.active { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
-  .mode-card h2 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #fff; }
-  .mode-card p { margin: 0; font-size: 0.85rem; color: #94a3b8; line-height: 1.4; }
-
-  /* App Content & Grid */
+  /* App Content Layout */
   .app-content { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
   .mode-container { display: none; flex-direction: column; width: 100%; height: 100%; flex: 1; padding: 0 16px max(16px, env(safe-area-inset-bottom, 16px)) 16px; box-sizing: border-box;}
   .mode-container.active { display: flex; animation: fadeIn 0.3s ease-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .outputs-area { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; margin-bottom: 8px; z-index: 20;}
-  .hero { background: var(--hero-grad); padding: 12px 16px; border-radius: 20px; text-align: center; box-shadow: 0 0 0 1px var(--panel-border), var(--shadow-soft); position: relative; overflow: hidden; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: background 0.4s; }
-  .hero-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.22em; color: #93c5fd; margin-bottom: 2px; font-weight: 700; transition: color 0.4s; }
-  .hero h1 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 2.8rem; color: #ffffff; line-height: 1; font-variant-numeric: tabular-nums; display: inline-block; transition: all 0.2s ease; }
+  /* Visualizer State Layout Adjustments */
+  body.vis-active .top-actions { display: none; }
+  body.vis-active .spell-selector-bar { display: none; }
+  body.vis-active #m1-input-section { display: none; }
+  body.vis-active #m1-visualizer-wrapper { display: flex; flex: 1; flex-direction: column; min-height: 0; margin: 0 -16px; padding: 0 16px; }
+  
+  .outputs-area { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; margin-bottom: 8px; z-index: 20; transition: all 0.3s ease;}
+  body.vis-active .outputs-area { margin-top: max(16px, env(safe-area-inset-top, 16px)); padding: 0; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .hero { background: var(--hero-grad); padding: 12px 16px; border-radius: 20px; text-align: center; box-shadow: 0 0 0 1px var(--panel-border), var(--shadow-soft); position: relative; overflow: hidden; backdrop-filter: blur(16px); transition: background 0.4s; } .hero-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.22em; color: #93c5fd; margin-bottom: 2px; font-weight: 700; transition: color 0.4s; } .hero h1 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 2.8rem; color: #ffffff; line-height: 1; font-variant-numeric: tabular-nums; display: inline-block; transition: all 0.2s ease; }
+  .metrics { display: flex; gap: 8px; } .metric-box { background: var(--panel-bg); flex: 1; padding: 10px 6px; border-radius: 16px; text-align: center; border: 1px solid var(--panel-border); font-size: 0.68rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; backdrop-filter: blur(16px); transition: all 0.3s ease; position: relative; user-select: none; cursor:pointer; } .metric-box strong { display: block; font-family: 'Outfit', sans-serif; font-size: 1.45rem; color: #ffffff; margin-top: 2px; font-variant-numeric: tabular-nums; transition: all 0.3s ease; }
 
-  .metrics { display: flex; gap: 8px; }
-  .metric-box { background: var(--panel-bg); flex: 1; padding: 10px 6px; border-radius: 16px; text-align: center; border: 1px solid var(--panel-border); font-size: 0.68rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: all 0.3s ease; position: relative;}
-  .metric-box strong { display: block; font-family: 'Outfit', sans-serif; font-size: 1.45rem; color: #ffffff; margin-top: 2px; font-variant-numeric: tabular-nums; transition: all 0.3s ease; }
-
-  /* Input Grid (Scrollable) */
+  /* Input Grid */
+  #m1-input-section { display: flex; flex-direction: column; flex: 1; min-height: 0; }
   .grid-scroll-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; margin: 0 -16px; padding: 0 16px; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; flex-shrink: 0;} .grid-full { grid-column: span 2; }
-  
-  .card { position: relative; background: var(--panel-bg); border-radius: 18px; border: 1px solid var(--panel-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow-soft); overflow: hidden; transition: all 0.4s ease; display: flex; flex-direction: column; justify-content: center; padding: 10px 8px; gap: 8px; }
-  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: var(--card-glow-opacity); transition: opacity 0.4s; }
-  .card.echoes::before { background: #e11d48; box-shadow: 0 0 14px #e11d48; } .card.fleshraker::before { background: #d97706; box-shadow: 0 0 14px #d97706; } .card.throne::before { background: #94a3b8; box-shadow: 0 0 14px #94a3b8; } .card.unsealing::before { background: #2563eb; box-shadow: 0 0 14px #2563eb; } .card.cast::before { background: #10b981; box-shadow: 0 0 14px #10b981; } .card.colorless::before { background: #8b5cf6; box-shadow: 0 0 14px #8b5cf6; } .card.colored::before { background: #06b6d4; box-shadow: 0 0 14px #06b6d4; } .card.spellcost::before { background: #eab308; box-shadow: 0 0 14px #eab308; } .card.leftover::before { background: #ec4899; box-shadow: 0 0 14px #ec4899; } .card.targetmv::before { background: #f43f5e; box-shadow: 0 0 14px #f43f5e; } 
-  .card h3 { margin: 0; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: #cbd5e1; font-weight: 700; text-align: center; }
-  .stepper { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); border-radius: 12px; padding: 3px; border: 1px solid rgba(255, 255, 255, 0.04); box-shadow: inset 0 2px 6px rgba(0,0,0,0.4); } .btn { background: rgba(255,255,255,0.08); color: #94a3b8; border: none; font-size: 1.5rem; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; transition: 0.1s; } .btn:active { transform: scale(0.85); background: rgba(255,255,255,0.22); color: #fff; } .val-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0; height: 100%; pointer-events: none; } .val { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; width: 100%; text-align: center; color: #f8fafc; font-variant-numeric: tabular-nums; display: inline-block; }
+  .card { position: relative; background: var(--panel-bg); border-radius: 18px; border: 1px solid var(--panel-border); backdrop-filter: blur(16px); box-shadow: var(--shadow-soft); overflow: hidden; transition: all 0.4s ease; display: flex; flex-direction: column; justify-content: center; padding: 10px 8px; gap: 8px; user-select: none; } .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: var(--card-glow-opacity); transition: opacity 0.4s; } .card.echoes::before { background: #e11d48; box-shadow: 0 0 14px #e11d48; } .card.fleshraker::before { background: #d97706; box-shadow: 0 0 14px #d97706; } .card.throne::before { background: #94a3b8; box-shadow: 0 0 14px #94a3b8; } .card.unsealing::before { background: #2563eb; box-shadow: 0 0 14px #2563eb; } .card.cast::before { background: #10b981; box-shadow: 0 0 14px #10b981; } .card.colorless::before { background: #8b5cf6; box-shadow: 0 0 14px #8b5cf6; } .card.colored::before { background: #06b6d4; box-shadow: 0 0 14px #06b6d4; } .card.spellcost::before { background: #eab308; box-shadow: 0 0 14px #eab308; } .card.leftover::before { background: #ec4899; box-shadow: 0 0 14px #ec4899; } .card.targetmv::before { background: #f43f5e; box-shadow: 0 0 14px #f43f5e; } .card.paymentcap::before { background: #64748b; box-shadow: 0 0 14px #64748b; }
+  .card h3 { margin: 0; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: #cbd5e1; font-weight: 700; text-align: center; display:flex; justify-content:center; align-items:center; gap:4px; } .stepper { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); border-radius: 12px; padding: 3px; border: 1px solid rgba(255, 255, 255, 0.04); box-shadow: inset 0 2px 6px rgba(0,0,0,0.4); } .btn { background: rgba(255,255,255,0.08); color: #94a3b8; border: none; font-size: 1.5rem; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; transition: 0.1s; } .btn:active { transform: scale(0.85); background: rgba(255,255,255,0.22); color: #fff; } .val-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0; height: 100%; pointer-events: none; } .val { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; width: 100%; text-align: center; color: #f8fafc; font-variant-numeric: tabular-nums; display: inline-block; }
 
-  /* M2 & M3 Original Dashboards */
-  .smooth-accordion { background: var(--panel-bg); border-radius: 16px; border: 1px solid var(--panel-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); flex-shrink: 0; overflow: hidden; transition: all 0.4s ease; display: flex; flex-direction: column; margin-bottom:8px;}
-  .acc-header { padding: 12px 16px; font-weight: 700; cursor: pointer; color: #60a5fa; font-size: 0.85rem; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; transition: color 0.4s; user-select: none; }
-  .acc-arrow { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  .smooth-accordion.open .acc-arrow { transform: rotate(-180deg); }
-  .acc-content-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  .smooth-accordion.open .acc-content-wrapper { grid-template-rows: 1fr; }
-  .acc-content-inner { overflow: hidden; }
-
-  .dash { background: var(--header-bg); border: 1px solid var(--panel-border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-soft); backdrop-filter: blur(16px); transition: all 0.4s ease; display: flex; flex-direction: column; margin-bottom:8px;}
-  .dash.highlight { border-color: #10b981; background: rgba(16, 185, 129, 0.09); box-shadow: 0 0 20px rgba(16, 185, 129, 0.18); }
-  .dash-header { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; user-select: none; }
-  .dash-sum-header { display: flex; justify-content: space-between; align-items: center; font-family: 'Outfit', sans-serif; font-size: 1.05rem; color: #fff; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px; }
-  .dash-sum-header span { font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #94a3b8; font-weight: 600; }
-  .dash-sum-stats { display: flex; justify-content: space-between; align-items: center; }
-  .stat-col { display: flex; flex-direction: column; gap: 2px; } .stat-col.right { text-align: right; align-items: flex-end; }
-  .stat-label { font-size: 0.62rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
-  .stat-val { font-family: 'Outfit', sans-serif; font-size: 1.45rem; color: #fff; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; line-height: 1; }
-  .stat-val.blue { color: var(--accent); transition: color 0.4s; } .stat-val.red { color: #ef4444; font-size: 1.1rem; }
-  .dash-body { padding: 0 16px 14px 16px; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.06); margin-top: -4px; padding-top: 12px;}
-  .mini-proof { font-size: 0.8rem; color: #cbd5e1; line-height: 1.45; border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 8px; transition: border-color 0.4s; } .mini-proof b { color: #fff; }
-  .yield-breakdown { font-size: 0.78rem; color: #94a3b8; margin-top: 4px; }
-  .badge { font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 800; padding: 3px 6px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; line-height: 1; display: flex; align-items: center; }
-  .badge-ok { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
-  .badge-short { background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.35); }
+  /* Mode 2/3 Dashboards */
+  .smooth-accordion { background: var(--panel-bg); border-radius: 16px; border: 1px solid var(--panel-border); backdrop-filter: blur(16px); flex-shrink: 0; overflow: hidden; transition: all 0.4s ease; display: flex; flex-direction: column; margin-bottom:8px;} .acc-header { padding: 12px 16px; font-weight: 700; cursor: pointer; color: #60a5fa; font-size: 0.85rem; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; transition: color 0.4s; user-select: none; } .acc-arrow { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); } .smooth-accordion.open .acc-arrow { transform: rotate(-180deg); } .acc-content-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); } .smooth-accordion.open .acc-content-wrapper { grid-template-rows: 1fr; } .acc-content-inner { overflow: hidden; }
+  .dash { background: var(--header-bg); border: 1px solid var(--panel-border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-soft); backdrop-filter: blur(16px); transition: all 0.4s ease; display: flex; flex-direction: column; margin-bottom:8px;} .dash.highlight { border-color: #10b981; background: rgba(16, 185, 129, 0.09); box-shadow: 0 0 20px rgba(16, 185, 129, 0.18); } .dash-header { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; user-select: none; } .dash-sum-header { display: flex; justify-content: space-between; align-items: center; font-family: 'Outfit', sans-serif; font-size: 1.05rem; color: #fff; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px; } .dash-sum-header span { font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #94a3b8; font-weight: 600; } .dash-sum-stats { display: flex; justify-content: space-between; align-items: center; } .stat-col { display: flex; flex-direction: column; gap: 2px; } .stat-col.right { text-align: right; align-items: flex-end; } .stat-label { font-size: 0.62rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; } .stat-val { font-family: 'Outfit', sans-serif; font-size: 1.45rem; color: #fff; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; line-height: 1; } .stat-val.blue { color: var(--accent); transition: color 0.4s; } .stat-val.red { color: #ef4444; font-size: 1.1rem; } .dash-body { padding: 0 16px 14px 16px; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.06); margin-top: -4px; padding-top: 12px;} .yield-breakdown { font-size: 0.78rem; color: #94a3b8; margin-top: 4px; } .badge { font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 800; padding: 3px 6px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; line-height: 1; display: flex; align-items: center; } .badge-ok { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); } .badge-short { background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.35); }
 
   /* ---------------------------------------------------- */
-  /* THE INLINE ARENA VISUALIZER (TAP-TO-EXPAND)          */
+  /* VISUALIZER ENGINE (PROXIMITY SNAP, TIGHTER 3-CARD FIT) */
   /* ---------------------------------------------------- */
-  .deploy-vis-btn { width: 100%; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: 1px solid #60a5fa; border-radius: 16px; color: #fff; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.05em; padding: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); transition: all 0.2s ease; margin-top: auto; flex-shrink: 0; } .deploy-vis-btn:active { transform: scale(0.96); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
-  .deploy-vis-btn.deactivate { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border-color: #fca5a5; box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4); } .deploy-vis-btn.deactivate:active { box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+  .deploy-btn { width: 100%; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: 1px solid #60a5fa; border-radius: 12px; color: #fff; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.05em; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); transition: all 0.2s ease; margin-top: 12px; flex-shrink: 0; box-sizing: border-box; } .deploy-btn:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4); }
+  .deploy-btn.deactivate { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border-color: #fca5a5; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); } .deploy-btn.deactivate:active { box-shadow: 0 2px 10px rgba(239, 68, 68, 0.4); }
 
-  #m1-visualizer { display: none; flex: 1; flex-direction: column; overflow-y: auto; margin: 0 -16px; padding: 0 16px 40px 16px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-  
-  .vis-divider { width: 100%; text-align: center; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; color: #94a3b8; padding: 12px 0; margin: 15px 0 10px 0; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.3); text-transform: uppercase; }
-  
-  .vis-item { position: relative; width: 100%; height: 45px; display: flex; align-items: flex-start; margin-bottom: 0; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); flex-shrink: 0; }
-  
-  .vis-card-art { position: absolute; left: 0; top: 0; width: 100px; height: 140px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background-size: cover; background-position: center center; box-shadow: 0 -4px 12px rgba(0,0,0,0.6); transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: top left; display: flex; flex-direction: column; overflow: hidden;}
-  .vis-ribbon { width: 100%; padding: 4px 2px; text-align: center; font-size: 0.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  
-  .vis-text-box { margin-left: 110px; width: calc(100% - 110px); background: rgba(0,0,0,0.75); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid transparent; padding: 10px 12px; opacity: 0; transform: translateX(-10px); transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none; display: flex; flex-direction: column; justify-content: center; height: 130px; box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
-  .vis-title { font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 4px; } 
-  .vis-desc { font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #94a3b8; line-height: 1.4; }
+  #m1-visualizer-wrapper { display: none; flex: 1; flex-direction: column; min-height: 0; margin: 0 -16px; padding: 0 16px; }
 
-  /* Expanded Active State */
-  .vis-item.active { height: 155px; margin-top: 10px; margin-bottom: 10px; z-index: 50 !important; }
-  .vis-item.active .vis-card-art { transform: scale(1.05) translateX(5px); box-shadow: 0 8px 25px rgba(0,0,0,0.8); border-color: #3b82f6; z-index: 50; }
-  .vis-item.active .vis-text-box { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  #vis-scroll-container { 
+      flex: 1; overflow-y: auto; overflow-x: hidden; 
+      scroll-snap-type: y proximity; 
+      -webkit-overflow-scrolling: touch; 
+      padding: 0; margin: 0 -16px; padding-left: 16px; padding-right: 16px;
+      position: relative;
+  }
+  
+  .vis-snap-point { scroll-snap-align: center; width: 100%; flex-shrink: 0; }
+  
+  /* Dynamic JS Spacers */
+  #vis-top-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
+  #vis-bottom-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
+  
+  /* Card Size and Spacing adjusted to guarantee 3-card fit */
+  .vis-card-row { 
+      position: relative; display: flex; gap: 8px; align-items: stretch; width: 100%; 
+      padding: 4px 0; transition: transform 0.2s ease-out, filter 0.2s ease-out, opacity 0.2s ease-out; 
+      transform-origin: center center; 
+  }
+  
+  .vis-art { 
+      flex: 0 0 120px; /* Reduced width for vertical fit */
+      border-radius: 8px; background-size: cover; background-position: center; 
+      border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 8px 20px rgba(0,0,0,0.6); 
+      aspect-ratio: 2.5/3.5; cursor: pointer;
+  }
+  
+  .vis-panel { 
+      flex: 1; min-width: 0; background: var(--panel-bg); border: 1px solid var(--panel-border); 
+      border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 4px; 
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4); justify-content: center;
+  }
+  
+  .vis-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;}
+  .vis-pill { font-size: 0.5rem; font-weight: 800; text-transform: uppercase; padding: 3px 6px; border-radius: 4px; color: #fff; letter-spacing: 0.05em; line-height: 1; }
+  .vis-origin-pill { font-size: 0.45rem; font-weight: 800; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.05em; line-height: 1; border: 1px solid; display: inline-flex; align-items: center; white-space: nowrap; }
+  .vis-index { font-family: 'Outfit', sans-serif; font-size: 0.8rem; font-weight: 800; color: #94a3b8; }
+  
+  .vis-title { font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 700; color: #fff; line-height: 1.2; }
+  .vis-desc { font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #cbd5e1; line-height: 1.35; }
+  .vis-context { font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #94a3b8; line-height: 1.35; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-top: 4px; display: none; }
+  
+  /* Non-snapping Scaffolding & Notes */
+  .vis-divider-wrapper { width: 100%; flex-shrink: 0; scroll-snap-align: none; opacity: 0.7; }
+  .vis-divider { width: 100%; text-align: center; font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.2em; color: #94a3b8; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.4); text-transform: uppercase; margin: 12px 0;}
+  
+  /* Proof Blocks */
+  .vis-note-wrapper { width: 100%; flex-shrink: 0; opacity: 1 !important; scroll-snap-align: end; } 
+  .vis-proof { padding: 16px; border-radius: 12px; font-size: 0.8rem; line-height: 1.5; text-align: left; box-sizing: border-box; margin: 12px 0; }
+  .vis-proof b { font-family: 'Outfit', sans-serif; font-size: 0.9rem; letter-spacing: 0.05em; }
+  .vis-proof.infinite { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #a7f3d0; }
+  .vis-proof.infinite b { color: #34d399; }
+  .vis-proof.finite { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); color: #fde68a; }
+  .vis-proof.finite b { color: #fbbf24; }
+  .vis-proof.fizzle { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); color: #fecaca; }
+  .vis-proof.fizzle b { color: #fca5a5; }
 
-  .vis-missing-note { margin: 15px 0; padding: 14px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; color: #fbbf24; font-size: 0.85rem; line-height: 1.4; width: 100%; box-sizing: border-box;}
-  .vis-missing-note.infinite { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #34d399; }
-  .vis-missing-note.lethal { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
-
-  /* Simple Modals / Overlays (Restored) */
-  #scryfall-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; cursor: pointer; } #scryfall-overlay.active { opacity: 1; visibility: visible; } #scryfall-img { max-width: 85%; max-height: 80vh; border-radius: 4.75% / 3.5%; box-shadow: 0 20px 60px rgba(0,0,0,0.8); transform: scale(0.9); transition: transform 0.3s; display: none; } #scryfall-overlay.active #scryfall-img { transform: scale(1); }
+  /* Clean UI Animations */
+  @keyframes popScale { 0% { transform: scale(1); } 40% { transform: scale(1.15); color: #93c5fd; } 100% { transform: scale(1); } } .pop { animation: popScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .hero-infinite { font-size: 3rem !important; letter-spacing: 2px; color: #fff !important; }
+  
   .swipe-tut { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; transition: opacity 0.4s ease; pointer-events: none; } .swipe-anim-container { display: flex; align-items: center; gap: 16px; color: var(--accent); animation: swipeDrift 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1); } @keyframes swipeDrift { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-24px); } 75% { transform: translateX(24px); } } .tut-text { color: #fff; font-weight: 800; font-family: 'Outfit'; font-size: 1.5rem; letter-spacing: 0.12em; text-shadow: 0 0 24px rgba(255,255,255,0.4); } .tut-check-container { pointer-events: auto; background: rgba(0,0,0,0.5); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; gap: 10px; cursor: pointer; } .tut-check-container span { color: #94a3b8; font-size: 0.95rem; font-family: 'Inter', sans-serif; font-weight: 600; } .tut-check-container input { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
-
-  /* Animations */
-  @keyframes flashRed { 0% { background-color: rgba(239, 68, 68, 0.4); transform: scale(0.96); border-color: #ef4444; } 100% { background-color: var(--panel-bg); transform: scale(1); border-color: var(--panel-border); } } .flash-reset { animation: flashRed 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  @keyframes popScale { 0% { transform: scale(1); } 40% { transform: scale(1.25); color: #93c5fd; } 100% { transform: scale(1); } } .pop { animation: popScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  @keyframes popScaleExtreme { 0% { transform: scale(1); } 40% { transform: scale(1.6); color: #fff; text-shadow: 0 0 30px #fef08a, 0 0 60px #f97316; } 100% { transform: scale(1); } } .pop-extreme { animation: popScaleExtreme 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  .hero-infinite { font-size: 2.8rem !important; letter-spacing: 2px; color: #fff !important; text-shadow: 0 0 20px #fef08a, 0 0 40px #f97316 !important; }
-  @keyframes shake-lethal { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-2px, 2px); } 50% { transform: translate(2px, -2px); } 75% { transform: translate(-2px, -2px); } } .shake-lethal { animation: shake-lethal 0.3s infinite ease-in-out; }
-  @keyframes shake-infinite { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(-3px, 3px) rotate(-1deg); } 50% { transform: translate(3px, -3px) rotate(1deg); } 75% { transform: translate(-3px, -3px) rotate(-1deg); } } .shake-infinite { animation: shake-infinite 0.2s infinite ease-in-out; }
-  .real-fire { position: relative; overflow: hidden; background: linear-gradient(to top, #7f1d1d 0%, #450a0a 100%) !important; border-color: #ef4444 !important; box-shadow: 0 0 25px rgba(239, 68, 68, 0.5) !important; } .real-fire::before { content: ''; position: absolute; top: -50%; left: -50%; right: -50%; bottom: -50%; background: radial-gradient(circle at 50% 120%, #fef08a 0%, transparent 25%), radial-gradient(circle at 50% 90%, #f97316 0%, transparent 45%), radial-gradient(circle at 50% 60%, #ef4444 0%, transparent 65%); filter: blur(10px); mix-blend-mode: color-dodge; animation: flicker 0.6s infinite alternate; z-index: 0; } .real-fire > * { position: relative; z-index: 1; }
-  @keyframes flicker { 0% { transform: translateY(0) scale(1); opacity: 0.8; } 100% { transform: translateY(-10px) scale(1.05); opacity: 1; } }
 </style>
 </head>
 <body class="audio-off">
 
-<canvas id="glcanvas"></canvas>
-
-<!-- WebGL Shader Script -->
-<script type="x-shader/x-fragment" id="fragShader">
-  precision mediump float;
-  uniform vec2 u_res; uniform float u_time; uniform float u_intensity;
-  float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
-  float noise(vec2 p) {
-      vec2 i = floor(p); vec2 f = fract(p); vec2 u = f*f*(3.0-2.0*f);
-      return mix(mix(hash(i + vec2(0.0,0.0)), hash(i + vec2(1.0,0.0)), u.x), mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), u.x), u.y);
-  }
-  void main() {
-      vec2 st = gl_FragCoord.xy / u_res.xy; st.x *= u_res.x / u_res.y;
-      float t = u_time * 0.15; vec2 q = vec2(0.);
-      q.x = noise(st * 3.0 + t); q.y = noise(st * 3.0 - t);
-      float n = noise(st * 2.0 + q * 2.0 + t * 2.0);
-      vec3 alienPurple = vec3(0.5, 0.1, 0.9); vec3 fireRed = vec3(1.0, 0.2, 0.0);
-      vec3 color = mix(alienPurple, fireRed, u_intensity);
-      float alpha = n * (0.15 + u_intensity * 0.7);
-      gl_FragColor = vec4(color * alpha, alpha);
-  }
-</script>
-
 <script>
   const symC = `<svg class="sym-c" viewBox="0 0 100 100"><circle cx="48" cy="52" r="44" fill="#000000"/><circle cx="50" cy="48" r="44" fill="#cbc5be"/><path d="M 50 10 Q 50 48 88 48 Q 50 48 50 86 Q 50 48 12 48 Q 50 48 50 10 Z" fill="#181615"/></svg>`;
   const symInf = `<svg class="sym-inf" viewBox="0 0 100 50"><path d="M 28 40 C 6 40, 6 10, 28 10 C 46 10, 54 40, 72 40 C 94 40, 94 10, 72 10 C 54 10, 46 40, 28 40 Z" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  
+  // Permanent API Image Routes - using API format for perfectly stable loading without hotlink breaks
   const ART_CACHE = {
-      'Ulalek': 'https://cards.scryfall.io/normal/front/8/8/88cd1d58-bc6e-4ec6-9f8d-fc51907892b4.jpg',
-      'Fleshraker': 'https://cards.scryfall.io/normal/front/8/0/80c2a3c7-1486-4ff9-88ec-79ec67a437f8.jpg',
-      'Echoes': 'https://cards.scryfall.io/normal/front/b/2/b2c2925d-7258-4562-b261-26c1170067da.jpg',
-      'Unsealing': 'https://cards.scryfall.io/normal/front/e/6/e6b44ffe-ce9e-422a-8c28-0a427346caa2.jpg',
-      'Spawn': 'https://cards.scryfall.io/normal/front/1/7/17b2ed27-8025-455f-8647-8ccb63dc4e9a.jpg'
+      'Ulalek': 'https://api.scryfall.com/cards/named?exact=Ulalek,%20Fused%20Atrocity&format=image',
+      'Fleshraker': 'https://api.scryfall.com/cards/named?exact=Glaring%20Fleshraker&format=image',
+      'Echoes': 'https://api.scryfall.com/cards/named?exact=Echoes%20of%20Eternity&format=image',
+      'Unsealing': 'https://api.scryfall.com/cards/named?exact=Kozilek%27s%20Unsealing&format=image',
+      'Throne': 'https://api.scryfall.com/cards/named?exact=Roaming%20Throne&format=image',
+      'Spawn': 'https://api.scryfall.com/cards/named?exact=Eldrazi%20Spawn&format=image'
   };
   Object.values(ART_CACHE).forEach(url => { let img = new Image(); img.src = url; });
 </script>
@@ -362,6 +218,7 @@
   
   <!-- MODE 1 -->
   <div id="mode1" class="mode-container active">
+    
     <div class="spell-selector-bar" id="spell-bar" onpointerdown="onSpellBarDown(event)" onpointerup="onSpellBarUp(event)" onpointercancel="onSpellBarCancel(event)" oncontextmenu="event.preventDefault()">
       <div class="ss-left">
         <div class="ss-icon" id="ss-icon-container"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="8" x2="20" y2="8"></line></svg></div>
@@ -377,29 +234,38 @@
       <div class="hero"><div class="hero-label">Max Copies</div><h1 id="out-spells"><span class="val">1</span></h1></div>
       <div class="metrics">
         <div class="metric-box">Payments <strong id="out-payments">0</strong></div>
-        <div class="metric-box" style="cursor:pointer;" onpointerdown="showBreakdown(true)" onpointerup="showBreakdown(false)" onpointerleave="showBreakdown(false)" oncontextmenu="event.preventDefault()">REMAINING <script>document.write(symC);</script><strong id="out-leftover">0</strong></div>
+        <div class="metric-box" style="cursor:pointer; user-select:none;" onclick="toggleRemainingBreakdown()">REMAINING <script>document.write(symC);</script><strong id="out-leftover">0</strong></div>
         <div class="metric-box" id="damage-box" style="display:none;">ETB Damage <strong id="out-damage">0</strong></div>
       </div>
     </div>
 
-    <!-- Wrapping grid so we can swap it out inline -->
-    <div id="m1-grid-wrapper" class="grid-scroll-area">
-      <div class="grid">
-        <div class="card echoes"><h3>Echoes of Eternity</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'echoes', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-echoes">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'echoes', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
-        <div class="card fleshraker"><h3>Glaring Fleshraker</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'fleshraker', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-fleshraker">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'fleshraker', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
-        <div class="card throne"><h3>Roaming Throne</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'throne', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-throne">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'throne', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
-        <div class="card unsealing"><h3>Kozilek's Unsealing</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'unsealing', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-unsealing">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'unsealing', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
-        <div class="card cast"><h3>Extra Spawns (Misc)</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'cast', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-cast">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'cast', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
-        <div class="card colorless"><h3><script>document.write(symC);</script> Pool</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'mana', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-mana">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'mana', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
-      </div>
+    <div id="m1-input-section">
+        <div class="grid-scroll-area">
+          <div class="grid">
+            <div class="card echoes" onpointerdown="onBoardCardDown(event, 'Echoes')" onpointerup="onBoardCardUp()" onpointercancel="onBoardCardUp()" oncontextmenu="event.preventDefault()"><h3>Echoes of Eternity</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'echoes', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-echoes">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'echoes', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
+            <div class="card fleshraker" onpointerdown="onBoardCardDown(event, 'Fleshraker')" onpointerup="onBoardCardUp()" onpointercancel="onBoardCardUp()" oncontextmenu="event.preventDefault()"><h3>Glaring Fleshraker</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'fleshraker', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-fleshraker">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'fleshraker', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
+            <div class="card throne" onpointerdown="onBoardCardDown(event, 'Throne')" onpointerup="onBoardCardUp()" onpointercancel="onBoardCardUp()" oncontextmenu="event.preventDefault()"><h3>Roaming Throne</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'throne', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-throne">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'throne', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
+            <div class="card unsealing" onpointerdown="onBoardCardDown(event, 'Unsealing')" onpointerup="onBoardCardUp()" onpointercancel="onBoardCardUp()" oncontextmenu="event.preventDefault()"><h3>Kozilek's Unsealing</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'unsealing', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-unsealing">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'unsealing', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
+            <div class="card cast" onpointerdown="onBoardCardDown(event, 'Spawn')" onpointerup="onBoardCardUp()" onpointercancel="onBoardCardUp()" oncontextmenu="event.preventDefault()"><h3>Extra Spawns (Misc)</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'cast', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-cast">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'cast', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
+            <div class="card colorless"><h3><script>document.write(symC);</script> Pool</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'mana', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-mana">0</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'mana', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
+            <div class="card paymentcap grid-full"><h3>Max <script>document.write(symC);</script><script>document.write(symC);</script> Payments</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 1, 'max_pay', -1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">-</button><div class="val-wrapper"><span class="val" id="val1-max_pay">ALL</span></div><button class="btn" onpointerdown="startUpdate(event, 1, 'max_pay', 1)" onpointerup="stopUpdate()" onpointerleave="stopUpdate()" onpointercancel="stopUpdate()">+</button></div></div>
+          </div>
+        </div>
     </div>
     
-    <!-- The Arena Deckbuilder Inline Visualizer (Touch/Tap Native) -->
-    <div id="m1-visualizer" style="display: none; flex: 1; flex-direction: column; overflow-y: auto; padding: 10px 16px 150px 16px; margin: 0 -16px; -webkit-overflow-scrolling: touch;">
-      <!-- JavaScript renders the cards here -->
+    <div id="m1-visualizer-wrapper">
+        <div id="vis-scroll-container">
+            <div id="vis-top-pad"></div>
+            <!-- Cards and Scaffolding Injected Here -->
+            <div id="vis-bottom-pad"></div>
+        </div>
     </div>
 
-    <button class="deploy-vis-btn" id="vis-toggle-btn" onclick="toggleVisualizer()">▶ ACTIVATE VISUALIZER</button>
+    <!-- Master Button -->
+    <div style="padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)); flex-shrink: 0; z-index: 100; margin: 0 -16px;">
+        <button class="deploy-btn" id="vis-toggle-btn" onclick="toggleVisualizer()">▶ ACTIVATE VISUALIZER</button>
+    </div>
+
   </div>
 
   <!-- MODE 2 -->
@@ -434,43 +300,11 @@
 <script>
   let currentMode = 1; let hapticsEnabled = true; let audioEnabled = false; 
   let selectedSpellCard = null; let spellCastSpawns = 0; let spellResoSpawns = 0; let spellTriggersUnsealing = true; let spellDrawsCards = false;
-  let currentSearchResults = []; let visIsOpen = false; let currentVisualStack = [];
+  let currentSearchResults = []; let visIsOpen = false; let currentVisualStack = []; let isInfCurrent = false;
 
-  const state1 = { echoes: 0, fleshraker: 0, throne: 0, unsealing: 0, cast: 0, mana: 0 };
+  const state1 = { echoes: 0, fleshraker: 0, throne: 0, unsealing: 0, cast: 0, mana: 0, max_pay: -1 };
   const state2 = { colored: 0, colorless: 0, spellcost: 0, spawns: 0, leftover: 0 };
   const state3 = { colored: 0, colorless: 0, spawns: 0, targetmv: 0 };
-
-  const canvas = document.getElementById("glcanvas");
-  const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
-  let uIntensityLoc, uTimeLoc, uResLoc; let targetIntensity = 0.0; let currentIntensity = 0.0; let startTime = Date.now();
-
-  function initWebGL() {
-      if(!gl) return;
-      const vsSource = `attribute vec4 a_position; void main() { gl_Position = a_position; }`;
-      const fsSource = document.getElementById("fragShader").text;
-      const compile = (type, source) => { const shader = gl.createShader(type); gl.shaderSource(shader, source); gl.compileShader(shader); return shader; };
-      const program = gl.createProgram();
-      gl.attachShader(program, compile(gl.VERTEX_SHADER, vsSource)); gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fsSource));
-      gl.linkProgram(program); gl.useProgram(program);
-      const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-      const pos = gl.getAttribLocation(program, "a_position");
-      gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-      uIntensityLoc = gl.getUniformLocation(program, "u_intensity"); uTimeLoc = gl.getUniformLocation(program, "u_time"); uResLoc = gl.getUniformLocation(program, "u_res");
-      gl.clearColor(0.0, 0.0, 0.0, 0.0); requestAnimationFrame(renderWebGL);
-  }
-  function renderWebGL() {
-      if(!gl) return;
-      if(canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-          canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-          gl.viewport(0, 0, canvas.width, canvas.height); gl.uniform2f(uResLoc, canvas.width, canvas.height);
-      }
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      currentIntensity += (targetIntensity - currentIntensity) * 0.05;
-      gl.uniform1f(uTimeLoc, (Date.now() - startTime) / 1000.0); gl.uniform1f(uIntensityLoc, currentIntensity);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); requestAnimationFrame(renderWebGL);
-  }
-  initWebGL();
 
   let audioCtx;
   function initAudioCtx() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); }
@@ -494,105 +328,192 @@
   function playPaperSlide() {
       if(!audioEnabled || !audioCtx) return; let t = audioCtx.currentTime;
       let bufferSize = audioCtx.sampleRate * 0.08; 
-      let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      let data = buffer.getChannelData(0);
+      let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); let data = buffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
       let noise = audioCtx.createBufferSource(); noise.buffer = buffer;
       let filter = audioCtx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.setValueAtTime(800, t); filter.frequency.exponentialRampToValueAtTime(300, t + 0.08);
       let gain = audioCtx.createGain(); gain.gain.setValueAtTime(0.04, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
       noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start(t);
   }
-  function playEldritchRumble(isInf) {
-      if(!audioEnabled || !audioCtx) return; let t = audioCtx.currentTime;
-      let drone = audioCtx.createOscillator(); drone.type = 'sawtooth'; drone.frequency.setValueAtTime(isInf ? 35 : 45, t); drone.frequency.exponentialRampToValueAtTime(15, t + 2.0);
-      let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.setValueAtTime(200, t); filter.frequency.exponentialRampToValueAtTime(30, t + 2.0);
-      let gain = audioCtx.createGain(); gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(isInf ? 0.8 : 0.5, t + 0.2); gain.gain.exponentialRampToValueAtTime(0.01, t + 2.0);
-      drone.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); drone.start(t); drone.stop(t + 2.0);
-  }
 
   // ==========================================
-  // INLINE TAP-TO-EXPAND VISUALIZER
+  // WIDE ROW NATIVE PROXIMITY SCROLL VISUALIZER
   // ==========================================
+  let focusedIndex = -1; let visScrollRAF;
+
   function toggleVisualizer() {
       vibrate(2); playSnap();
       visIsOpen = !visIsOpen;
-      const grid = document.getElementById('m1-grid-wrapper');
-      const vis = document.getElementById('m1-visualizer');
       const btn = document.getElementById('vis-toggle-btn');
       
       if (visIsOpen) {
-          grid.style.display = 'none';
-          vis.style.display = 'flex';
+          document.body.classList.add('vis-active');
           btn.classList.add('deactivate');
-          btn.innerHTML = '▼ DEACTIVATE VISUALIZER';
+          btn.innerHTML = '▼ CLOSE VISUALIZER';
+          focusedIndex = -1;
           renderVisualizer();
       } else {
-          grid.style.display = 'flex';
-          vis.style.display = 'none';
+          document.body.classList.remove('vis-active');
           btn.classList.remove('deactivate');
           btn.innerHTML = '▶ ACTIVATE VISUALIZER';
+          focusedIndex = -1;
       }
   }
 
-  function toggleVisItem(el) {
-      vibrate(2);
-      const wasActive = el.classList.contains('active');
-      document.querySelectorAll('.vis-item').forEach(i => i.classList.remove('active'));
+  function updateWave() {
+      if(!visIsOpen) return;
+      const container = document.getElementById('vis-scroll-container');
+      const cards = container.querySelectorAll('.vis-snap-point'); 
+      if(cards.length === 0) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const centerY = containerRect.height / 2; 
       
-      if (!wasActive) {
-          el.classList.add('active');
-          playPaperSlide();
-          setTimeout(() => {
-              el.scrollIntoView({behavior: 'smooth', block: 'center'});
-          }, 150);
-      } else {
-          playSnap();
+      let closestIdx = -1; let minDist = Infinity;
+
+      cards.forEach((item, i) => {
+          const itemCenter = item.offsetTop + (item.offsetHeight / 2) - container.scrollTop;
+          const dist = Math.abs(centerY - itemCenter);
+          if(dist < minDist) { minDist = dist; closestIdx = i; }
+      });
+
+      if(closestIdx !== focusedIndex && closestIdx !== -1) {
+          focusedIndex = closestIdx;
+          vibrate(2); playPaperSlide();
       }
+
+      cards.forEach((item, i) => {
+          const itemCenter = item.offsetTop + (item.offsetHeight / 2) - container.scrollTop;
+          const dist = Math.abs(centerY - itemCenter);
+          const maxDist = containerRect.height / 1.5; 
+          
+          let ratio = Math.max(0, 1 - (dist / maxDist));
+          let focusRatio = Math.pow(ratio, 1.5); 
+
+          const row = item.querySelector('.vis-card-row');
+          const contextText = item.querySelector('.vis-context');
+          
+          if(row) {
+              const scale = 0.85 + (0.15 * focusRatio);
+              row.style.transform = `scale(${scale})`;
+              row.style.opacity = 0.4 + (0.6 * focusRatio);
+              item.style.zIndex = Math.round(focusRatio * 100) + (100 - i);
+              
+              if(i === focusedIndex) {
+                  row.style.filter = `brightness(1)`;
+                  if(contextText) {
+                      contextText.style.display = 'block';
+                      contextText.style.opacity = focusRatio;
+                  }
+              } else {
+                  row.style.filter = `brightness(0.7)`;
+                  if(contextText) contextText.style.display = 'none';
+              }
+          }
+      });
   }
+
+  document.getElementById('vis-scroll-container').addEventListener('scroll', () => {
+      cancelAnimationFrame(visScrollRAF); visScrollRAF = requestAnimationFrame(updateWave);
+  }, {passive: true});
 
   function renderVisualizer() {
       if(!visIsOpen) return;
-      const container = document.getElementById('m1-visualizer');
-      let html = '';
+      const container = document.getElementById('vis-scroll-container');
       
-      currentVisualStack.forEach((item, index) => {
+      let html = `<div id="vis-top-pad"></div>`;
+      
+      currentVisualStack.forEach((item) => {
           if (item.type === 'divider') {
-              html += `<div class="vis-divider">${item.text}</div>`;
-              return;
+              html += `<div class="vis-divider-wrapper"><div class="vis-divider">${item.text}</div></div>`; return;
           }
-          if (item.type === 'note') {
-              let cls = item.lethal ? 'lethal' : (item.infinite ? 'infinite' : '');
-              html += `<div class="vis-note-wrapper"><div class="vis-missing-note ${cls}">${item.text}</div></div>`;
-              return;
+          if (item.type === 'proof') {
+              html += `<div class="vis-note-wrapper"><div class="vis-proof ${item.class}">${item.html}</div></div>`; return;
           }
-          
-          let z = 100 - index;
-          let imgUrl = item.img || ART_CACHE['Spawn'];
           
           html += `
-          <div class="vis-item" style="z-index: ${z}; --hud-color: ${item.color};" onclick="toggleVisItem(this)">
-              <div class="vis-card-art" style="background-image: url('${imgUrl}');">
-                  <div class="vis-ribbon" style="background: ${item.color}">${item.ribbon}</div>
-              </div>
-              <div class="vis-text-box" style="border-left-color: ${item.color}">
-                  <div class="vis-title">${item.title}</div>
-                  <div class="vis-desc">${item.desc}</div>
+          <div class="vis-snap-point">
+              <div class="vis-card-row">
+                  <div class="vis-art" style="background-image: url('${item.img}');" onclick="showCardArt('${item.img}')"></div>
+                  <div class="vis-panel">
+                      <div class="vis-panel-header">
+                          <div style="display: flex; gap: 6px; align-items: center;">
+                              <div class="vis-pill" style="background: ${item.color}">${item.ribbon}</div>
+                              ${item.origin ? `<div class="vis-origin-pill" style="color: ${item.originColor}; border-color: ${item.originColor};">${item.origin}</div>` : ''}
+                          </div>
+                          <div class="vis-index">${item.idxStr}</div>
+                      </div>
+                      <div>
+                          <div class="vis-title">${item.title}</div>
+                          <div class="vis-desc">${item.desc}</div>
+                      </div>
+                      <div class="vis-context">${item.context}</div>
+                  </div>
               </div>
           </div>`;
       });
+      html += `<div id="vis-bottom-pad"></div>`;
       container.innerHTML = html;
+      
+      requestAnimationFrame(() => {
+          const cards = container.querySelectorAll('.vis-snap-point');
+          if(cards.length > 0) {
+              document.getElementById('vis-top-pad').style.height = '0px';
+              document.getElementById('vis-bottom-pad').style.height = '0px';
+              void container.offsetHeight; 
+              
+              const cHeight = container.clientHeight;
+              const centerY = cHeight / 2;
+              
+              const firstCard = cards[0];
+              const firstCenter = firstCard.offsetTop + (firstCard.offsetHeight / 2);
+              let topPad = centerY - firstCenter;
+              
+              const lastCard = cards[cards.length - 1];
+              const lastCenter = lastCard.offsetTop + (lastCard.offsetHeight / 2);
+              let bottomPad = centerY - (container.scrollHeight - lastCenter);
+              
+              document.getElementById('vis-top-pad').style.height = `${Math.max(0, topPad)}px`;
+              document.getElementById('vis-bottom-pad').style.height = `${Math.max(0, bottomPad)}px`;
+          }
+          updateWave();
+      });
   }
 
   // ==========================================
   // SCRYFALL SPELL SELECTOR ENGINE
   // ==========================================
   let barHoldTimer; let barIsHolding = false;
-
+  
+  function showCardArt(url) {
+      if(!url) return;
+      vibrate(2); playSnap();
+      const overlay = document.getElementById('scryfall-overlay');
+      document.getElementById('scryfall-img').src = url;
+      document.getElementById('scryfall-img').style.display = 'block';
+      overlay.classList.add('active');
+  }
+  
+  let boardHoldTimer; let boardIsHolding = false;
+  function onBoardCardDown(e, key) {
+      if(e.button !== 0 && e.type !== 'touchstart') return;
+      boardIsHolding = false;
+      boardHoldTimer = setTimeout(() => {
+          boardIsHolding = true;
+          let url = ART_CACHE[key];
+          if(url) showCardArt(url);
+      }, 400);
+  }
+  function onBoardCardUp() { 
+      clearTimeout(boardHoldTimer); 
+      boardIsHolding = false; 
+  }
+  
   function onSpellBarDown(e) {
       if(e.button !== 0 && e.type !== 'touchstart') return;
       barIsHolding = false; if(!selectedSpellCard) return; 
       barHoldTimer = setTimeout(() => {
-          barIsHolding = true; vibrate(2); playSnap();
+          barIsHolding = true; vibrate(); playSnap();
           const imgUrl = selectedSpellCard.image_uris?.normal || selectedSpellCard.card_faces?.[0]?.image_uris?.normal;
           if(imgUrl) {
               const overlay = document.getElementById('scryfall-overlay');
@@ -650,14 +571,11 @@
       vibrate(2); playSnap(); document.getElementById('spell-search-modal').classList.remove('active');
       let card = currentSearchResults[i]; selectedSpellCard = card; parseSpellData(card);
       let imgUrl = card.image_uris ? card.image_uris.art_crop : (card.card_faces && card.card_faces[0].image_uris ? card.card_faces[0].image_uris.art_crop : '');
-      document.getElementById('ss-icon-container').innerHTML = imgUrl ? `<img src="${imgUrl}" style="width:34px; height:34px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.2);">` : `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="8" x2="20" y2="8"></line></svg>`;
+      document.getElementById('ss-icon-container').innerHTML = imgUrl ? `<img src="${imgUrl}" style="width:34px; height:34px; object-fit:cover; border-radius:50%; border:1px solid rgba(255,255,255,0.2);">` : `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="8" x2="20" y2="8"></line></svg>`;
       document.getElementById('ss-selected-title').innerText = card.name; document.getElementById('ss-clear-btn').style.display = 'block';
       updateSpellBadge();
-      
-      let totalNativeSpawns = spellCastSpawns + spellResoSpawns;
-      state2.spawns = totalNativeSpawns; state3.spawns = totalNativeSpawns;
+      let totalNativeSpawns = spellCastSpawns + spellResoSpawns; state2.spawns = totalNativeSpawns; state3.spawns = totalNativeSpawns;
       if(card.cmc) state2.spellcost = Math.floor(card.cmc);
-      
       updateAllDisplays(); calcCurrent(); saveState();
   }
 
@@ -673,9 +591,9 @@
   // ==========================================
   // LOCALSTORAGE
   // ==========================================
-  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v16', JSON.stringify(data)); }
+  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v44', JSON.stringify(data)); }
   function loadState() {
-      const saved = localStorage.getItem('ulalek_save_v16');
+      const saved = localStorage.getItem('ulalek_save_v44');
       if(saved) {
           try {
               const parsed = JSON.parse(saved); Object.assign(state1, parsed.state1); Object.assign(state2, parsed.state2); Object.assign(state3, parsed.state3);
@@ -683,7 +601,7 @@
                   selectedSpellCard = parsed.selectedSpellCard; parseSpellData(selectedSpellCard);
                   document.getElementById('ss-selected-title').innerText = selectedSpellCard.name; document.getElementById('ss-clear-btn').style.display = 'block'; updateSpellBadge();
                   let imgUrl = selectedSpellCard.image_uris ? selectedSpellCard.image_uris.art_crop : (selectedSpellCard.card_faces && selectedSpellCard.card_faces[0].image_uris ? selectedSpellCard.card_faces[0].image_uris.art_crop : '');
-                  if(imgUrl) document.getElementById('ss-icon-container').innerHTML = `<img src="${imgUrl}" style="width:34px; height:34px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.2);">`;
+                  if(imgUrl) document.getElementById('ss-icon-container').innerHTML = `<img src="${imgUrl}" style="width:34px; height:34px; object-fit:cover; border-radius:50%; border:1px solid rgba(255,255,255,0.2);">`;
               } else { parseSpellData(null); updateSpellBadge(); }
           } catch(e){}
       } else parseSpellData(null);
@@ -694,11 +612,28 @@
   // CORE UI & EVENT LISTENERS
   // ==========================================
   let finalSpawns = 0; let finalMana = 0;
+  let showRemainingBreakdown = false;
 
-  function showBreakdown(state) {
-    if(currentMode !== 1 || isInfCurrent) return; const el = document.getElementById('out-leftover');
-    if(state) el.innerHTML = `<span style="color:#10b981">${finalSpawns}</span><span style="color:#94a3b8; font-size:0.8em; margin:0 6px;">/</span><span style="color:#8b5cf6">${finalMana}</span>`;
-    else el.innerHTML = (finalSpawns + finalMana).toString();
+  function toggleRemainingBreakdown() {
+    if(currentMode !== 1 || isInfCurrent) return; 
+    vibrate(2);
+    showRemainingBreakdown = !showRemainingBreakdown;
+    renderRemainingBreakdown();
+  }
+
+  function renderRemainingBreakdown() {
+    const el = document.getElementById('out-leftover');
+    if(!el) return;
+    if(isInfCurrent) { el.innerHTML = symInf; el.style.fontSize = ''; return; }
+    
+    if(showRemainingBreakdown) {
+        el.innerHTML = `<span style="color:#10b981">${finalSpawns}</span><span style="color:#94a3b8; font-size:0.8em; margin:0 6px;">/</span><span style="color:#8b5cf6">${finalMana}</span>`;
+        el.style.fontSize = '1.1rem';
+    } else {
+        el.innerHTML = (finalSpawns + finalMana).toString();
+        el.style.fontSize = '';
+    }
+    triggerPop('out-leftover', false);
   }
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -723,6 +658,7 @@
   let touchStartX = 0; let touchEndX = 0;
   document.getElementById('swipe-area').addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
   document.getElementById('swipe-area').addEventListener('touchend', e => {
+    if(document.body.classList.contains('vis-active')) return;
     if (e.target.tagName.toLowerCase() === 'button') return; touchEndX = e.changedTouches[0].screenX;
     if (touchEndX < touchStartX - 70) { switchMode(currentMode === 1 ? 2 : currentMode === 2 ? 3 : 1, currentMode === 1 ? "CAST FEASIBILITY" : currentMode === 2 ? "KOZILEK OPTIMIZER" : "ULALEK STACK ENGINE"); }
     if (touchEndX > touchStartX + 70) { switchMode(currentMode === 1 ? 3 : currentMode === 2 ? 1 : 2, currentMode === 1 ? "KOZILEK OPTIMIZER" : currentMode === 2 ? "ULALEK STACK ENGINE" : "CAST FEASIBILITY"); }
@@ -747,7 +683,7 @@
     document.getElementById('guide-close-btn').style.background = themeColor;
 
     let dHTML = "";
-    if (currentMode === 1) dHTML = `<div style="color:#fff; font-size:0.9rem; line-height:1.45; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">Tracks lethal ETB damage, infinite loop requirements, and exact stack trigger sequences.</div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Select Eldrazi Spell</div><div>Search Scryfall to select your spell. The engine auto-parses Cast vs Resolution spawns. With Echoes of Eternity, the engine can resolve a spell copy *before* Ulalek to use its Resolution Spawns!</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Permanents on Board</div><div>For <b>Echoes</b>, <b>Fleshraker</b>, <b>Throne</b>, and <b>Unsealing</b>: Input the exact number currently under your control.</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Extra Spawns (Misc)</div><div>Manually add independent Spawns generating cast triggers from other board state sources.</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">${symC} Pool</div><div>Floating colorless mana available <b>before</b> jumping into the loop.</div></div><div><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Remaining ${symC}</div><div>Total liquid resources (Spawns + Mana) left after resolution.<br><b>Hold down</b> the number to view the breakdown.</div></div>`;
+    if (currentMode === 1) dHTML = `<div style="color:#fff; font-size:0.9rem; line-height:1.45; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">Tracks lethal ETB damage, infinite loop requirements, and exact stack trigger sequences.</div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Select Eldrazi Spell</div><div>Search Scryfall to select your spell. The engine auto-parses Cast vs Resolution spawns. With Echoes of Eternity, the engine can resolve a spell copy *before* Ulalek to use its Resolution Spawns!</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Permanents on Board</div><div>For <b>Echoes</b>, <b>Fleshraker</b>, <b>Throne</b>, and <b>Unsealing</b>: Input the exact number currently under your control.</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Extra Spawns (Misc)</div><div>Manually add independent Spawns generating cast triggers from other board state sources.</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">${symC} Pool</div><div>Floating colorless mana available <b>before</b> jumping into the loop.</div></div><div><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Remaining ${symC}</div><div>Total liquid resources (Spawns + Mana) left after resolution.<br><b>Click</b> the number to toggle the breakdown.</div></div>`;
     else if (currentMode === 2) dHTML = `<div style="color:#fff; font-size:0.9rem; line-height:1.45; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">Calculates if you can afford to cast and copy a spell while retaining enough mana for a specific follow-up play.</div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">New Spell MV</div><div>The total Mana Value of the spell you are attempting to cast and copy.</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Colored / ${symC} Pool</div><div>The engine spends <b>Colored Mana</b> first, preserving ${symC} for the Ulalek copy tax.</div></div><div><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Target Leftover ${symC}</div><div>Exact amount of liquid mana you want remaining AFTER this entire stack resolves.</div></div>`;
     else dHTML = `<div style="color:#fff; font-size:0.9rem; line-height:1.45; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">Optimizes Kozilek's Command X value against your mana pool while managing the Ulalek copy tax.</div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Target MV (Min X)</div><div>Minimum value of X required to exile your opponent's target threat.</div></div><div><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px;">Colored / ${symC} Pool</div><div>Colored mana is dumped directly into X. The engine calculates if you have enough ${symC} to cast AND copy.</div></div>`;
     document.getElementById('dynamic-info').innerHTML = dHTML; document.getElementById('info-modal').classList.add('active');
@@ -772,180 +708,438 @@
   function resetCurrentMode() {
     vibrate(2); playSnap();
     let s = currentMode === 1 ? state1 : currentMode === 2 ? state2 : state3; let changedKeys = [];
-    for (let k in s) { if (s[k] > 0) changedKeys.push(k); }
-    Object.keys(s).forEach(k => {
-        if((k === 'cast' || k === 'spawns') && spellCastSpawns > 0) s[k] = spellCastSpawns;
-        else s[k] = 0;
-        let el = document.getElementById(`val${currentMode}-${k}`); if(el) el.innerText = s[k]; 
-    });
+    for (let k in s) { if (Number(s[k]) > 0 || (k === 'max_pay' && Number(s[k]) !== -1)) changedKeys.push(k); s[k] = (k === 'max_pay') ? -1 : 0; }
     changedKeys.forEach(k => { let card = document.getElementById(`c${currentMode}-${k}`); if (card) { card.classList.remove('flash-reset'); void card.offsetWidth; card.classList.add('flash-reset'); } });
+    Object.keys(s).forEach(k => { let el = document.getElementById(`val${currentMode}-${k}`); if(el) el.innerText = (k === 'max_pay' && s[k] === -1) ? "ALL" : "0"; });
     calcCurrent(); saveState();
   }
 
   let holdTimer, holdInterval;
   function startUpdate(e, mode, key, delta) {
-    if (e.button !== 0 && e.type !== 'touchstart') return;
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (e && e.button !== 0 && e.type !== 'touchstart') return;
     stopUpdate(); let s = mode === 1 ? state1 : mode === 2 ? state2 : state3;
-    let minVal = 0;
-    let val = Math.max(minVal, parseInt(s[key] || 0) + delta);
-    s[key] = val; document.getElementById(`val${mode}-${key}`).innerText = val;
-    triggerPop(`val${mode}-${key}`, false); vibrate(2); playTick(); calcCurrent();
-    holdTimer = setTimeout(() => { 
-      holdInterval = setInterval(() => {
-        let val = Math.max(minVal, parseInt(s[key] || 0) + delta);
+    let val = Number(s[key]) || 0;
+    if (key === 'max_pay' && s[key] === -1) val = -1;
+    
+    if (key === 'max_pay') {
+        if (val === -1 && delta === -1) val = 10;
+        else if (val === 10 && delta === 1) val = -1;
+        else if (val === -1 && delta === 1) val = -1;
+        else val = Math.max(0, val + delta);
+        s[key] = val; document.getElementById(`val${mode}-${key}`).innerText = val === -1 ? 'ALL' : val;
+    } else {
+        val = Math.max(0, val + delta);
         s[key] = val; document.getElementById(`val${mode}-${key}`).innerText = val;
-        triggerPop(`val${mode}-${key}`, false); vibrate(2); playTick(); calcCurrent();
-      }, 80); 
-    }, 400);
+    }
+    
+    triggerPop(`val${mode}-${key}`, false); vibrate(2); playTick(); calcCurrent();
+    
+    if (key !== 'max_pay') {
+        holdTimer = setTimeout(() => { 
+          holdInterval = setInterval(() => {
+            let val = Math.max(0, (Number(s[key]) || 0) + delta);
+            s[key] = val; document.getElementById(`val${mode}-${key}`).innerText = val;
+            triggerPop(`val${mode}-${key}`, false); vibrate(2); playTick(); calcCurrent();
+          }, 80); 
+        }, 400);
+    }
   }
   function stopUpdate() { clearTimeout(holdTimer); clearInterval(holdInterval); saveState(); }
 
   function updateAllDisplays() {
-    Object.keys(state1).forEach(k => document.getElementById(`val1-${k}`).innerText = state1[k]);
-    Object.keys(state2).forEach(k => document.getElementById(`val2-${k}`).innerText = state2[k]);
-    Object.keys(state3).forEach(k => document.getElementById(`val3-${k}`).innerText = state3[k]);
+    Object.keys(state1).forEach(k => { let el = document.getElementById(`val1-${k}`); if(el) el.innerText = (k === 'max_pay' && Number(state1[k]) === -1) ? 'ALL' : Number(state1[k]) || 0; });
+    Object.keys(state2).forEach(k => { let el = document.getElementById(`val2-${k}`); if(el) el.innerText = Number(state2[k]) || 0; });
+    Object.keys(state3).forEach(k => { let el = document.getElementById(`val3-${k}`); if(el) el.innerText = Number(state3[k]) || 0; });
   }
 
   function calcCurrent() { if (currentMode === 1) calcMode1(); else if (currentMode === 2) calcMode2(); else if (currentMode === 3) calcMode3(); }
 
   // ==========================================
-  // MATH ENGINE & DATA MAPPING
+  // STATE-MACHINE SIMULATOR ENGINE
   // ==========================================
-  let lastDmgFlag = 0; 
+  
   function calcMode1() {
-    const { echoes: E, fleshraker: F, throne: R, unsealing: K, cast: C, mana: M } = state1;
-    const U = 1 + E + R; 
+    const E = Number(state1.echoes) || 0;
+    const F = Number(state1.fleshraker) || 0;
+    const R = Number(state1.throne) || 0;
+    const K = Number(state1.unsealing) || 0;
+    const C = Number(state1.cast) || 0;
+    const M = Number(state1.mana) || 0;
+    const MP = Number(state1.max_pay) || -1;
+    
+    const allowed_payments = MP === -1 ? Infinity : MP;
     const spellName = selectedSpellCard ? selectedSpellCard.name : "Eldrazi Spell";
     const spellImg = selectedSpellCard?.image_uris?.normal || selectedSpellCard?.card_faces?.[0]?.image_uris?.normal || '';
     
-    const unsealCastYield = spellTriggersUnsealing ? 2 : 0;
-    const unsealDraws = spellDrawsCards ? K * 3 * (1 + E) : 0;
-
-    let poolSpellCast = spellCastSpawns > 0 ? (1 + E) : 0;
-    let poolMiscCast = C > 0 ? (1 + E) : 0;
-    let poolUnseal = (K > 0 && unsealCastYield > 0) ? K * (1 + E) : 0;
-    let poolEchoes = (E > 0 && spellResoSpawns > 0) ? E : 0;
-
-    let usedSpellCast = 0, usedMiscCast = 0, usedUnseal = 0, usedEchoes = 0;
-    let manaGained = M;
+    let spellIsCreature = !selectedSpellCard || (selectedSpellCard.type_line && selectedSpellCard.type_line.includes('Creature'));
     
-    while(manaGained < 2) {
-        if(poolSpellCast > 0 && spellCastSpawns >= 2) { usedSpellCast++; poolSpellCast--; manaGained += spellCastSpawns; continue; }
-        if(poolMiscCast > 0 && C >= 2) { usedMiscCast++; poolMiscCast--; manaGained += C; continue; }
-        if(poolEchoes > 0 && spellResoSpawns >= 2) { usedEchoes++; poolEchoes--; manaGained += spellResoSpawns; continue; }
-        if(poolUnseal > 0 && unsealCastYield >= 2) { usedUnseal++; poolUnseal--; manaGained += unsealCastYield; continue; }
-        
-        if(poolSpellCast > 0 && spellCastSpawns > 0) { usedSpellCast++; poolSpellCast--; manaGained += spellCastSpawns; continue; }
-        if(poolMiscCast > 0 && C > 0) { usedMiscCast++; poolMiscCast--; manaGained += C; continue; }
-        if(poolEchoes > 0 && spellResoSpawns > 0) { usedEchoes++; poolEchoes--; manaGained += spellResoSpawns; continue; }
-        if(poolUnseal > 0 && unsealCastYield > 0) { usedUnseal++; poolUnseal--; manaGained += unsealCastYield; continue; }
-        break; 
+    const unsealCastYield = spellTriggersUnsealing ? 2 : 0;
+    const unsealDraws = spellDrawsCards ? K * (1 + E) : 0;
+
+    let flat_manaGens = [];
+    if(spellCastSpawns > 0) {
+        flat_manaGens.push({id: 'spell_cast_spawn', yield: spellCastSpawns, title: 'Cast Trigger', desc: `Yields {Y} Spawn(s).`, img: spellImg || ART_CACHE['Spawn'], origin: 'Original', originColor: '#10b981'});
+        for(let i=0; i<E; i++) flat_manaGens.push({id: 'spell_cast_spawn', yield: spellCastSpawns, title: 'Cast Trigger', desc: `Yields {Y} Spawn(s).`, img: spellImg || ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#f43f5e'});
+    }
+    if(C > 0) {
+        flat_manaGens.push({id: 'misc_cast_spawn', yield: C, title: 'Misc Trigger', desc: `Yields {Y} Spawn(s).`, img: ART_CACHE['Spawn'], origin: 'Original', originColor: '#10b981'});
+        for(let i=0; i<E; i++) flat_manaGens.push({id: 'misc_cast_spawn', yield: C, title: 'Misc Trigger', desc: `Yields {Y} Spawn(s).`, img: ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#f43f5e'});
+    }
+    if(unsealCastYield > 0) {
+        for(let k=0; k<K; k++) {
+            flat_manaGens.push({id: 'unseal_spawn', yield: unsealCastYield, title: 'Cast Trigger', desc: `Yields {Y} Spawn(s).`, img: ART_CACHE['Unsealing'], origin: 'Original', originColor: '#10b981'});
+            for(let i=0; i<E; i++) flat_manaGens.push({id: 'unseal_spawn', yield: unsealCastYield, title: 'Cast Trigger', desc: `Yields {Y} Spawn(s).`, img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#f43f5e'});
+        }
+    }
+    if(F > 0) {
+        for(let f=0; f<F; f++) {
+            flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', desc: `Yields {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Original', originColor: '#10b981'});
+            for(let i=0; i<E; i++) flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', desc: `Yields {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Echoes Copy', originColor: '#f43f5e'});
+            for(let i=0; i<R; i++) flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', desc: `Yields {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Throne Copy', originColor: '#94a3b8'});
+        }
+    }
+
+    function extractOptimal(gens, req) {
+        gens.sort((a,b) => { return a.yield - b.yield; });
+        if (req <= 0) return [];
+        if (req === 1) return [gens.shift()];
+        if (req >= 2) {
+            let ones = gens.filter(g => g.yield === 1);
+            let twos = gens.filter(g => g.yield === 2);
+            if (ones.length >= 2) {
+                let res = [];
+                res.push(gens.splice(gens.indexOf(ones[0]), 1)[0]);
+                res.push(gens.splice(gens.indexOf(ones[1]), 1)[0]);
+                return res;
+            } else if (twos.length >= 1) {
+                return [gens.splice(gens.indexOf(twos[0]), 1)[0]];
+            } else {
+                let g2 = gens.find(g => g.yield >= 2);
+                if (g2) { return [gens.splice(gens.indexOf(g2), 1)[0]]; }
+                let res = []; let sum = 0;
+                while(sum < req && gens.length > 0) {
+                    let popped = gens.shift();
+                    res.push(popped); sum += popped.yield;
+                }
+                return res;
+            }
+        }
+        return [];
+    }
+
+    let running_M = M;
+    let ulalek_blocks = [];
+    let payments_budget = allowed_payments;
+    
+    let ulalek_sources = [{desc: 'Copies stack elements below it.', origin: 'Original', originColor: '#10b981'}];
+    for(let i=0; i<E; i++) ulalek_sources.push({desc: 'Copies stack elements below it.', origin: 'Echoes Copy', originColor: '#f43f5e'});
+    for(let i=0; i<R; i++) ulalek_sources.push({desc: 'Copies stack elements below it.', origin: 'Throne Copy', originColor: '#94a3b8'});
+
+    for(let i=0; i<ulalek_sources.length; i++) {
+        let req = 2 - running_M;
+        let block_gens = [];
+        if (req > 0 && flat_manaGens.length > 0 && payments_budget > 0) {
+            let extracted = extractOptimal(flat_manaGens, req);
+            block_gens.push(...extracted);
+            running_M += extracted.reduce((s, g) => s + g.yield, 0);
+        }
+        if(running_M >= 2 && payments_budget > 0) {
+            running_M -= 2; 
+            payments_budget--;
+            ulalek_blocks.push({ canPay: true, missing: 0, gens: block_gens, origin: ulalek_sources[i].origin, originColor: ulalek_sources[i].originColor, baseDesc: ulalek_sources[i].desc });
+        } else {
+            ulalek_blocks.push({ canPay: false, missing: (payments_budget <= 0) ? "Limit" : 2 - running_M, gens: block_gens, origin: ulalek_sources[i].origin, originColor: ulalek_sources[i].originColor, baseDesc: ulalek_sources[i].desc });
+            running_M = 0; 
+        }
+    }
+
+    let stack = [];
+    stack.push({id: 'spell', yield: spellResoSpawns, isCreature: spellIsCreature, title: 'Original Spell', desc: `Yields ${spellResoSpawns} Reso Spawns.`, img: spellImg || ART_CACHE['Spawn'], origin: 'Original', originColor: '#10b981'});
+    
+    let payload = [];
+    for(let i=0; i<flat_manaGens.length; i++) {
+        payload.push(flat_manaGens[i]);
+        stack.push(flat_manaGens[i]);
     }
     
-    let canJumpstart = (manaGained >= 2);
-    let remSpellCast = poolSpellCast; let remMiscCast = poolMiscCast; let remUnseal = poolUnseal; let remEchoes = poolEchoes; 
-    let unusedEchoes = E - usedEchoes - remEchoes; if (unusedEchoes > 0) remEchoes += unusedEchoes; 
-    let remUlaleks = Math.max(0, U - 1);
+    if(unsealCastYield > 0) {
+        for(let k=0; k<K; k++) {
+            stack.push({id: 'unseal_draw', title: 'Cast Trigger', desc: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Original', originColor: '#10b981'});
+            for(let i=0; i<E; i++) stack.push({id: 'unseal_draw', title: 'Cast Trigger', desc: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#f43f5e'});
+        }
+    }
+    for(let i=0; i<E; i++) stack.push({id: 'echoes_trigger', title: 'Echoes of Eternity Trigger', desc: `When this resolves, it creates a copy of ${spellName} on the stack.`, img: ART_CACHE['Echoes'], origin: 'Original', originColor: '#10b981'});
     
-    let copiedYield = (remSpellCast * spellCastSpawns) + (remMiscCast * C) + (remUnseal * unsealCastYield) + (remEchoes * spellResoSpawns) + spellResoSpawns; 
-    let totalInitialSpawns = ( (1 + E) * spellCastSpawns ) + ( (1 + E) * C ) + ( K * (1 + E) * unsealCastYield ) + ( (1 + E) * spellResoSpawns ) + (F * (1 + E + R));
+    for(let i = ulalek_blocks.length - 1; i >= 0; i--) {
+        let block = ulalek_blocks[i];
+        stack.push({id: 'ulalek_trigger', title: 'Ulalek Trigger', canPay: block.canPay, missing: block.missing, img: ART_CACHE['Ulalek'], origin: block.origin, originColor: block.originColor, desc: block.baseDesc});
+        for(let j=0; j<block.gens.length; j++) {
+            stack.push(block.gens[j]);
+        }
+    }
 
-    isInfCurrent = (canJumpstart && remUlaleks > 0 && copiedYield >= 2);
+    let state = { M: M, S: 0, damage: 0, spells: 0, payments: 0, draws: 0, infinite: false };
+    let loops = 0;
+    let simStack = [...stack]; 
+    let F_mult = F * (1 + E + R);
+    let U = 1 + E + R;
     
-    let P = 0, currentSpells = 1 + E, damage = 0;
-    finalSpawns = totalInitialSpawns; finalMana = M;
-
-    if (!isInfCurrent) {
-      let currentM = M, currentU = U, failsafe = 0; let currentS = totalInitialSpawns; 
-      while (currentU > 0 && (currentM + currentS >= 2)) {
-        let manaUsed = Math.min(currentM, 2); currentM -= manaUsed;
-        let spawnsUsed = 2 - manaUsed; currentS -= spawnsUsed;
-        P++; currentU--; currentSpells *= 2; currentU *= 2;
-        currentS += copiedYield; failsafe++; if(failsafe > 1000) break;
-      }
-      finalSpawns = currentS; finalMana = currentM;
-      damage = (currentSpells + currentS) * (F * (1 + E + R)); 
-      targetIntensity = damage >= 40 ? 0.8 : 0.0;
-    } else { damage = Infinity; targetIntensity = 1.0; }
-
-    let newFlag = isInfCurrent ? 2 : (damage >= 40 ? 1 : 0);
-    if(newFlag > lastDmgFlag && F > 0) playEldritchRumble(isInfCurrent);
-    lastDmgFlag = newFlag;
+    function addSpawns(n) {
+        state.S += n;
+        if (F > 0) state.damage += n * F_mult;
+    }
     
+    let topUlalekIndex = -1;
+    for(let i = stack.length - 1; i >= 0; i--) {
+        if(stack[i].id === 'ulalek_trigger' && stack[i].canPay) {
+            topUlalekIndex = i;
+            break;
+        }
+    }
+    
+    let truePayloadSpawns = 0;
+    let extraUlaleks = 0;
+    if (topUlalekIndex !== -1) {
+        for(let i = 0; i < topUlalekIndex; i++) {
+            if (stack[i].yield) truePayloadSpawns += stack[i].yield;
+            if (stack[i].id === 'ulalek_trigger') extraUlaleks++;
+        }
+    }
+
+    if (U > 0 && MP === -1 && topUlalekIndex !== -1 && truePayloadSpawns >= 2 && extraUlaleks >= 1) {
+        state.infinite = true;
+    }
+
+    if (!state.infinite) {
+        while (simStack.length > 0 && loops < 50000) {
+            loops++;
+            let item = simStack.pop();
+            
+            if (item.id === 'fleshraker_cast' || item.id === 'unseal_spawn' || item.id === 'spell_cast_spawn' || item.id === 'misc_cast_spawn') {
+                addSpawns(item.yield || 0);
+            } else if (item.id === 'unseal_draw') {
+                state.draws += 3;
+            } else if (item.id === 'ulalek_trigger') {
+                if (state.M + state.S >= 2 && state.payments < allowed_payments) {
+                    let payM = Math.min(state.M, 2);
+                    state.M -= payM;
+                    state.S -= (2 - payM);
+                    state.payments++;
+                    
+                    let copies = simStack.map(obj => ({...obj}));
+                    copies.forEach(c => { 
+                        c.origin = 'Ulalek Copy'; 
+                        c.originColor = '#a855f7'; 
+                    });
+                    simStack.push(...copies);
+                }
+            } else if (item.id === 'echoes_trigger') {
+                simStack.push({id: 'spell', yield: spellResoSpawns, isCreature: spellIsCreature, title: 'Spell Copy', desc: `Yields ${spellResoSpawns} Reso Spawns.`, img: spellImg || ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#f43f5e'});
+            } else if (item.id === 'spell') {
+                state.spells++;
+                addSpawns(item.yield || 0);
+                if (item.isCreature && F > 0) {
+                    state.damage += 1 * F_mult;
+                }
+            }
+        }
+    }
+
+    isInfCurrent = state.infinite;
+    finalSpawns = isInfCurrent ? "∞" : state.S;
+    finalMana = isInfCurrent ? "∞" : state.M;
+    let P = isInfCurrent ? "∞" : state.payments;
+    let currentSpells = isInfCurrent ? "INFINITE" : state.spells;
+    let damage = isInfCurrent ? Infinity : state.damage;
+
     const damageBox = document.getElementById('damage-box');
     if (F > 0) {
-      damageBox.style.display = 'block'; damageBox.className = 'metric-box'; void damageBox.offsetWidth; 
-      if (isInfCurrent) damageBox.classList.add('real-fire', 'shake-infinite');
-      else if (damage >= 40) damageBox.classList.add('real-fire', 'shake-lethal');
+      damageBox.style.display = 'block'; 
       const newDamageText = isInfCurrent ? symInf : damage.toString();
-      if (document.getElementById('out-damage').innerHTML !== newDamageText) { document.getElementById('out-damage').innerHTML = newDamageText; triggerPop('out-damage', isInfCurrent); }
-    } else { damageBox.style.display = 'none'; damageBox.className = 'metric-box'; }
+      if (document.getElementById('out-damage').innerHTML !== newDamageText) { document.getElementById('out-damage').innerHTML = newDamageText; triggerPop('out-damage', false); }
+    } else { damageBox.style.display = 'none'; }
     
     const newSpellsText = isInfCurrent ? "INFINITE" : currentSpells.toString();
     const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
     if (spellsEl.innerHTML !== newSpellsText) { 
         spellsEl.innerHTML = newSpellsText; 
-        if(isInfCurrent) spellsEl.classList.add('hero-infinite'); else spellsEl.classList.remove('hero-infinite');
-        triggerPop('out-spells', isInfCurrent); 
+        triggerPop('out-spells', false); 
     }
     
     const newPaymentsText = isInfCurrent ? symInf : P.toString();
-    if (document.getElementById('out-payments').innerHTML !== newPaymentsText) { document.getElementById('out-payments').innerHTML = newPaymentsText; triggerPop('out-payments', isInfCurrent); }
+    if (document.getElementById('out-payments').innerHTML !== newPaymentsText) { document.getElementById('out-payments').innerHTML = newPaymentsText; triggerPop('out-payments', false); }
     
-    const newLeftoverText = isInfCurrent ? symInf : (finalSpawns + finalMana).toString();
-    if (document.getElementById('out-leftover').innerHTML !== newLeftoverText) { document.getElementById('out-leftover').innerHTML = newLeftoverText; triggerPop('out-leftover', isInfCurrent); }
+    renderRemainingBreakdown();
+    
+    let visItems = [];
+    let currentGroup = null;
+    
+    // Build Base Stack Visuals
+    for (let i = stack.length - 1; i >= 0; i--) {
+        let item = stack[i];
+        let zone = '';
+        let color = '';
+        
+        if (item.id === 'spell') {
+            zone = 'BASE SPELL'; color = '#94a3b8';
+        } else if (i < topUlalekIndex) {
+            zone = 'PAYLOAD'; color = '#3b82f6';
+        } else if (item.id === 'ulalek_trigger') {
+            if (item.canPay) { zone = 'COPY ENGINE'; color = '#a855f7'; }
+            else { zone = 'TAX UNPAID'; color = '#ef4444'; }
+        } else {
+            zone = 'RESOLVING NOW'; color = '#10b981';
+        }
+        
+        if (!currentGroup || currentGroup.id !== item.id || currentGroup.zone !== zone || currentGroup.desc !== item.desc || currentGroup.missing !== item.missing || currentGroup.origin !== item.origin) {
+            if (currentGroup) visItems.push(currentGroup);
+            currentGroup = { ...item, count: 1, zone: zone, ribbon: zone, color: color };
+        } else {
+            currentGroup.count++;
+        }
+    }
+    if (currentGroup) visItems.push(currentGroup);
+    
+    // Build Phase 2 Visuals
+    let phase2Items = [];
+    if (topUlalekIndex !== -1) {
+        let currCopyGrp = null;
+        for (let i = topUlalekIndex - 1; i >= 0; i--) {
+            let item = { ...stack[i], origin: 'Ulalek Copy', originColor: '#a855f7' };
+            if (!currCopyGrp || currCopyGrp.id !== item.id || currCopyGrp.desc !== item.desc || currCopyGrp.missing !== item.missing || currCopyGrp.origin !== item.origin) {
+                if (currCopyGrp) phase2Items.push(currCopyGrp);
+                currCopyGrp = { ...item, count: 1, zone: 'PHASE 2', ribbon: 'NEW COPY', color: '#a855f7' };
+            } else {
+                currCopyGrp.count++;
+            }
+        }
+        if (currCopyGrp) phase2Items.push(currCopyGrp);
+        
+        let currOrigGrp = null;
+        for (let i = topUlalekIndex - 1; i >= 0; i--) {
+            let item = stack[i];
+            let ribbon = item.id === 'spell' ? 'BASE SPELL' : 'PENDING PAYLOAD';
+            let color = item.id === 'spell' ? '#94a3b8' : '#3b82f6';
+            if (!currOrigGrp || currOrigGrp.id !== item.id || currOrigGrp.ribbon !== ribbon || currOrigGrp.desc !== item.desc || currOrigGrp.missing !== item.missing || currOrigGrp.origin !== item.origin) {
+                if (currOrigGrp) phase2Items.push(currOrigGrp);
+                currOrigGrp = { ...item, count: 1, zone: 'PHASE 2', ribbon: ribbon, color: color };
+            } else {
+                currOrigGrp.count++;
+            }
+        }
+        if (currOrigGrp) phase2Items.push(currOrigGrp);
+    }
     
     currentVisualStack = [];
+    let currentZone = '';
+    let visualIndex = 1;
+    function getIdx() { let s = visualIndex.toString().padStart(2, '0'); visualIndex++; return s; }
+    
     let floatPaid = Math.min(M, 2); let spawnsPaid = Math.max(0, 2 - floatPaid);
     let taxString = floatPaid === 2 ? "2 Float" : (spawnsPaid === 2 ? "2 Sac'd Spawns" : "1 Float + 1 Sac'd");
+    
+    function injectGroup(group) {
+        if (group.zone !== currentZone) {
+            if (group.zone === 'RESOLVING NOW') currentVisualStack.push({ type: 'divider', text: '▲ PHASE 1: RESOLVE FIRST (MANA GENERATION) ▲' });
+            if (group.zone === 'COPY ENGINE') currentVisualStack.push({ type: 'divider', text: `▶ PHASE 1: ULALEK RESOLUTION ◀` });
+            if (group.zone === 'PAYLOAD') currentVisualStack.push({ type: 'divider', text: '▼ PHASE 1: WAITING TO BE COPIED ▼' });
+            if (group.zone === 'NORMAL RESOLUTION' || group.zone === 'TAX UNPAID') {
+                if (currentZone === '') currentVisualStack.push({ type: 'divider', text: '▼ CURRENT STACK RESOLUTION ▼' });
+            }
+            if (group.zone === 'PHASE 2') currentVisualStack.push({ type: 'divider', text: `▶ PHASE 2: RESULTING STACK (AFTER ULALEK PAYS) ◀` });
+            currentZone = group.zone;
+        }
+        
+        let descText = group.desc;
+        if (group.zone === 'COPY ENGINE') descText = `Paid via ${taxString}.`;
+        else if (group.zone === 'TAX UNPAID') {
+            if (group.missing === 'Limit') descText = `Payment limit reached.`;
+            else descText = `Cannot pay tax. Missing ${group.missing} ${symC}.`;
+        }
+        
+        if (descText && descText.includes('{Y}')) {
+            let totalYield = (group.yield || 0) * group.count;
+            descText = descText.replace('{Y}', totalYield);
+            descText = descText.replace('Spawn(s)', totalYield === 1 ? 'Spawn' : 'Spawns');
+        }
+        
+        let contextText = "";
+        if (group.zone === 'RESOLVING NOW') contextText = `These objects resolve before the Ulalek trigger to generate the mana required to pay the copy tax.`;
+        if (group.zone === 'COPY ENGINE') contextText = `Ulalek sits above the objects below it and copies every remaining object under it once the tax is paid.`;
+        if (group.zone === 'PAYLOAD') contextText = `These objects are beneath the Ulalek copy point, so they are the payload that gets duplicated.`;
+        if (group.zone === 'PHASE 2') {
+            if (group.ribbon === 'NEW COPY') contextText = `These are the exact new objects that were generated and placed on top of the stack after the first Ulalek trigger was paid.`;
+            if (group.ribbon === 'PENDING PAYLOAD') contextText = `This is the original payload that was copied. It sits below the new copies, waiting to resolve.`;
+            if (group.ribbon === 'BASE SPELL') contextText = `The original spell remains at the very bottom of the stack.`;
+        }
+        if (group.zone === 'BASE SPELL') contextText = `The original spell at the bottom of the stack.`;
+        if (group.zone === 'NORMAL RESOLUTION') contextText = `Resolves normally.`;
+        if (group.zone === 'TAX UNPAID') contextText = `Triggers will resolve without copying anything.`;
+                       
+        currentVisualStack.push({
+            idxStr: getIdx(),
+            color: group.color,
+            ribbon: group.ribbon,
+            title: group.count > 1 ? `${group.count}x ${group.title}` : group.title,
+            desc: descText,
+            context: contextText,
+            img: group.img,
+            origin: group.origin,
+            originColor: group.originColor
+        });
+    }
+    
+    visItems.forEach(injectGroup);
+    phase2Items.forEach(injectGroup);
+    
+    let proofHTML = "";
 
-    if (canJumpstart && U > 0) {
-      if (spawnsPaid > 0) {
-        currentVisualStack.push({ type: 'divider', text: '▲ RESOLVE FIRST (MANA GENERATION) ▲' });
-        if(usedSpellCast > 0 && spellCastSpawns > 0) currentVisualStack.push({ color: '#10b981', ribbon: 'RESOLVE FIRST', title: `${usedSpellCast}x ${spellName} Cast Trigger`, desc: `Yields ${usedSpellCast * spellCastSpawns} Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: spellImg || ART_CACHE['Spawn'] });
-        if(usedMiscCast > 0 && C > 0) currentVisualStack.push({ color: '#10b981', ribbon: 'RESOLVE FIRST', title: `${usedMiscCast}x Misc Cast Trigger`, desc: `Yields ${usedMiscCast * C} Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: ART_CACHE['Spawn'] });
-        if(usedUnseal > 0 && unsealCastYield > 0) currentVisualStack.push({ color: '#10b981', ribbon: 'RESOLVE FIRST', title: `${usedUnseal}x Unsealing Trigger`, desc: `Yields ${usedUnseal * unsealCastYield} Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: ART_CACHE['Unsealing'] });
-        if(usedEchoes > 0 && spellResoSpawns > 0) currentVisualStack.push({ color: '#10b981', ribbon: 'RESOLVE FIRST', title: `${usedEchoes}x Echoes Copy of ${spellName}`, desc: `Yields ${usedEchoes * spellResoSpawns} Reso Spawns (Sacrifices ${spawnsPaid} to pay tax).`, img: ART_CACHE['Echoes'] });
-      }
-
-      currentVisualStack.push({ type: 'divider', text: '▶ ULALEK RESOLUTION ◀' });
-      currentVisualStack.push({ color: '#a855f7', ribbon: 'COPY TRIGGER (TAX PAID)', title: `1x Ulalek Copy Trigger`, desc: `Paid via ${taxString}. Copies all remaining triggers & spells below it!`, img: ART_CACHE['Ulalek'] });
-
-      currentVisualStack.push({ type: 'divider', text: '▼ WAITING TO BE COPIED ▼' });
-      if(remSpellCast > 0 && spellCastSpawns > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'WAITING TO BE COPIED', title: `${remSpellCast}x ${spellName} Cast Trigger`, desc: `Yields ${remSpellCast * spellCastSpawns} Spawns.`, img: spellImg || ART_CACHE['Spawn'] });
-      if(remMiscCast > 0 && C > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'WAITING TO BE COPIED', title: `${remMiscCast}x Misc Cast Trigger`, desc: `Yields ${remMiscCast * C} Spawns.`, img: ART_CACHE['Spawn'] });
-      if(F > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'WAITING TO BE COPIED', title: `${F*(1+E+R)}x Fleshraker Trigger`, desc: `Deals 1 damage to each opponent per trigger.`, img: ART_CACHE['Fleshraker'] });
-      if(remUnseal > 0 && unsealCastYield > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'WAITING TO BE COPIED', title: `${remUnseal}x Unsealing Trigger`, desc: `Yields ${remUnseal * unsealCastYield} Spawns.`, img: ART_CACHE['Unsealing'] });
-      if(unsealDraws > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'WAITING TO BE COPIED', title: `${unsealDraws / 3}x Unsealing Trigger`, desc: `Draws ${unsealDraws} cards.`, img: ART_CACHE['Unsealing'] });
-      if(remEchoes > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'WAITING TO BE COPIED', title: `${remEchoes}x Echoes Copy Trigger`, desc: `Copies the original spell on resolution.`, img: ART_CACHE['Echoes'] });
-      if(remUlaleks > 0) currentVisualStack.push({ color: '#a855f7', ribbon: 'WAITING TO BE COPIED', title: `${remUlaleks}x Extra Ulalek Trigger`, desc: `Copies all stack elements below it if tax is paid.`, img: ART_CACHE['Ulalek'] });
-      currentVisualStack.push({ color: '#94a3b8', ribbon: 'ORIGINAL SPELL', title: `1x ${spellName}`, desc: `Base spell casting. Yields ${spellResoSpawns} Reso Spawns.`, img: spellImg });
-
-      if (isInfCurrent) currentVisualStack.push({ type: 'note', infinite: true, text: `∞ INFINITE LOOP LOCKED: The copied Spawns generate more than enough ${symC}${symC} to fuel the copied Ulalek triggers indefinitely.` });
-      else if (remUlaleks === 0 && copiedYield >= 2) currentVisualStack.push({ type: 'note', lethal: true, text: `⚠️ ALMOST INFINITE: You generate enough mana to loop, but you need at least 1 more Ulalek Trigger (via Throne or Echoes) to continue.` });
-
-    } else {
-      targetIntensity = 0.0;
-      currentVisualStack.push({ type: 'divider', text: '▼ CURRENT STACK RESOLUTION ▼' });
-      if(U > 0) currentVisualStack.push({ color: '#ef4444', ribbon: 'TAX UNPAID (FIZZLES)', title: `${U}x Ulalek Trigger`, desc: `Cannot pay ${symC}${symC} tax. Triggers will resolve without copying anything.`, img: ART_CACHE['Ulalek'] });
-      
-      if(spellCastSpawns > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'NORMAL RESOLUTION', title: `${1+E}x ${spellName} Cast Trigger`, desc: `Yields ${(1+E) * spellCastSpawns} Spawns.`, img: spellImg || ART_CACHE['Spawn'] });
-      if(C > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'NORMAL RESOLUTION', title: `${1+E}x Misc Cast Trigger`, desc: `Yields ${(1+E) * C} Spawns.`, img: ART_CACHE['Spawn'] });
-      if(F > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'NORMAL RESOLUTION', title: `${F*(1+E+R)}x Fleshraker Trigger`, desc: `Deals 1 damage per trigger.`, img: ART_CACHE['Fleshraker'] });
-      if(unsealCastYield > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'NORMAL RESOLUTION', title: `${K*(1+E)}x Unsealing Trigger`, desc: `Yields ${K*(1+E) * unsealCastYield} Spawns.`, img: ART_CACHE['Unsealing'] });
-      if(unsealDraws > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'NORMAL RESOLUTION', title: `${unsealDraws / 3}x Unsealing Trigger`, desc: `Draws ${unsealDraws} cards.`, img: ART_CACHE['Unsealing'] });
-      if(E > 0) currentVisualStack.push({ color: '#3b82f6', ribbon: 'NORMAL RESOLUTION', title: `${E}x Echoes Copy Trigger`, desc: `Copies the original spell on resolution.`, img: ART_CACHE['Echoes'] });
-      
-      currentVisualStack.push({ color: '#94a3b8', ribbon: 'ORIGINAL SPELL', title: `1x ${spellName}`, desc: `Base spell casting. Yields ${spellResoSpawns} Reso Spawns.`, img: spellImg });
-      currentVisualStack.push({ type: 'note', lethal: true, text: `⚠️ Not enough pre-resolution mana to pay ${symC}${symC} tax. Spell and triggers resolve normally without copying.` });
+    if (isInfCurrent) {
+        proofHTML = `<b>∞ INFINITE LOOP PROOF:</b><br><br>
+        <b>1. Initialization:</b> The top-most triggers resolve to generate mana. This provides the ${symC}${symC} needed to pay for the first Ulalek trigger.<br>
+        <b>2. The Copy:</b> Paying the tax copies the entire stack beneath it. This copied payload contains ${extraUlaleks} extra Ulalek trigger(s) and generators that yield ${truePayloadSpawns} Spawn(s).<br>
+        <b>3. The Cascade:</b> When the copied payload resolves, it generates ${truePayloadSpawns} mana. You sacrifice 2 of these Spawns to pay for the next copied Ulalek trigger, netting you ${truePayloadSpawns - 2 > 0 ? '+' : ''}${truePayloadSpawns - 2} ${symC} every cycle.<br>
+        Because you continually generate enough mana to pay the tax for the copied Ulalek triggers, the stack copies itself endlessly.`;
+        if (F > 0) proofHTML += `<br><br><i>Each of the infinite Spawns entering the battlefield triggers Glaring Fleshraker, dealing infinite damage.</i>`;
+        
+        currentVisualStack.push({ type: 'proof', class: 'infinite', html: proofHTML });
+    } else if (U > 0 && P >= 1) {
+        proofHTML = `<b>✓ RESOLUTION TRACE:</b><br><br>
+        <b>1. Initialization:</b> The top-most triggers resolve to generate mana, providing the ${symC}${symC} needed to pay for the first Ulalek trigger.<br>
+        <b>2. The Engine:</b> Ulalek copies the payload beneath it, which yields ${truePayloadSpawns} Spawn(s) and contains ${extraUlaleks} extra Ulalek trigger(s).<br>
+        <b>3. The Collapse:</b><br>`;
+        
+        if (MP !== -1 && P >= MP) proofHTML += `The loop stops intentionally because you reached your manual limit of ${MP} payment(s).<br>`;
+        else if (extraUlaleks === 0) proofHTML += `Because there are no extra Ulalek triggers in the payload (via Echoes or Throne), the stack can only be copied once.<br>`;
+        else if (truePayloadSpawns < 2) proofHTML += `The copied payload only yields ${truePayloadSpawns} ${symC}, which means you slowly bleed mana each cycle until you can no longer afford the ${symC}${symC} tax.<br>`;
+        else proofHTML += `The chain breaks when you exhaust your floating mana and triggers.<br>`;
+        
+        proofHTML += `<br><b>4. Final Yield:</b> The chain collapses after ${P} payments. All remaining copies resolve, leaving you with ${currentSpells} total spells, ${finalSpawns} Spawns, and ${finalMana} floating ${symC}.`;
+        
+        currentVisualStack.push({ type: 'proof', class: 'finite', html: proofHTML });
+    } else if (U > 0 && P === 0) {
+        let manaGained = M;
+        for(let i=0; i<ulalek_blocks.length; i++) manaGained += ulalek_blocks[i].gens.reduce((s, g) => s + (g.yield || 0), 0);
+        
+        proofHTML = `<b>⚠️ RESOLUTION TRACE:</b><br><br>
+        You generate a total of ${manaGained} ${symC} before the first Ulalek trigger attempts to resolve.<br><br>`;
+        if (MP === 0) proofHTML += `Because your payment limit is set to 0, you decline to pay the tax. The remaining stack resolves normally without copying anything.`;
+        else proofHTML += `Because you are short of the 2 ${symC} tax, the Ulalek trigger fizzles. The remaining stack resolves normally without copying anything.`;
+        
+        currentVisualStack.push({ type: 'proof', class: 'fizzle', html: proofHTML });
     }
     
     if(visIsOpen) renderVisualizer();
   }
 
   function calcMode2() {
-    targetIntensity = 0.0;
-    const { colored: Col, colorless: C, spellcost: Cost, spawns: SS, leftover: L } = state2;
+    const Col = Number(state2.colored) || 0;
+    const C = Number(state2.colorless) || 0;
+    const Cost = Number(state2.spellcost) || 0;
+    const SS = Number(state2.spawns) || 0;
+    const L = Number(state2.leftover) || 0;
+
     const Total = Col + C; let res = "";
     if (Total < Cost) res = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div class="dash-sum-header"><span style="color:#ef4444; font-family:'Outfit'; font-size:1.1rem; letter-spacing:0.05em;">CANNOT CAST</span></div><div class="stat-val red" style="font-family:'Outfit'; font-size:1.3rem;">Need ${Cost} mana (Have ${Total})</div></div></div>`;
     else {
@@ -968,9 +1162,13 @@
   }
 
   function calcMode3() {
-    targetIntensity = 0.0;
-    const { colored: Col, colorless: C, spawns: SC, targetmv: MV } = state3; let res = "";
-    if (C < 2) { document.getElementById('m3-result-container').innerHTML = `<div class="dash"><div class="dash-header" style="cursor:default;"><div class="dash-sum-header"><span style="color:#ef4444;">CANNOT CAST</span></div><div class="stat-val red">Requires ${symC}${symC} base cost</div></div></div>`; return; }
+    const Col = Number(state3.colored) || 0;
+    const C = Number(state3.colorless) || 0;
+    const SC = Number(state3.spawns) || 0;
+    const MV = Number(state3.targetmv) || 0;
+
+    let res = "";
+    if (C < 2) { document.getElementById('m3-result-container').innerHTML = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div class="dash-sum-header"><span style="color:#ef4444;">CANNOT CAST</span></div><div class="stat-val red">Requires ${symC}${symC} base cost</div></div></div>`; return; }
     const cToReserveForTax = Math.max(0, 2 - SC); let validA1 = false; let xA1 = 0, yieldA1 = 0, strA1 = "";
     if (C >= 4) {
         xA1 = Col + (C - 4);
@@ -996,7 +1194,7 @@
     let maxScaleX = Col + (C - 2); let strB = "";
     if (maxScaleX >= MV) {
         let yieldB = maxScaleX + SC;
-        strB = `<div class="dash smooth-accordion" id="d3c"><div class="dash-header acc-header" onclick="toggleAccordion('d3c')"><div class="dash-sum-header">SINGLE TARGET (NO COPY) <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="dash-sum-stats"><div class="stat-col"><div class="stat-label">Total Tokens</div><div class="stat-val">${yieldB}</div></div><div class="stat-col right"><div class="stat-label">Cast For</div><div class="stat-val blue">X=${maxScaleX}</div></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><div class="yield-breakdown">Breakdown: ${maxScaleX} Scions + ${SC} Spawns.</div></div></div></div></div>`;
+        strB = `<div class="dash smooth-accordion" id="d3c"><div class="dash-header acc-header" onclick="toggleAccordion('d3c')"><div class="dash-sum-header">SINGLE TARGET (NO COPY) <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="dash-sum-stats"><div class="stat-col"><div class="stat-label">Total Tokens</div><div class="stat-val">${yieldB}</div></div><div class="stat-col right"><div class="stat-label">Cast For</div><div class="stat-val blue">X=${maxScaleX}</div></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><div class="yield-breakdown">Breakdown: ${maxScaleX} Scions + ${SC} Spawns. (Tax ignored).</div></div></div></div></div>`;
     } else strB = `<div class="dash"><div class="dash-header" style="cursor:default;"><div class="dash-sum-header"><span style="color:#fca5a5;">TARGET TOO LARGE</span></div><div class="stat-val red">Max possible X=${maxScaleX}</div></div></div>`;
 
     document.getElementById('m3-result-container').innerHTML = finalPathA + strB;
