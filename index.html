@@ -149,7 +149,7 @@
   body.vis-active .metric-box span.hero-label { font-size: 0.45rem; margin-bottom: 0; opacity: 0.7; display: flex; white-space: nowrap;}
   body.vis-active .metric-box strong { font-size: 1.3rem; margin-top: 2px; }
 
-  /* Aetheric Bloom Infinity Animations (Reverted to Perfect Original State) */
+  /* Aetheric Bloom Infinity Animations - RESTORED TO PERFECT ORGANIC PULSE */
   @keyframes aetherBloomText {
       0% { opacity: 0; filter: blur(6px); transform: scale(0.95); }
       40% { opacity: 1; filter: blur(0px); text-shadow: 0 0 30px #d946ef, 0 0 60px #06b6d4; transform: scale(1.05); color: #fff;}
@@ -157,19 +157,13 @@
   }
   .inf-warp { animation: aetherBloomText 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
 
-  @keyframes pulseSmall {
-      0% { text-shadow: 0 0 8px rgba(192, 38, 211, 0.4), 0 0 15px rgba(6, 182, 212, 0.3); }
-      50% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.8), 0 0 25px rgba(6, 182, 212, 0.6); }
-      100% { text-shadow: 0 0 8px rgba(192, 38, 211, 0.4), 0 0 15px rgba(6, 182, 212, 0.3); }
-  }
-  .inf-glow-small { color: #fdf4ff !important; animation: pulseSmall 2s infinite ease-in-out !important; }
-
   @keyframes pulseSmallSvg {
-      0% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.4)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.3)); }
-      50% { filter: drop-shadow(0 0 8px rgba(192, 38, 211, 0.8)) drop-shadow(0 0 15px rgba(6, 182, 212, 0.6)); }
-      100% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.4)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.3)); }
+      0% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.5)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.4)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 10px rgba(192, 38, 211, 0.9)) drop-shadow(0 0 20px rgba(6, 182, 212, 0.7)); transform: scale(1.05); }
+      100% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.5)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.4)); transform: scale(1); }
   }
-  .inf-glow-small svg { animation: pulseSmallSvg 2s infinite ease-in-out !important; }
+  .inf-glow-small { color: #fdf4ff !important; display: inline-block; }
+  .inf-glow-small svg { animation: pulseSmallSvg 2.5s infinite ease-in-out !important; color: #fdf4ff !important; overflow: visible; }
 
   /* Flash and Settle */
   @keyframes valFlash {
@@ -276,26 +270,19 @@
       touch-action: none; cursor: pointer; 
   }
   
-  /* The Line: Masked Bottom Taper */
+  /* The Track Line - Dynamically masked in Javascript */
   .spine-track { 
       position: absolute; width: 2px; background: rgba(255,255,255,0.15); z-index: 2;
       left: 50%; transform: translateX(-50%);
-      -webkit-mask-image: linear-gradient(to bottom, black 0%, black 90%, transparent 100%);
-      mask-image: linear-gradient(to bottom, black 0%, black 90%, transparent 100%);
   }
 
-  /* Inline Roman Numeral Phase Markers & Soft Eraser Mask */
+  /* Inline Roman Numeral Phase Markers (No Black Boxes) */
   .phase-pip {
       position: absolute; left: 50%; transform: translate(-50%, -50%);
       font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: #94a3b8;
       display: flex; align-items: center; justify-content: center; z-index: 9;
       pointer-events: none; transition: opacity 0.2s ease;
       width: 30px; text-align: center; letter-spacing: 2px; 
-  }
-  .phase-pip::before {
-      content: ''; position: absolute; inset: -6px;
-      background: radial-gradient(circle at center, #06080c 30%, rgba(6,8,12,0.9) 60%, transparent 100%);
-      z-index: -1;
   }
   
   /* Fiber-Optic Spill */
@@ -326,9 +313,19 @@
       scroll-snap-type: none !important;
   }
   
-  /* Compact Horizontal Badge with massive focus sizing */
-  .vis-snap-point { scroll-snap-align: center; width: 100%; flex-shrink: 0; padding: 24px 0; display: flex; justify-content: center; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; transform: scale(0.85); opacity: 0.35;}
-  .vis-snap-point.focused-card { transform: scale(1.05); opacity: 1; z-index: 50;}
+  /* Focused Cards - Fixed Overlap Blur Artifact via translateZ & z-index */
+  .vis-snap-point { 
+      scroll-snap-align: center; width: 100%; flex-shrink: 0; padding: 24px 0; 
+      display: flex; justify-content: center; 
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; 
+      transform: scale(0.85) translateZ(0); 
+      opacity: 0.35; position: relative; z-index: 1; 
+      will-change: transform, opacity;
+  }
+  .vis-snap-point.focused-card { 
+      transform: scale(1.05) translateZ(0); 
+      opacity: 1; z-index: 50; 
+  }
   
   #vis-top-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
   #vis-bottom-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
@@ -336,7 +333,7 @@
   .vis-slab { 
       position: relative; display: flex; gap: 14px; align-items: stretch; width: 100%; max-width: 280px; margin: 0 auto;
       padding: 10px 14px; transform-origin: center center; 
-      border-radius: 4px 20px 4px 20px; 
+      border-radius: 4px 20px 4px 20px; transform: translateZ(0);
   }
   
   .vis-art { 
@@ -356,7 +353,7 @@
   .vis-pill { font-size: 0.45rem; font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: 0.15em; line-height: 1; opacity: 0.7; margin-top: 2px;}
   
   /* Tactical Index Badge */
-  .vis-index { font-family: 'Outfit', sans-serif; font-size: 1rem; color: rgba(255,255,255,0.15); font-weight: 600; line-height: 1; margin-top: 2px; }
+  .vis-index { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: #475569; font-weight: 800; letter-spacing: 0.1em; }
   
   .vis-title { font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 500; color: #fff; letter-spacing: 0.02em; line-height: 1.1; margin-bottom: 2px;}
   
@@ -915,14 +912,14 @@
               document.getElementById('vis-top-pad').style.height = `${topPad}px`;
               document.getElementById('vis-bottom-pad').style.height = `${bottomPad}px`;
               
-              // Place Roman Numeral Pips dynamically based on rendered positions
+              // Place Roman Numeral Pips & Dynamic Track Mask
               const spine = document.getElementById('vis-fixed-spine');
               const track = document.querySelector('.spine-track');
               if (spine && track) {
                   spine.querySelectorAll('.phase-pip').forEach(p => p.remove());
                   const dividers = container.querySelectorAll('.vis-divider-wrapper');
-                  let firstPhysicalPct = null;
                   const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+                  let pipPcts = [];
                   
                   dividers.forEach((div, index) => {
                       let focusScrollTop = div.offsetTop + (div.offsetHeight / 2) - (container.clientHeight / 2);
@@ -930,7 +927,7 @@
                       let clampedPct = Math.max(0, Math.min(1, rawPct));
                       
                       let physicalPct = 10 + (clampedPct * 80);
-                      if (index === 0) firstPhysicalPct = physicalPct;
+                      pipPcts.push(physicalPct);
 
                       let pip = document.createElement('div');
                       pip.className = 'phase-pip';
@@ -940,10 +937,27 @@
                       spine.appendChild(pip);
                   });
                   
-                  // Cap the physical white line strictly from Phase I to 90%
-                  if (firstPhysicalPct !== null) {
-                      track.style.top = `${firstPhysicalPct}%`;
-                      track.style.bottom = `10%`; 
+                  // Construct Dynamic Linear Gradient Mask to perfectly cut the line around the numerals
+                  if (pipPcts.length > 0) {
+                      let maskStops = [];
+                      maskStops.push(`transparent 0%`);
+                      maskStops.push(`transparent calc(${pipPcts[0]}% + 8px)`);
+                      maskStops.push(`black calc(${pipPcts[0]}% + 24px)`);
+                      
+                      for (let i = 1; i < pipPcts.length; i++) {
+                          maskStops.push(`black calc(${pipPcts[i]}% - 24px)`);
+                          maskStops.push(`transparent calc(${pipPcts[i]}% - 8px)`);
+                          maskStops.push(`transparent calc(${pipPcts[i]}% + 8px)`);
+                          maskStops.push(`black calc(${pipPcts[i]}% + 24px)`);
+                      }
+                      maskStops.push(`black 95%`);
+                      maskStops.push(`transparent 100%`);
+                      
+                      let gradientStr = `linear-gradient(to bottom, ${maskStops.join(', ')})`;
+                      track.style.webkitMaskImage = gradientStr;
+                      track.style.maskImage = gradientStr;
+                      track.style.top = `0`;
+                      track.style.bottom = `0`;
                   }
               }
               
@@ -1073,9 +1087,9 @@
   // ==========================================
   // LOCALSTORAGE
   // ==========================================
-  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v67', JSON.stringify(data)); }
+  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v68', JSON.stringify(data)); }
   function loadState() {
-      const saved = localStorage.getItem('ulalek_save_v67');
+      const saved = localStorage.getItem('ulalek_save_v68');
       if(saved) {
           try {
               const parsed = JSON.parse(saved); Object.assign(state1, parsed.state1); Object.assign(state2, parsed.state2); Object.assign(state3, parsed.state3);
@@ -1235,6 +1249,14 @@
   let actionPending = false;
   let actionData = null;
   let activePointerId = null;
+  
+  // Nuclear Auto-Click Defense
+  window.ulalekGlobalTouchActive = false;
+  
+  window.addEventListener('touchstart', () => window.ulalekGlobalTouchActive = true, {passive: true, capture: true});
+  window.addEventListener('touchend', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
+  window.addEventListener('touchcancel', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
+  window.addEventListener('pointerup', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
 
   function startUpdate(e, mode, key, delta) {
     if (e && e.stopPropagation) e.stopPropagation();
@@ -1264,10 +1286,10 @@
     clearTimeouts();
 
     holdTimer = setTimeout(() => {
-        if (actionData && actionData.valid && activePointerId !== null) {
+        if (actionData && actionData.valid && window.ulalekGlobalTouchActive) {
             actionPending = false; 
             holdInterval = setInterval(() => {
-                if (activePointerId === null) {
+                if (!window.ulalekGlobalTouchActive) {
                     clearTimeouts();
                     return;
                 }
@@ -1278,7 +1300,7 @@
   }
 
   document.addEventListener('pointermove', (e) => {
-    if (actionData && actionData.valid && activePointerId === e.pointerId) {
+    if (actionData && actionData.valid) {
         let cx = e.clientX || (e.touches && e.touches[0].clientX) || 0;
         let cy = e.clientY || (e.touches && e.touches[0].clientY) || 0;
         if (Math.abs(cx - actionData.x) > 15 || Math.abs(cy - actionData.y) > 15) {
@@ -1308,9 +1330,6 @@
     clearTimeouts();
     saveState();
   }
-
-  document.addEventListener('pointerup', stopUpdate);
-  document.addEventListener('pointercancel', stopUpdate);
 
   function clearTimeouts() {
     if (holdTimer) clearTimeout(holdTimer);
