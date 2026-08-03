@@ -150,17 +150,21 @@
   body.vis-active .metric-box strong { font-size: 1.3rem; margin-top: 2px; }
 
   /* Aetheric Bloom Infinity Animations - RESTORED TO PERFECT ORGANIC PULSE */
-  @keyframes aetherBloomText {
+  @keyframes aetherBloomEntrance {
       0% { opacity: 0; filter: blur(6px); transform: scale(0.95); }
-      40% { opacity: 1; filter: blur(0px); text-shadow: 0 0 30px #d946ef, 0 0 60px #06b6d4; transform: scale(1.05); color: #fff;}
-      100% { opacity: 1; filter: blur(0px); transform: scale(1); text-shadow: 0 0 15px rgba(192, 38, 211, 0.5); color: #fdf4ff;}
+      100% { opacity: 1; filter: blur(0px); transform: scale(1); color: #fdf4ff;}
   }
-  .inf-warp { animation: aetherBloomText 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
+  @keyframes aetherBloomContinuous {
+      0% { text-shadow: 0 0 15px rgba(217, 70, 239, 0.6), 0 0 30px rgba(217, 70, 239, 0.3); }
+      50% { text-shadow: 0 0 25px rgba(217, 70, 239, 1), 0 0 50px rgba(217, 70, 239, 0.6); }
+      100% { text-shadow: 0 0 15px rgba(217, 70, 239, 0.6), 0 0 30px rgba(217, 70, 239, 0.3); }
+  }
+  .inf-warp { animation: aetherBloomEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards, aetherBloomContinuous 2.5s infinite ease-in-out 0.6s !important; }
 
   @keyframes pulseSmallSvg {
-      0% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.5)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.4)); transform: scale(1); }
-      50% { filter: drop-shadow(0 0 10px rgba(192, 38, 211, 0.9)) drop-shadow(0 0 20px rgba(6, 182, 212, 0.7)); transform: scale(1.05); }
-      100% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.5)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.4)); transform: scale(1); }
+      0% { filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.6)) drop-shadow(0 0 10px rgba(217, 70, 239, 0.3)); }
+      50% { filter: drop-shadow(0 0 12px rgba(217, 70, 239, 1)) drop-shadow(0 0 24px rgba(217, 70, 239, 0.6)); }
+      100% { filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.6)) drop-shadow(0 0 10px rgba(217, 70, 239, 0.3)); }
   }
   .inf-glow-small { color: #fdf4ff !important; display: inline-block; }
   .inf-glow-small svg { animation: pulseSmallSvg 2.5s infinite ease-in-out !important; color: #fdf4ff !important; overflow: visible; }
@@ -282,7 +286,7 @@
       font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: #94a3b8;
       display: flex; align-items: center; justify-content: center; z-index: 9;
       pointer-events: none; transition: opacity 0.2s ease;
-      width: 30px; text-align: center; letter-spacing: 2px; 
+      width: 30px; text-align: center; letter-spacing: 2px; padding-left: 2px;
   }
   
   /* Fiber-Optic Spill */
@@ -315,7 +319,7 @@
   
   /* Focused Cards - Fixed Overlap Blur Artifact via translateZ & z-index */
   .vis-snap-point { 
-      scroll-snap-align: center; width: 100%; flex-shrink: 0; padding: 24px 0; 
+      scroll-snap-align: center; width: 100%; flex-shrink: 0; padding: 14px 0; 
       display: flex; justify-content: center; 
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; 
       transform: scale(0.85) translateZ(0); 
@@ -1087,9 +1091,9 @@
   // ==========================================
   // LOCALSTORAGE
   // ==========================================
-  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v68', JSON.stringify(data)); }
+  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v69', JSON.stringify(data)); }
   function loadState() {
-      const saved = localStorage.getItem('ulalek_save_v68');
+      const saved = localStorage.getItem('ulalek_save_v69');
       if(saved) {
           try {
               const parsed = JSON.parse(saved); Object.assign(state1, parsed.state1); Object.assign(state2, parsed.state2); Object.assign(state3, parsed.state3);
@@ -1189,32 +1193,6 @@
     target.classList.remove('pop'); void target.offsetWidth; target.classList.add('pop');
   }
 
-  function triggerInfPop(elementId) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      const target = el.tagName === 'STRONG' ? el : (el.querySelector('span') || el);
-      if (elementId === 'out-spells') {
-          target.classList.remove('inf-warp');
-          void target.offsetWidth; 
-          target.classList.add('inf-warp');
-      } else {
-          el.classList.remove('inf-glow-small');
-          void el.offsetWidth;
-          el.classList.add('inf-glow-small');
-      }
-  }
-
-  function removeInfPop(elementId) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      const target = el.tagName === 'STRONG' ? el : (el.querySelector('span') || el);
-      if (elementId === 'out-spells') {
-          target.classList.remove('inf-warp');
-      } else {
-          el.classList.remove('inf-glow-small');
-      }
-  }
-
   function switchMode(mode, title) {
     currentMode = mode; document.getElementById('sys-mode-text').innerText = title;
     
@@ -1300,7 +1278,7 @@
   }
 
   document.addEventListener('pointermove', (e) => {
-    if (actionData && actionData.valid) {
+    if (actionData && actionData.valid && activePointerId === e.pointerId) {
         let cx = e.clientX || (e.touches && e.touches[0].clientX) || 0;
         let cy = e.clientY || (e.touches && e.touches[0].clientY) || 0;
         if (Math.abs(cx - actionData.x) > 15 || Math.abs(cy - actionData.y) > 15) {
@@ -1607,18 +1585,20 @@
 
     // Aetheric Bloom Propagation
     if (isInfCurrent && !prevIsInf) {
-        triggerInfPop('out-spells');
-        triggerInfPop('out-payments');
-        triggerInfPop('out-leftover');
-        if (F > 0) triggerInfPop('out-damage');
         document.getElementById('hero-dash').classList.add('infinite-bloom');
     } else if (!isInfCurrent) {
-        removeInfPop('out-spells');
-        removeInfPop('out-payments');
-        removeInfPop('out-leftover');
-        if (F > 0) removeInfPop('out-damage');
         document.getElementById('hero-dash').classList.remove('infinite-bloom');
     }
+    
+    // Explicitly add/remove inf-warp purely to handle class toggling
+    if (isInfCurrent && !prevIsInf) {
+        const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
+        spellsEl.classList.remove('inf-warp'); void spellsEl.offsetWidth; spellsEl.classList.add('inf-warp');
+    } else if (!isInfCurrent) {
+        const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
+        spellsEl.classList.remove('inf-warp');
+    }
+
     prevIsInf = isInfCurrent;
 
     const damageBox = document.getElementById('damage-box');
@@ -1714,7 +1694,10 @@
             if (group.zone === 'NORMAL RESOLUTION' || group.zone === 'TAX UNPAID') {
                 if (currentZone === '') currentVisualStack.push({ type: 'divider', text: 'I: STACK RESOLUTION' });
             }
-            if (group.zone === 'PHASE 2') currentVisualStack.push({ type: 'divider', text: `IV: NEW RESOLVING STACK` });
+            if (group.zone === 'PHASE 2') { 
+                currentVisualStack.push({ type: 'divider', text: `IV: NEW RESOLVING STACK` });
+                visualIndex = 1; // Reset counter for the new stack
+            }
             currentZone = group.zone;
         }
         
