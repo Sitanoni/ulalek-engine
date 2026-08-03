@@ -149,13 +149,27 @@
   body.vis-active .metric-box span.hero-label { font-size: 0.45rem; margin-bottom: 0; opacity: 0.7; display: flex; white-space: nowrap;}
   body.vis-active .metric-box strong { font-size: 1.3rem; margin-top: 2px; }
 
-  /* Aetheric Bloom Infinity Animations */
+  /* Aetheric Bloom Infinity Animations (Reverted to Perfect Original State) */
   @keyframes aetherBloomText {
       0% { opacity: 0; filter: blur(6px); transform: scale(0.95); }
       40% { opacity: 1; filter: blur(0px); text-shadow: 0 0 30px #d946ef, 0 0 60px #06b6d4; transform: scale(1.05); color: #fff;}
       100% { opacity: 1; filter: blur(0px); transform: scale(1); text-shadow: 0 0 15px rgba(192, 38, 211, 0.5); color: #fdf4ff;}
   }
   .inf-warp { animation: aetherBloomText 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
+
+  @keyframes pulseSmall {
+      0% { text-shadow: 0 0 8px rgba(192, 38, 211, 0.4), 0 0 15px rgba(6, 182, 212, 0.3); }
+      50% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.8), 0 0 25px rgba(6, 182, 212, 0.6); }
+      100% { text-shadow: 0 0 8px rgba(192, 38, 211, 0.4), 0 0 15px rgba(6, 182, 212, 0.3); }
+  }
+  .inf-glow-small { color: #fdf4ff !important; animation: pulseSmall 2s infinite ease-in-out !important; }
+
+  @keyframes pulseSmallSvg {
+      0% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.4)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.3)); }
+      50% { filter: drop-shadow(0 0 8px rgba(192, 38, 211, 0.8)) drop-shadow(0 0 15px rgba(6, 182, 212, 0.6)); }
+      100% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.4)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.3)); }
+  }
+  .inf-glow-small svg { animation: pulseSmallSvg 2s infinite ease-in-out !important; }
 
   /* Flash and Settle */
   @keyframes valFlash {
@@ -257,13 +271,6 @@
       transform: translateY(30px); transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Environmental Darkness behind the spine - Deep Seam Fix */
-  .env-darkness {
-      position: absolute; top: 0; bottom: 0; left: -50px; width: 150px;
-      background: linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 50px, transparent 100%);
-      z-index: 1; pointer-events: none;
-  }
-
   #vis-fixed-spine { 
       width: 40px; position: relative; flex-shrink: 0; display: flex; justify-content: center; z-index: 5; 
       touch-action: none; cursor: pointer; 
@@ -320,8 +327,8 @@
   }
   
   /* Compact Horizontal Badge with massive focus sizing */
-  .vis-snap-point { scroll-snap-align: center; width: 100%; flex-shrink: 0; padding: 18px 0; display: flex; justify-content: center; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; transform: scale(0.85); opacity: 0.35;}
-  .vis-snap-point.focused-card { transform: scale(1.15); opacity: 1; z-index: 50;}
+  .vis-snap-point { scroll-snap-align: center; width: 100%; flex-shrink: 0; padding: 24px 0; display: flex; justify-content: center; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; transform: scale(0.85); opacity: 0.35;}
+  .vis-snap-point.focused-card { transform: scale(1.05); opacity: 1; z-index: 50;}
   
   #vis-top-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
   #vis-bottom-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
@@ -345,11 +352,11 @@
       padding: 4px 0; gap: 2px;
   }
   
-  .vis-panel-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2px;}
-  .vis-pill { font-size: 0.45rem; font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: 0.15em; line-height: 1; opacity: 0.7; }
+  .vis-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;}
+  .vis-pill { font-size: 0.45rem; font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: 0.15em; line-height: 1; opacity: 0.7; margin-top: 2px;}
   
   /* Tactical Index Badge */
-  .vis-index { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: #475569; font-weight: 800; letter-spacing: 0.1em; }
+  .vis-index { font-family: 'Outfit', sans-serif; font-size: 1rem; color: rgba(255,255,255,0.15); font-weight: 600; line-height: 1; margin-top: 2px; }
   
   .vis-title { font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 500; color: #fff; letter-spacing: 0.02em; line-height: 1.1; margin-bottom: 2px;}
   
@@ -565,7 +572,6 @@
         </div>
         
         <div id="m1-visualizer-wrapper">
-            <div class="env-darkness"></div>
             <div id="vis-fixed-spine" onpointerdown="startSpineScrub(event)">
                 <div class="spine-track"></div>
                 <div class="spine-comet" id="spine-comet"></div>
@@ -1004,7 +1010,13 @@
           let match = line.match(/(?:create|put|creates) (a|one|1|two|2|three|3|four|4|five|5|six|6).* (?:spawn|scion)/i);
           if(match) { let qty = numMap[match[1]] || 0; if (line.includes("when you cast") || line.includes("whenever you cast")) spellCastSpawns += qty; else spellResoSpawns += qty; }
       }
-      if (card.type_line && card.type_line.includes('Creature')) { if (card.cmc >= 4 && card.cmc <= 6) spellTriggersUnsealing = true; if (card.cmc >= 7) spellDrawsCards = true; }
+      if (card.type_line && card.type_line.includes('Creature')) { 
+          if (card.cmc >= 4 && card.cmc <= 6) spellTriggersUnsealing = true; 
+          if (card.cmc >= 7) {
+              spellTriggersUnsealing = true; // 7+ also triggers the 4-6 spawn effect
+              spellDrawsCards = true; 
+          }
+      }
   }
 
   function fetchEldraziList(query = "") {
@@ -1061,9 +1073,9 @@
   // ==========================================
   // LOCALSTORAGE
   // ==========================================
-  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v66', JSON.stringify(data)); }
+  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v67', JSON.stringify(data)); }
   function loadState() {
-      const saved = localStorage.getItem('ulalek_save_v66');
+      const saved = localStorage.getItem('ulalek_save_v67');
       if(saved) {
           try {
               const parsed = JSON.parse(saved); Object.assign(state1, parsed.state1); Object.assign(state2, parsed.state2); Object.assign(state3, parsed.state3);
@@ -1222,20 +1234,14 @@
   let holdTimer = null, holdInterval = null;
   let actionPending = false;
   let actionData = null;
-  
-  // Nuclear Auto-Click Defense
-  window.ulalekGlobalTouchActive = false;
-  
-  window.addEventListener('touchstart', () => window.ulalekGlobalTouchActive = true, {passive: true, capture: true});
-  window.addEventListener('touchend', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
-  window.addEventListener('touchcancel', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
-  window.addEventListener('pointerup', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
+  let activePointerId = null;
 
   function startUpdate(e, mode, key, delta) {
     if (e && e.stopPropagation) e.stopPropagation();
     if (e && e.pointerType === 'mouse' && e.button !== 0) return;
 
-    if (actionData) stopUpdate();
+    if (activePointerId !== null) return; 
+    if (e && e.pointerId !== undefined) activePointerId = e.pointerId;
 
     let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
     
@@ -1258,10 +1264,10 @@
     clearTimeouts();
 
     holdTimer = setTimeout(() => {
-        if (actionData && actionData.valid && window.ulalekGlobalTouchActive) {
+        if (actionData && actionData.valid && activePointerId !== null) {
             actionPending = false; 
             holdInterval = setInterval(() => {
-                if (!window.ulalekGlobalTouchActive) {
+                if (activePointerId === null) {
                     clearTimeouts();
                     return;
                 }
@@ -1272,7 +1278,7 @@
   }
 
   document.addEventListener('pointermove', (e) => {
-    if (actionData && actionData.valid) {
+    if (actionData && actionData.valid && activePointerId === e.pointerId) {
         let cx = e.clientX || (e.touches && e.touches[0].clientX) || 0;
         let cy = e.clientY || (e.touches && e.touches[0].clientY) || 0;
         if (Math.abs(cx - actionData.x) > 15 || Math.abs(cy - actionData.y) > 15) {
@@ -1286,6 +1292,8 @@
   });
 
   function stopUpdate(e) {
+    if (e && e.pointerId !== undefined && e.pointerId !== activePointerId) return;
+    
     if (actionPending && actionData && actionData.valid) {
         applyDelta(actionData.mode, actionData.key, actionData.delta);
     }
@@ -1296,9 +1304,13 @@
     
     actionPending = false;
     actionData = null;
+    activePointerId = null;
     clearTimeouts();
     saveState();
   }
+
+  document.addEventListener('pointerup', stopUpdate);
+  document.addEventListener('pointercancel', stopUpdate);
 
   function clearTimeouts() {
     if (holdTimer) clearTimeout(holdTimer);
@@ -1487,7 +1499,7 @@
         stack.push(flat_manaGens[i]);
     }
     
-    if(unsealCastYield > 0) {
+    if(unsealDraws > 0) {
         for(let k=0; k<K; k++) {
             stack.push({id: 'unseal_draw', title: 'Cast Trigger', shortContext: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Original', originColor: '#10b981'});
             for(let i=0; i<E; i++) stack.push({id: 'unseal_draw', title: 'Cast Trigger', shortContext: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#be123c'});
@@ -1677,13 +1689,13 @@
     
     function injectGroup(group) {
         if (group.zone !== currentZone) {
-            if (group.zone === 'RESOLVING NOW') currentVisualStack.push({ type: 'divider', text: 'PHASE I: RESOLVE FIRST' });
-            if (group.zone === 'COPY ENGINE') currentVisualStack.push({ type: 'divider', text: `PHASE II: ULALEK RESOLUTION` });
-            if (group.zone === 'PAYLOAD') currentVisualStack.push({ type: 'divider', text: 'PHASE III: PENDING PAYLOAD' });
+            if (group.zone === 'RESOLVING NOW') currentVisualStack.push({ type: 'divider', text: 'I: TOP OF THE STACK' });
+            if (group.zone === 'COPY ENGINE') currentVisualStack.push({ type: 'divider', text: `II: COPY ENGINE` });
+            if (group.zone === 'PAYLOAD') currentVisualStack.push({ type: 'divider', text: 'III: BASE PAYLOAD' });
             if (group.zone === 'NORMAL RESOLUTION' || group.zone === 'TAX UNPAID') {
-                if (currentZone === '') currentVisualStack.push({ type: 'divider', text: 'PHASE I: STACK RESOLUTION' });
+                if (currentZone === '') currentVisualStack.push({ type: 'divider', text: 'I: STACK RESOLUTION' });
             }
-            if (group.zone === 'PHASE 2') currentVisualStack.push({ type: 'divider', text: `PHASE IV: RESULTING STACK` });
+            if (group.zone === 'PHASE 2') currentVisualStack.push({ type: 'divider', text: `IV: NEW RESOLVING STACK` });
             currentZone = group.zone;
         }
         
