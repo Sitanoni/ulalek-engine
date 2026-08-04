@@ -1,1847 +1,251 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" id="meta-theme-color" content="#06080c"><title>Ulalek Engine</title>
-<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Ulalek%22%2C%22short_name%22%3A%22Ulalek%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%2306080c%22%2C%22theme_color%22%3A%22%2306080c%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22icon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap');
-  
-  :root { 
-      --bg-color: #06080c;
-      --panel-border: rgba(255, 255, 255, 0.08); 
-      --header-bg: rgba(14, 18, 26, 0.75); 
-      --accent: #3b82f6; 
-  }
-  
-  html { background-color: var(--bg-color); height: 100dvh; width: 100%; overflow: hidden; }
-  
-  body { 
-      height: 100dvh; width: 100%; margin: 0; padding: 0; overflow: hidden; 
-      font-family: 'Inter', sans-serif; color: #f8fafc; 
-      user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
-      -webkit-tap-highlight-color: transparent; box-sizing: border-box; display: flex; flex-direction: column;
-      background-color: var(--bg-color);
-  }
-
-  /* Material Layer 1: Graphite Atmosphere & Cosmic Dust */
-  body::before {
-      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-      background-image: 
-          radial-gradient(circle at 10% 30%, rgba(139, 92, 246, 0.08), transparent 40%),
-          radial-gradient(circle at 90% 20%, rgba(6, 182, 212, 0.06), transparent 40%),
-          radial-gradient(circle at 50% 90%, rgba(236, 72, 153, 0.04), transparent 40%);
-  }
-  body::after {
-      content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
-  }
-  
-  .app-content, .top-actions { position: relative; z-index: 10; }
-  .sym-c { width: 1.15em; height: 1.15em; vertical-align: -0.18em; display: inline-block; } .sym-inf { width: 1.25em; height: 0.65em; display: inline-block; vertical-align: middle; }
-  
-  /* Shared Luxury Glass Material */
-  .glass-panel {
-      background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 30%, rgba(0,0,0,0.2) 100%);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(0,0,0,0.4), 0 10px 24px rgba(0,0,0,0.6);
-      backdrop-filter: blur(32px);
-      border: 1px solid var(--panel-border);
-  }
-
-  /* Top Actions Row */
-  .top-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: max(12px, env(safe-area-inset-top, 12px)) 16px 10px 16px; flex-shrink: 0; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
-  .engine-header { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-radius: 4px 16px 4px 16px; cursor: pointer; transition: transform 0.2s cubic-bezier(0.1, 1, 0.3, 1), border-color 0.2s; }
-  .engine-header:active { transform: translateY(2px) scale(0.98); border-color: rgba(255,255,255,0.2); } 
-  .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
-  
-  .mode-sliver { flex-shrink: 0; width: 3px; height: 16px; border-radius: 2px; transition: all 0.4s ease; box-shadow: 0 0 10px currentColor; }
-  .mode-sliver.mode-1 { color: #10b981; background: #10b981; } .mode-sliver.mode-2 { color: #06b6d4; background: #06b6d4; } .mode-sliver.mode-3 { color: #f43f5e; background: #f43f5e; }
-  
-  .header-text { display: flex; flex-direction: column; min-width: 0; flex: 1; } 
-  .sys-label { font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.25em; color: #64748b; font-weight: 700; margin-bottom: 2px; } 
-  .sys-mode { font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: #fff; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } 
-  .mode-arrow { flex-shrink: 0; color: #64748b; margin-left: 6px; }
-  
-  .circle-btn { width: 42px; height: 42px; border-radius: 4px 16px 4px 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s cubic-bezier(0.1, 1, 0.3, 1), border-color 0.2s; flex-shrink: 0; outline: none; color: #94a3b8; } 
-  .circle-btn:active { transform: translateY(2px) scale(0.96); border-color: rgba(255,255,255,0.2); } 
-  
-  /* Micro-interactions */
-  .btn-reset svg { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-  .btn-reset:active svg { transform: rotate(90deg); color: #fff; }
-  .btn-info::after { content: ''; position: absolute; width: 100%; height: 100%; border-radius: inherit; border: 1px solid #fff; opacity: 0; transform: scale(1); transition: all 0.4s ease; }
-  .btn-info:active::after { opacity: 0.3; transform: scale(1.4); transition: none; }
-  .btn-info:active svg { color: #fff; }
-
-  /* Selector Bar */
-  .spell-selector-bar { border-radius: 4px 16px 4px 16px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s cubic-bezier(0.1, 1, 0.3, 1), border-color 0.2s; margin-bottom: 10px; flex-shrink: 0; } 
-  .spell-selector-bar:active { transform: translateY(2px) scale(0.98); border-color: rgba(255,255,255,0.2); }
-  .ss-left { display: flex; align-items: center; gap: 12px; min-width: 0; pointer-events: none;} 
-  .ss-icon { color: #64748b; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width:34px; height:34px; } 
-  .ss-info { display: flex; flex-direction: column; min-width: 0; }
-  .ss-tag { display:flex; gap:8px; align-items:center; margin-bottom: 2px; } 
-  .ss-tag-text { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: #64748b; }
-  .ss-spawns-badge { background: rgba(16, 185, 129, 0.1); color: #34d399; font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.2); display: none; letter-spacing: 0.05em; } 
-  .ss-reso-badge { background: rgba(244, 63, 94, 0.1); color: #fb7185; font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(244, 63, 94, 0.2); display: none; letter-spacing: 0.05em; }
-  .ss-name { font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 400; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.02em; } 
-  .ss-clear { color: #94a3b8; padding: 5px 10px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; transition: color 0.2s; z-index: 20; pointer-events: auto;} 
-  .ss-clear:active { color: #fff; }
-
-  /* App Content Layout */
-  .app-content { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-  .mode-container { display: none; flex-direction: column; width: 100%; height: 100%; flex: 1; padding: 0 16px max(12px, env(safe-area-inset-bottom, 12px)) 16px; box-sizing: border-box; overflow:hidden;}
-  .mode-container.active { display: flex; animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* Layout Adjustments (Normal State) */
-  .outputs-area { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; margin-bottom: 10px; z-index: 40; position: relative; }
-  
-  .hero { padding: 14px; border-radius: 4px 20px 4px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; transition: border-color 1.2s ease; } 
-  .hero.infinite-bloom { border-color: rgba(192, 38, 211, 0.4); }
-  .hero.infinite-bloom::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(192, 38, 211, 0.15) 0%, transparent 80%); pointer-events: none; }
-  .hero-label { display: inline-flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.25em; color: #64748b; margin-bottom: 4px; font-weight: 700; position: relative; z-index: 2; } 
-  .hero h1 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 3.2rem; color: #ffffff; line-height: 1; font-weight: 300; font-variant-numeric: tabular-nums; display: inline-block; letter-spacing: -0.02em; position: relative; z-index: 2; text-align: center;}
-  
-  .metrics { display: flex; gap: 8px; } 
-  .metric-box { flex: 1; padding: 12px 6px; border-radius: 4px 16px 4px 16px; text-align: center; color: #64748b; position: relative; user-select: none; cursor:pointer; overflow: visible !important; } 
-  .metric-box:active { transform: translateY(2px) scale(0.96); border-color: rgba(255,255,255,0.2); }
-  .metric-box strong { display: block; font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 300; color: #ffffff; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; transition: filter 0.3s ease; }
-
-  /* Visualizer Active States - Overlay Architecture */
-  body.vis-active .top-actions { display: none; }
-  body.vis-active .spell-selector-bar { display: none; }
-  
-  body.vis-active #m1-input-section { opacity: 0; pointer-events: none; transform: scale(0.96); }
-  
-  body.vis-active #m1-visualizer-wrapper { 
-      opacity: 1; pointer-events: auto; transform: translateY(0);
-  }
-
-  body.vis-active .outputs-area { 
-      flex-direction: row; align-items: center; justify-content: space-between;
-      margin-top: max(16px, env(safe-area-inset-top, 16px)); padding: 10px 16px; 
-      margin-left: -16px; margin-right: -16px; 
-      background: var(--header-bg); backdrop-filter: blur(32px); border-bottom: 1px solid var(--panel-border);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.8); gap: 12px;
-      animation: slideDownFadeVis 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  
-  /* Closing State Choreography */
-  body.vis-closing .outputs-area { animation: slideDownFadeMain 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  body.vis-closing #m1-input-section { display: flex; animation: slideUpFadeMain 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  body.vis-closing #m1-visualizer-wrapper { 
-      position: absolute; inset: 0; z-index: 30;
-      display: flex; opacity: 0; pointer-events: none; animation: fadeOutVis 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-  }
-  
-  @keyframes slideDownFadeVis { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes slideUpFadeVis { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes slideDownFadeMain { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes slideUpFadeMain { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeOutVis { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(30px); } }
-
-  /* Dashboard Squish Typography */
-  body.vis-active .hero { flex: 1; padding: 0; box-shadow: none; border: none; background: transparent; }
-  body.vis-active .hero.infinite-bloom::before { display: none; }
-  body.vis-active .hero-label { font-size: 0.45rem; margin-bottom: 0; opacity: 0.7; }
-  body.vis-active .hero h1 { font-size: 1.5rem; margin-top: 2px; }
-  
-  body.vis-active .metrics { flex: 2; gap: 8px; justify-content: space-around; }
-  body.vis-active .metric-box { padding: 0; box-shadow: none; border: none; background: transparent; flex: 1; }
-  body.vis-active .metric-box span.hero-label { font-size: 0.45rem; margin-bottom: 0; opacity: 0.7; display: flex; white-space: nowrap;}
-  body.vis-active .metric-box strong { font-size: 1.3rem; margin-top: 2px; }
-
-  /* Aetheric Bloom Infinity Animations - TRUE ORGANIC PURPLE PULSE */
-  @keyframes aetherPulseText {
-      0%, 100% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.6), 0 0 30px rgba(192, 38, 211, 0.3); color: #fdf4ff; }
-      50% { text-shadow: 0 0 25px rgba(192, 38, 211, 1), 0 0 50px rgba(192, 38, 211, 0.8), 0 0 75px rgba(6, 182, 212, 0.5); color: #ffffff; }
-  }
-  .inf-warp { animation: aetherPulseText 3s infinite ease-in-out !important; }
-
-  /* Perfect SVG Pseudo-Element Aura (Bypasses iOS Drop-Shadow Bugs) */
-  .inf-glow-small { position: relative; display: inline-flex; align-items: center; justify-content: center; color: #fdf4ff !important; z-index: 1; }
-  .inf-glow-small::after {
-      content: ''; position: absolute; top: 50%; left: 50%; width: 70%; height: 70%;
-      transform: translate(-50%, -50%); border-radius: 50%; z-index: -1;
-      animation: aetherPulseGlow 3s infinite ease-in-out !important;
-      pointer-events: none;
-  }
-  @keyframes aetherPulseGlow {
-      0%, 100% { box-shadow: 0 0 12px 3px rgba(192, 38, 211, 0.6), 0 0 24px 6px rgba(192, 38, 211, 0.3); background: rgba(192, 38, 211, 0.15); }
-      50% { box-shadow: 0 0 20px 6px rgba(192, 38, 211, 1), 0 0 40px 12px rgba(192, 38, 211, 0.8), 0 0 60px 18px rgba(6, 182, 212, 0.5); background: rgba(192, 38, 211, 0.4); }
-  }
-
-  /* Flash and Settle */
-  @keyframes valFlash {
-      0% { transform: scale(1); filter: brightness(1); }
-      30% { transform: scale(1.05); filter: brightness(1.5); text-shadow: 0 0 10px rgba(255,255,255,0.8); }
-      100% { transform: scale(1); filter: brightness(1); text-shadow: none; }
-  }
-  .pop { animation: valFlash 0.3s cubic-bezier(0.1, 1, 0.3, 1); }
-
-  /* Input Grid Layout (NO SCROLL MODE 1) */
-  #m1-content-area { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-bottom: 12px; position: relative; }
-  
-  #m1-input-section { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; transition: opacity 0.3s, transform 0.3s; opacity: 1; transform: scale(1); }
-  #m1-input-section .grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); gap: 10px; margin-bottom: 0; height: 100%;} 
-  .grid-full { grid-column: span 2; }
-  
-  /* MODE 1 50/50 Rigid Slabs */
-  #m1-input-section .card { 
-      position: relative; border-radius: 4px 16px 4px 16px; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; overflow: hidden; user-select: none;
-  } 
-  
-  /* Persistent Left Emissive Edge */
-  #m1-input-section .card::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 2px; background: var(--edge-color, transparent); opacity: 0.25; transition: opacity 0.3s; z-index: 15; pointer-events: none;}
-  #m1-input-section .card.echoes::before { --edge-color: #be123c; } #m1-input-section .card.fleshraker::before { --edge-color: #d97706; } #m1-input-section .card.throne::before { --edge-color: #94a3b8; } #m1-input-section .card.unsealing::before { --edge-color: #0284c7; } #m1-input-section .card.cast::before { --edge-color: #10b981; } #m1-input-section .card.colorless::before { --edge-color: #8b5cf6; } #m1-input-section .card.paymentcap::before { --edge-color: #64748b; opacity:0;}
-  #m1-input-section .card.active::before { opacity: 1; box-shadow: 0 0 12px var(--edge-color); }
-
-  #m1-input-section .card-title { position: absolute; top: 12px; width: 100%; text-align: center; font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.2em; color: #64748b; font-weight: 700; pointer-events: none; z-index: 5; display:flex; justify-content:center; align-items:center; gap:4px; } 
-  
-  /* Centered Values and +/- Anchors */
-  #m1-input-section .card-center { display: flex; justify-content: center; align-items: center; gap: 32px; width: 100%; position: absolute; top: 50%; transform: translateY(-40%); transition: transform 0.1s; pointer-events: none; z-index: 5;}
-  #m1-input-section .card-val { font-family: 'Outfit', sans-serif; font-size: 2.6rem; font-weight: 300; color: #fff; letter-spacing: -0.03em; text-align: center; margin-top: 6px;}
-  #m1-input-section .sub-btn-minus, #m1-input-section .sub-btn-plus { font-size: 1.4rem; font-weight: 300; color: rgba(255,255,255,0.15); transition: color 0.1s; margin-top: 4px; }
-  
-  /* Invisible 50/50 Touch Zones & JS Ripples */
-  #m1-input-section .touch-zone { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 10; cursor: pointer; touch-action: none; }
-  #m1-input-section .touch-left { left: 0; border-right: 1px solid rgba(255,255,255,0.03); }
-  #m1-input-section .touch-right { right: 0; }
-  
-  #m1-input-section .half-bg { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
-  /* Noticeable illumination on press */
-  #m1-input-section .half-bg.left { left: 0; background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 70%); }
-  #m1-input-section .half-bg.right { right: 0; background: radial-gradient(circle at 70% 50%, rgba(255,255,255,0.2) 0%, transparent 70%); }
-
-  /* Independent Touch Reactions (Text Shift) */
-  #m1-input-section .card.press-left .half-bg.left { opacity: 1; }
-  #m1-input-section .card.press-right .half-bg.right { opacity: 1; }
-  #m1-input-section .card.press-left .card-center, #m1-input-section .card.press-right .card-center { transform: translateY(calc(-40% + 2px)); }
-  #m1-input-section .card.press-left .sub-btn-minus { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.6); }
-  #m1-input-section .card.press-right .sub-btn-plus { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.6); }
-
-  /* Mode 2/3 Preserved Layout */
-  #mode2 .grid-scroll-area, #mode3 .grid-scroll-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; margin: 0 -16px; padding: 0 16px; }
-  #mode2 .grid, #mode3 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; flex-shrink: 0;}
-  #mode2 .card, #mode3 .card { position: relative; border-radius: 8px; overflow: hidden; transition: transform 0.2s cubic-bezier(0.1, 1, 0.3, 1), border-color 0.2s; display: flex; flex-direction: column; justify-content: center; padding: 14px 0; gap: 8px; user-select: none; } 
-  #mode2 .card:active, #mode3 .card:active { transform: translateY(2px) scale(0.975); border-color: rgba(255,255,255,0.2); }
-  #mode2 .card::before, #mode3 .card::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 2px; background: transparent; transition: background 0.4s, box-shadow 0.4s; }
-  #mode2 .card.cast::before, #mode3 .card.cast::before { --edge-color: #10b981; } #mode2 .card.colorless::before, #mode3 .card.colorless::before { --edge-color: #8b5cf6; } #mode2 .card.colored::before, #mode3 .card.colored::before { --edge-color: #06b6d4; } #mode2 .card.spellcost::before { --edge-color: #eab308; } #mode2 .card.leftover::before { --edge-color: #ec4899; } #mode3 .card.targetmv::before { --edge-color: #f43f5e; }
-  #mode2 .card.active::before, #mode3 .card.active::before { background: var(--edge-color); box-shadow: 0 0 12px var(--edge-color); }
-  #mode2 .card h3, #mode3 .card h3 { margin: 0; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.15em; color: #64748b; font-weight: 700; text-align: center; display:flex; justify-content:center; align-items:center; gap:4px; padding: 0 8px; } 
-  #mode2 .stepper, #mode3 .stepper { display: flex; justify-content: space-between; align-items: center; padding: 0 8px; } 
-  #mode2 .btn, #mode3 .btn { background: transparent; color: #475569; border: none; font-size: 1.4rem; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; touch-action: none; transition: color 0.2s, text-shadow 0.2s; font-weight: 300; cursor:pointer;} 
-  #mode2 .btn:active, #mode3 .btn:active { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); } 
-  #mode2 .val-wrapper, #mode3 .val-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0; height: 100%; pointer-events: none; } 
-  #mode2 .val, #mode3 .val { font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 300; width: 100%; text-align: center; color: #f8fafc; font-variant-numeric: tabular-nums; display: inline-block; letter-spacing: -0.02em; }
-
-  /* Dashboards */
-  .smooth-accordion { border-radius: 4px 16px 4px 16px; flex-shrink: 0; overflow: hidden; transition: all 0.3s ease; display: flex; flex-direction: column; margin-bottom:8px; } 
-  .acc-header { padding: 16px; font-weight: 700; cursor: pointer; color: #60a5fa; font-size: 0.75rem; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; transition: color 0.3s; user-select: none; letter-spacing: 0.1em; } 
-  .acc-arrow { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); } .smooth-accordion.open .acc-arrow { transform: rotate(-180deg); } 
-  .acc-content-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1); } .smooth-accordion.open .acc-content-wrapper { grid-template-rows: 1fr; } .acc-content-inner { overflow: hidden; }
-  
-  .dash { border-radius: 4px 16px 4px 16px; overflow: hidden; display: flex; flex-direction: column; margin-bottom:8px; } 
-  .dash.highlight { border-left: 2px solid #10b981; background: linear-gradient(90deg, rgba(16, 185, 129, 0.05), transparent); } 
-  .dash-header { padding: 16px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; user-select: none; } 
-  .dash-sum-header { display: flex; justify-content: space-between; align-items: center; font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: #fff; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; font-weight: 500; letter-spacing: 0.05em; } 
-  .dash-sum-header span { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: #64748b; font-weight: 700; letter-spacing: 0.1em; } 
-  .dash-sum-stats { display: flex; justify-content: space-between; align-items: center; } 
-  .stat-col { display: flex; flex-direction: column; gap: 2px; } .stat-col.right { text-align: right; align-items: flex-end; } 
-  .stat-label { font-size: 0.55rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; } 
-  .stat-val { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 300; color: #fff; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; line-height: 1; } 
-  .stat-val.blue { color: var(--accent); } .stat-val.red { color: #ef4444; font-size: 1.1rem; } 
-  .dash-body { padding: 0 16px 16px 16px; background: transparent; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 0; padding-top: 12px; color: #94a3b8; font-size: 0.8rem; line-height: 1.5; } 
-  .yield-breakdown { font-size: 0.75rem; color: #64748b; margin-top: 4px; } 
-  .badge { font-family: 'Inter', sans-serif; font-size: 0.55rem; font-weight: 800; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; line-height: 1; display: flex; align-items: center; border: 1px solid; } 
-  .badge-ok { background: rgba(16, 185, 129, 0.1); color: #34d399; border-color: rgba(16, 185, 129, 0.2); } .badge-short { background: rgba(249, 115, 22, 0.1); color: #fb923c; border-color: rgba(249, 115, 22, 0.2); }
-
-  /* ---------------------------------------------------- */
-  /* VISUALIZER ENGINE (THE DYNAMIC SPINE & AETHER SLABS) */
-  /* ---------------------------------------------------- */
-  .fixed-bottom-bar { flex-shrink: 0; width: 100%; z-index: 100; margin-top: auto; }
-  .deploy-btn { width: 100%; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(0,0,0,0.8); border-top: 1px solid rgba(255, 255, 255, 0.15); border-radius: 4px 16px 4px 16px; color: #f8fafc; font-family: 'Outfit', sans-serif; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.15em; padding: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: transform 0.2s cubic-bezier(0.1, 1, 0.3, 1), background 0.2s, border-color 0.2s; box-sizing: border-box; text-transform: uppercase; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 24px rgba(0,0,0,0.8); backdrop-filter: blur(24px); } 
-  .deploy-btn:active { transform: translateY(2px) scale(0.98); background: #0f172a; border-top-color: rgba(255,255,255,0.3); }
-  .deploy-btn.deactivate { background: linear-gradient(180deg, #3f0414 0%, #170107 100%); border-top-color: rgba(225, 29, 72, 0.25); color: #fda4af; } 
-
-  /* Overlay Architecture for Visualizer */
-  #m1-visualizer-wrapper { 
-      position: absolute; inset: 0; z-index: 30;
-      display: flex; flex-direction: row; opacity: 0; pointer-events: none;
-      transform: translateY(30px); transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  #vis-fixed-spine { 
-      width: 40px; position: relative; flex-shrink: 0; display: flex; justify-content: center; z-index: 5; 
-      touch-action: none; cursor: pointer; 
-  }
-  
-  /* The Track Line - Dynamically masked in Javascript */
-  .spine-track { 
-      position: absolute; width: 2px; background: rgba(255,255,255,0.15); z-index: 2;
-      left: 50%; transform: translateX(-50%);
-  }
-
-  /* Inline Roman Numeral Phase Markers (No Black Boxes) */
-  .phase-pip {
-      position: absolute; left: 50%; transform: translate(-50%, -50%);
-      font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: #94a3b8;
-      display: flex; align-items: center; justify-content: center; z-index: 9;
-      pointer-events: none; transition: opacity 0.2s ease;
-      width: 30px; text-align: center; letter-spacing: 2px; 
-      /* Counterbalance letter-spacing right-bias */
-      padding-left: 2px; 
-  }
-  
-  /* Fiber-Optic Spill */
-  .spine-comet {
-      position: absolute; left: 50%; transform: translateX(-50%); width: 2px;
-      height: 400px; top: var(--dot-y, 10%); margin-top: -200px;
-      z-index: 8; pointer-events: none;
-  }
-  
-  /* Solid Magenta Core */
-  .spine-reticle { 
-      position: absolute; top: var(--dot-y, 10%); width: 8px; height: 8px; margin-top: -4px; border-radius: 2px; 
-      transform: translateX(-50%) rotate(45deg); left: 50%;
-      background: #fdf4ff; box-shadow: 0 0 15px #d946ef, 0 0 5px #fff;
-      z-index: 10; pointer-events: none;
-  }
-
-  #vis-scroll-container { 
-      flex: 1; overflow-y: auto; overflow-x: hidden; 
-      scroll-snap-type: y proximity; 
-      -webkit-overflow-scrolling: touch; 
-      padding: 0; margin: 0; padding-right: 16px;
-      position: relative; z-index: 10;
-  }
-
-  /* Dynamic Scrubber Override */
-  #vis-scroll-container.no-snap {
-      scroll-snap-type: none !important;
-  }
-  
-  /* Focused Cards - Fixed Overlap Blur Artifact via translateZ & z-index */
-  .vis-snap-point { 
-      scroll-snap-align: center; width: 100%; flex-shrink: 0; padding: 14px 0; 
-      display: flex; justify-content: center; 
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; 
-      transform: scale(0.85) translateZ(0); 
-      opacity: 0.35; position: relative; z-index: 1; 
-      will-change: transform, opacity;
-  }
-  
-  /* Overrides Blur kernel completely on focus to prevent edge-glow bleed */
-  .vis-snap-point.focused-card { 
-      transform: scale(1.05) translateZ(0); 
-      opacity: 1; z-index: 50; 
-  }
-  .vis-snap-point.focused-card .vis-slab {
-      backdrop-filter: none !important; 
-      background: linear-gradient(135deg, #161e2e 0%, #0b0f19 100%) !important;
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), 0 15px 40px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.05);
-  }
-  
-  #vis-top-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
-  #vis-bottom-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
-  
-  .vis-slab { 
-      position: relative; display: flex; gap: 14px; align-items: stretch; width: 100%; max-width: 280px; margin: 0 auto;
-      padding: 10px 14px; transform-origin: center center; 
-      border-radius: 4px 20px 4px 20px; transform: translateZ(0);
-      transition: background 0.3s ease, backdrop-filter 0.3s ease;
-  }
-  
-  .vis-art { 
-      flex: 0 0 140px; 
-      border-radius: 4.75% / 3.5%; background-size: cover; background-position: center; 
-      box-shadow: 0 10px 24px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05); 
-      aspect-ratio: 2.5/3.5; cursor: pointer;
-  }
-  
-  /* RESTRUCTURED TEXT HIERARCHY - CSS FLEX COLUMN */
-  .vis-panel { 
-      flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; position: relative; text-align: left;
-      padding: 4px 0; gap: 2px;
-  }
-  
-  .vis-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;}
-  .vis-pill { font-size: 0.45rem; font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: 0.15em; line-height: 1; opacity: 0.7; margin-top: 2px;}
-  
-  /* Tactical Index Badge */
-  .vis-index { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: #475569; font-weight: 800; letter-spacing: 0.1em; }
-  
-  .vis-title { font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 500; color: #fff; letter-spacing: 0.02em; line-height: 1.1; margin-bottom: 2px;}
-  
-  .vis-origin-text { font-size: 0.60rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; line-height: 1.2; display: inline-block; margin-bottom: 4px;}
-  
-  .vis-short-context { font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #94a3b8; opacity: 0; transform: translateY(4px); transition: all 0.3s ease; line-height: 1.3; }
-  .focused-card .vis-short-context { opacity: 1; transform: translateY(0); color: #cbd5e1; }
-  
-  /* Etched Dividers */
-  .vis-divider-wrapper { width: 100%; flex-shrink: 0; scroll-snap-align: none; display: flex; align-items: center; margin: 16px 0; opacity: 0.8; }
-  .vis-divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); }
-  .vis-divider { margin: 0 12px; font-family: 'Outfit', sans-serif; font-size: 0.6rem; font-weight: 500; letter-spacing: 0.25em; color: #64748b; text-transform: uppercase; display: flex; align-items: center; gap: 8px;}
-  .vis-divider .pip { width: 4px; height: 4px; background: #64748b; border-radius: 50%; display: inline-block; transform: rotate(45deg);}
-  
-  /* Proof Blocks */
-  .vis-note-wrapper { width: 100%; flex-shrink: 0; opacity: 1 !important; scroll-snap-align: end; margin: 8px 0 16px 0; } 
-  .vis-proof { padding: 20px; border-radius: 4px 16px 4px 16px; font-size: 0.8rem; line-height: 1.6; text-align: left; box-sizing: border-box; }
-  .vis-proof b { font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.05em; }
-  .vis-proof.infinite { border-color: rgba(16, 185, 129, 0.2); border-left: 3px solid #10b981; color: #a7f3d0; } .vis-proof.infinite b { color: #34d399; }
-  .vis-proof.finite { border-color: rgba(245, 158, 11, 0.2); border-left: 3px solid #f59e0b; color: #fde68a; } .vis-proof.finite b { color: #fbbf24; }
-  .vis-proof.fizzle { border-color: rgba(239, 68, 68, 0.2); border-left: 3px solid #ef4444; color: #fecaca; } .vis-proof.fizzle b { color: #fca5a5; }
-
-  /* Search Modal & Menus */
-  #spell-search-modal, #scryfall-overlay { position: fixed; inset: 0; background: rgba(6, 8, 12, 0.95); backdrop-filter: blur(30px); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); padding: max(50px, env(safe-area-inset-top, 50px)) 16px 16px 16px; box-sizing: border-box; }
-  #spell-search-modal.active, #scryfall-overlay.active { opacity: 1; visibility: visible; }
-  #scryfall-overlay { justify-content: center; cursor: pointer; z-index: 2000; } 
-  #scryfall-img { max-width: 85%; max-height: 80vh; border-radius: 4.75% / 3.5%; box-shadow: 0 20px 60px rgba(0,0,0,0.8); transform: scale(0.95) translateY(10px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; display: none; } 
-  #scryfall-overlay.active #scryfall-img { transform: scale(1) translateY(0); opacity: 1; }
-  .search-card-box { background: rgba(14, 18, 26, 0.8); border: 1px solid var(--panel-border); border-radius: 12px; width: 100%; max-width: 440px; display: flex; flex-direction: column; height: 88vh; padding: 20px; box-sizing: border-box; gap: 14px; box-shadow: 0 30px 80px rgba(0,0,0,0.9); }
-  .search-controls { display: flex; width: 100%; flex-shrink: 0;} 
-  .search-input-wrap { display: flex; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px 14px; gap: 10px; flex: 1; } 
-  .search-input-wrap input { background: transparent; border: none; outline: none; color: #fff; font-size: 1rem; font-family: 'Inter', sans-serif; width: 100%; } 
-  .search-input-wrap input::placeholder { color: #475569; }
-  .search-results-grid { display: flex; flex-direction: column; gap: 24px; overflow-y: auto; flex: 1; padding: 10px 4px 30px 4px; align-items: center; } 
-  .grid-card { width: 100%; max-width: 320px; aspect-ratio: 2.5/3.5; object-fit: cover; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); cursor: pointer; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid rgba(255,255,255,0.05); } 
-  .grid-card:active { transform: translateY(2px) scale(0.97); border-color: rgba(255,255,255,0.2); }
-  
-  .mode-menu-overlay { position: fixed; inset: 0; background: rgba(6, 8, 12, 0.95); backdrop-filter: blur(30px); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: max(80px, env(safe-area-inset-top, 80px)) 24px 24px 24px; } 
-  .mode-menu-overlay.active { opacity: 1; visibility: visible; } 
-  .modal-content { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 500px; transform: translateY(-20px) scale(0.98); opacity: 0; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); } 
-  .mode-menu-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
-  .menu-title { font-family: 'Outfit', sans-serif; color: #fff; font-size: 1.2rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; text-align: center; margin-bottom: 12px; color: #94a3b8; } 
-  .mode-card { border-radius: 4px 16px 4px 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: transform 0.2s cubic-bezier(0.1, 1, 0.3, 1), border-color 0.2s; padding: 20px;} 
-  .mode-card:active { transform: translateY(2px) scale(0.97); border-color: rgba(255,255,255,0.2); } 
-  .mode-card.active { border-left: 3px solid #10b981; } 
-  .mode-card h2 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #fff; font-weight: 500; letter-spacing: 0.05em; } 
-  .mode-card p { margin: 0; font-size: 0.8rem; color: #64748b; line-height: 1.5; } 
-  #info-modal { justify-content: center; padding-top: 24px; }
-  
-  .utilities-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; } 
-  .toggle-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 4px; display: flex; position: relative; cursor: pointer; align-items: center; } 
-  .toggle-option { flex: 1; text-align: center; font-size: 0.65rem; font-weight: 700; color: #475569; z-index: 2; transition: color 0.3s; letter-spacing: 0.1em; padding: 12px 0; } 
-  .toggle-pill { position: absolute; top: 4px; bottom: 4px; width: calc(50% - 4px); background: rgba(255,255,255,0.1); border-radius: 4px; z-index: 1; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s; }
-  .toggle-box.haptics .toggle-pill { background: rgba(16, 185, 129, 0.2); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); } 
-  body.haptics-off .toggle-box.haptics .toggle-pill { transform: translateX(100%); background: rgba(255,255,255,0.05); box-shadow: none; border: 1px solid transparent; } 
-  body:not(.haptics-off) #h-on { color: #fff; } body.haptics-off #h-off { color: #fff; }
-  .toggle-box.audio .toggle-pill { background: rgba(139, 92, 246, 0.2); box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.3); } 
-  body.audio-off .toggle-box.audio .toggle-pill { transform: translateX(100%); background: rgba(255,255,255,0.05); box-shadow: none; border: 1px solid transparent; } 
-  body:not(.audio-off) #a-on { color: #fff; } body.audio-off #a-off { color: #fff; }
-
-  /* Swipe Tutorial */
-  .swipe-tut { position: fixed; inset: 0; background: rgba(6, 8, 12, 0.8); backdrop-filter: blur(12px); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; transition: opacity 0.4s ease; pointer-events: none; } 
-  .swipe-anim-container { display: flex; align-items: center; gap: 16px; color: var(--accent); animation: swipeDrift 2s infinite cubic-bezier(0.16, 1, 0.3, 1); } 
-  @keyframes swipeDrift { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-24px); } 75% { transform: translateX(24px); } } 
-  .tut-text { color: #fff; font-weight: 500; font-family: 'Outfit'; font-size: 1.2rem; letter-spacing: 0.2em; } 
-  .tut-check-container { pointer-events: auto; background: rgba(0,0,0,0.4); padding: 12px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; cursor: pointer; } 
-  .tut-check-container span { color: #94a3b8; font-size: 0.85rem; font-family: 'Inter', sans-serif; } 
-  .tut-check-container input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
-</style>
-</head>
-<body class="audio-off">
-
-<script>
-  const symC = `<svg class="sym-c" viewBox="0 0 100 100"><circle cx="48" cy="52" r="44" fill="#000000"/><circle cx="50" cy="48" r="44" fill="#cbc5be"/><path d="M 50 10 Q 50 48 88 48 Q 50 48 50 86 Q 50 48 12 48 Q 50 48 50 10 Z" fill="#181615"/></svg>`;
-  const symInf = `<svg class="sym-inf" viewBox="0 0 100 50"><path d="M 28 40 C 6 40, 6 10, 28 10 C 46 10, 54 40, 72 40 C 94 40, 94 10, 72 10 C 54 10, 46 40, 28 40 Z" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  
-  // Permanent API Image Routes
-  const ART_CACHE = {
-      'Ulalek': 'https://api.scryfall.com/cards/named?exact=Ulalek,%20Fused%20Atrocity&format=image',
-      'Fleshraker': 'https://api.scryfall.com/cards/named?exact=Glaring%20Fleshraker&format=image',
-      'Echoes': 'https://api.scryfall.com/cards/named?exact=Echoes%20of%20Eternity&format=image',
-      'Unsealing': 'https://api.scryfall.com/cards/named?exact=Kozilek%27s%20Unsealing&format=image',
-      'Throne': 'https://api.scryfall.com/cards/named?exact=Roaming%20Throne&format=image',
-      'Spawn': 'https://api.scryfall.com/cards/named?exact=Eldrazi%20Spawn&format=image'
-  };
-  Object.values(ART_CACHE).forEach(url => { let img = new Image(); img.src = url; });
-</script>
-
-<div id="scryfall-overlay" onclick="hideScryfall()"><img id="scryfall-img" src="" alt="MTG Card" /></div>
-
-<div id="spell-search-modal" onclick="closeSpellSearch(event)">
-  <div class="search-card-box glass-panel" onclick="event.stopPropagation()">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
-      <h2 style="font-family:'Outfit'; color:#fff; margin:0; font-size:1.1rem; font-weight:500; letter-spacing:0.1em;">SELECT ELDRAZI SPELL</h2>
-      <span style="color:#ef4444; font-weight:800; cursor:pointer; font-size:1.2rem; padding:4px;" onclick="closeSpellSearch(null)">✕</span>
-    </div>
-    <div class="search-controls">
-      <div class="search-input-wrap">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#64748b" stroke-width="2" fill="none"><circle cx="11" cy="12" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="spell-search-input" placeholder="Type spell name..." oninput="onSpellSearchInput(this.value)">
-      </div>
-    </div>
-    <div class="search-results-grid" id="spell-search-results"></div>
-  </div>
-</div>
-
-<div id="swipe-tut" class="swipe-tut" style="opacity: 0; display:none;">
-  <div class="swipe-anim-container"><svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg><svg viewBox="0 0 24 24" width="54" height="54" stroke="currentColor" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="8"/></svg><svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-  <div class="tut-text">SWIPE TO CHANGE MODE</div>
-  <label class="tut-check-container" onclick="event.stopPropagation()"><input type="checkbox" id="tut-checkbox"><span>Don't show again</span></label>
-</div>
-
-<div class="top-actions">
-  <div class="engine-header glass-panel" onclick="openMenu('mode-menu')">
-    <div class="header-left"><div class="mode-sliver mode-1" id="main-pulse"></div><div class="header-text"><div class="sys-label">MENU / MODE</div><div class="sys-mode" id="sys-mode-text">ULALEK STACK ENGINE</div></div></div>
-    <svg class="mode-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
-  </div>
-  <button class="circle-btn glass-panel btn-info" onclick="openInfoModal()"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></button>
-  <button class="circle-btn glass-panel btn-reset" onclick="resetCurrentMode()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
-</div>
-
-<div id="mode-menu" class="mode-menu-overlay" onclick="closeMenu(event, 'mode-menu')">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <h2 class="menu-title">SYSTEM MODES</h2>
-    <div class="mode-card glass-panel active" id="mc-1" onclick="switchMode(1, 'ULALEK STACK ENGINE')"><h2>Ulalek Stack Engine</h2><p>The core stack calculator. Track lethal ETB damage and infinite loop requirements.</p></div>
-    <div class="mode-card glass-panel" id="mc-2" onclick="switchMode(2, 'CAST FEASIBILITY')"><h2>Cast Feasibility</h2><p>Calculate optimal play lines to ensure you have enough resources left for a second spell.</p></div>
-    <div class="mode-card glass-panel" id="mc-3" onclick="switchMode(3, 'KOZILEK OPTIMIZER')"><h2>Kozilek Optimizer</h2><p>Optimize {X} value against available mana, factoring in Spawns generated mid-resolution.</p></div>
-    <div class="utilities-row" style="grid-template-columns: 1fr;"><div class="toggle-box haptics" onclick="toggleHaptics()"><div class="toggle-pill" id="haptics-pill"></div><div class="toggle-option active" id="h-on">HAPTICS</div><div class="toggle-option" id="h-off">OFF</div></div></div>
-    <div class="utilities-row" style="grid-template-columns: 1fr;"><div class="toggle-box audio" onclick="toggleAudio()"><div class="toggle-pill" id="audio-pill"></div><div class="toggle-option active" id="a-on">AUDIO FX ON</div><div class="toggle-option" id="a-off">MUTED</div></div></div>
-  </div>
-</div>
-
-<div id="info-modal" class="mode-menu-overlay" onclick="closeMenu(event, 'info-modal')">
-  <div class="mode-card glass-panel modal-content" id="info-card-container" style="border-left-color:#10b981;" onclick="event.stopPropagation()">
-    <h2 id="guide-title" style="color:#10b981; justify-content:center; margin-bottom:8px; text-align:center; font-size: 1rem; letter-spacing: 0.15em; font-weight: 500;">GUIDE</h2>
-    <div id="dynamic-info" style="color:#94a3b8; font-size:0.85rem; line-height:1.5; text-align:center;"></div>
-    <button class="circle-btn glass-panel" id="guide-close-btn" style="width:100%; margin-top:16px; background:rgba(255,255,255,0.05); color:#fff; font-size:0.9rem; font-family:'Outfit'; font-weight: 500; height:44px; letter-spacing: 0.1em; display:flex;" onclick="closeMenu(null, 'info-modal')">CLOSE</button>
-  </div>
-</div>
-
-<div class="app-content" id="swipe-area">
-  
-  <!-- MODE 1 -->
-  <div id="mode1" class="mode-container active" style="padding-bottom: 0;">
-    
-    <div class="spell-selector-bar glass-panel" id="spell-bar" onpointerdown="onSpellBarDown(event)" onpointerup="onSpellBarUp(event)" onpointercancel="onSpellBarCancel(event)" oncontextmenu="event.preventDefault()">
-      <div class="ss-left">
-        <div class="ss-icon" id="ss-icon-container"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="8" x2="20" y2="8"></line></svg></div>
-        <div class="ss-info">
-          <div class="ss-tag"><span class="ss-tag-text">SPELL BEING CAST</span><span class="ss-spawns-badge" id="ss-cast-badge">0 CAST SPAWNS</span><span class="ss-reso-badge" id="ss-reso-badge">0 RESO SPAWNS</span></div>
-          <div class="ss-name" id="ss-selected-title">Generic Eldrazi Spell</div>
-        </div>
-      </div>
-      <div id="ss-clear-btn" style="display:none;" onclick="clearSelectedSpell(event)" class="ss-clear">CLEAR</div>
-    </div>
-
-    <div class="outputs-area" id="m1-metrics-dock">
-      <div class="hero glass-panel" id="hero-dash"><div class="hero-label">Max Copies</div><h1 id="out-spells"><span class="val">1</span></h1></div>
-      <div class="metrics">
-        <div class="metric-box glass-panel"><span class="hero-label">Payments</span><strong id="out-payments">0</strong></div>
-        <div class="metric-box glass-panel" onclick="toggleRemainingBreakdown()"><span class="hero-label">REMAINING <script>document.write(symC);</script></span><strong id="out-leftover">0</strong></div>
-        <div class="metric-box glass-panel" id="damage-box" style="display:none;"><span class="hero-label">ETB Damage</span><strong id="out-damage">0</strong></div>
-      </div>
-    </div>
-
-    <!-- Mode 1 Content Area -->
-    <div id="m1-content-area">
-        <div id="m1-input-section">
-            <div class="grid">
-                <div class="card glass-panel echoes">
-                    <div class="card-title">Echoes of Eternity</div>
-                    <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-echoes">0</div><div class="sub-btn-plus">+</div></div>
-                    <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'echoes', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'echoes', 1)"></div>
-                </div>
-                <div class="card glass-panel fleshraker">
-                    <div class="card-title">Glaring Fleshraker</div>
-                    <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-fleshraker">0</div><div class="sub-btn-plus">+</div></div>
-                    <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'fleshraker', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'fleshraker', 1)"></div>
-                </div>
-                <div class="card glass-panel throne">
-                    <div class="card-title">Roaming Throne</div>
-                    <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-throne">0</div><div class="sub-btn-plus">+</div></div>
-                    <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'throne', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'throne', 1)"></div>
-                </div>
-                <div class="card glass-panel unsealing">
-                    <div class="card-title">Kozilek's Unsealing</div>
-                    <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-unsealing">0</div><div class="sub-btn-plus">+</div></div>
-                    <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'unsealing', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'unsealing', 1)"></div>
-                </div>
-                <div class="card glass-panel cast">
-                    <div class="card-title">Extra Spawns (Misc)</div>
-                    <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-cast">0</div><div class="sub-btn-plus">+</div></div>
-                    <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'cast', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'cast', 1)"></div>
-                </div>
-                <div class="card glass-panel colorless">
-                    <div class="card-title"><script>document.write(symC);</script> Pool</div>
-                    <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-mana">0</div><div class="sub-btn-plus">+</div></div>
-                    <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'mana', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'mana', 1)"></div>
-                </div>
-                <div class="card glass-panel paymentcap grid-full">
-                    <div class="card-title">Max <script>document.write(symC);</script><script>document.write(symC);</script> Payments</div>
-                    <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-max_pay" style="font-size:2.4rem;">ALL</div><div class="sub-btn-plus">+</div></div>
-                    <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'max_pay', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'max_pay', 1)"></div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="m1-visualizer-wrapper">
-            <div id="vis-fixed-spine" onpointerdown="startSpineScrub(event)">
-                <div class="spine-track"></div>
-                <div class="spine-comet" id="spine-comet"></div>
-                <div class="spine-reticle" id="spine-dot"></div>
-            </div>
-            <div id="vis-scroll-container">
-                <div id="vis-top-pad"></div>
-                <!-- Cards and Scaffolding Injected Here -->
-                <div id="vis-bottom-pad"></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Anchored Footer Button -->
-    <div class="fixed-bottom-bar" style="padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));">
-        <button class="deploy-btn" id="vis-toggle-btn" onclick="toggleVisualizer()">▲ ACTIVATE VISUALIZER</button>
-    </div>
-
-  </div>
-
-  <!-- MODE 2 (Preserved layout) -->
-  <div id="mode2" class="mode-container">
-    <div class="outputs-area" id="m2-result-container"></div>
-    <div class="grid-scroll-area">
-      <div class="grid">
-        <div class="card glass-panel cast"><h3>Spawns on Cast</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'spawns', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-spawns">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'spawns', 1)">+</button></div></div>
-        <div class="card glass-panel colorless"><h3><script>document.write(symC);</script> Pool</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'colorless', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-colorless">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'colorless', 1)">+</button></div></div>
-        <div class="card glass-panel spellcost"><h3>New Spell MV</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'spellcost', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-spellcost">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'spellcost', 1)">+</button></div></div>
-        <div class="card glass-panel colored"><h3>Colored Mana</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'colored', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-colored">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'colored', 1)">+</button></div></div>
-        <div class="card glass-panel leftover grid-full"><h3>Target Leftover <script>document.write(symC);</script></h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'leftover', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-leftover">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'leftover', 1)">+</button></div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODE 3 (Preserved layout) -->
-  <div id="mode3" class="mode-container">
-    <div class="outputs-area" id="m3-result-container"></div>
-    <div class="grid-scroll-area">
-      <div class="grid">
-        <div class="card glass-panel cast"><h3>Spawns on Cast</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'spawns', -1)">-</button><div class="val-wrapper"><span class="val" id="val3-spawns">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'spawns', 1)">+</button></div></div>
-        <div class="card glass-panel colorless"><h3><script>document.write(symC);</script> Pool</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'colorless', -1)">-</button><div class="val-wrapper"><span class="val" id="val3-colorless">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'colorless', 1)">+</button></div></div>
-        <div class="card glass-panel targetmv"><h3>Target MV (Min X)</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'targetmv', -1)">-</button><div class="val-wrapper"><span class="val" id="val3-targetmv">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'targetmv', 1)">+</button></div></div>
-        <div class="card glass-panel colored"><h3>Colored Mana</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'colored', -1)">-</button><div class="val-wrapper"><span class="val" id="val3-colored">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'colored', 1)">+</button></div></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-  let currentMode = 1; let hapticsEnabled = true; let audioEnabled = false; 
-  let selectedSpellCard = null; let spellCastSpawns = 0; let spellResoSpawns = 0; let spellTriggersUnsealing = true; let spellDrawsCards = false;
-  let currentSearchResults = []; let visIsOpen = false; let currentVisualStack = []; let isInfCurrent = false;
-
-  const state1 = { echoes: 0, fleshraker: 0, throne: 0, unsealing: 0, cast: 0, mana: 0, max_pay: -1 };
-  const state2 = { colored: 0, colorless: 0, spellcost: 0, spawns: 0, leftover: 0 };
-  const state3 = { colored: 0, colorless: 0, spawns: 0, targetmv: 0 };
-
-  let audioCtx;
-  function initAudioCtx() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); }
-  document.addEventListener('pointerdown', initAudioCtx, {once:true}); document.addEventListener('touchstart', initAudioCtx, {once:true});
-
-  function playTick() {
-      if(!audioEnabled || !audioCtx) return; let t = audioCtx.currentTime;
-      let osc = audioCtx.createOscillator(); let filter = audioCtx.createBiquadFilter(); let gain = audioCtx.createGain();
-      osc.type = 'sine'; osc.frequency.setValueAtTime(140, t); osc.frequency.exponentialRampToValueAtTime(30, t + 0.04);
-      filter.type = 'lowpass'; filter.frequency.setValueAtTime(300, t);
-      gain.gain.setValueAtTime(0.12, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-      osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.04);
-  }
-  function playSnap() {
-      if(!audioEnabled || !audioCtx) return; let t = audioCtx.currentTime;
-      let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.type = 'sine'; osc.frequency.setValueAtTime(200, t); osc.frequency.exponentialRampToValueAtTime(60, t + 0.06);
-      gain.gain.setValueAtTime(0.06, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06); osc.start(t); osc.stop(t + 0.06);
-  }
-  function playPaperSlide() {
-      if(!audioEnabled || !audioCtx) return; let t = audioCtx.currentTime;
-      let bufferSize = audioCtx.sampleRate * 0.08; 
-      let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); let data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-      let noise = audioCtx.createBufferSource(); noise.buffer = buffer;
-      let filter = audioCtx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.setValueAtTime(800, t); filter.frequency.exponentialRampToValueAtTime(300, t + 0.08);
-      let gain = audioCtx.createGain(); gain.gain.setValueAtTime(0.04, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-      noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start(t);
-  }
-
-  // ==========================================
-  // DYNAMIC SPINE & VISUALIZER ENGINE
-  // ==========================================
-  let focusedIndex = -1; let visScrollRAF;
-  let savedVisScroll = 0; let shouldRestoreScroll = false;
-  
-  let isSpineScrubbing = false;
-  let spineTrackRect = null;
-  
-  // Physics engine variables
-  let physicsRAF;
-  let scrollVelocity = 0;
-  let lastScrollTop = 0;
-  let currentTrailUp = 0;
-  let currentTrailDown = 0;
-
-  function physicsLoop() {
-      if (!visIsOpen) {
-          physicsRAF = requestAnimationFrame(physicsLoop);
-          return;
-      }
-      
-      const container = document.getElementById('vis-scroll-container');
-      let currentScroll = container.scrollTop;
-      let instantVelocity = currentScroll - lastScrollTop;
-      lastScrollTop = currentScroll;
-      
-      // Blend velocity for smoothness
-      scrollVelocity = (scrollVelocity * 0.8) + (instantVelocity * 0.2);
-      
-      let targetTrailUp = 0;
-      let targetTrailDown = 0;
-      
-      if (scrollVelocity > 0.5) targetTrailUp = Math.min(scrollVelocity * 4, 150);
-      else if (scrollVelocity < -0.5) targetTrailDown = Math.min(-scrollVelocity * 4, 150);
-      
-      currentTrailUp += (targetTrailUp - currentTrailUp) * 0.15;
-      currentTrailDown += (targetTrailDown - currentTrailDown) * 0.15;
-
-      const comet = document.getElementById('spine-comet');
-      if (comet) {
-          // The comet element is 400px tall. Core is absolutely centered at 200px.
-          let startPx = 200 - 30 - currentTrailUp; 
-          let coreTop = 200 - 2;
-          let coreBot = 200 + 2;
-          let endPx = 200 + 30 + currentTrailDown;
-          comet.style.background = `linear-gradient(to bottom, transparent 0px, transparent ${startPx}px, rgba(217, 70, 239, 0.9) ${coreTop}px, rgba(217, 70, 239, 0.9) ${coreBot}px, transparent ${endPx}px, transparent 400px)`;
-      }
-      
-      physicsRAF = requestAnimationFrame(physicsLoop);
-  }
-  physicsRAF = requestAnimationFrame(physicsLoop);
-
-  function startSpineScrub(e) {
-      if (e.button !== 0 && e.type !== 'touchstart') return;
-      isSpineScrubbing = true;
-      document.getElementById('vis-scroll-container').classList.add('no-snap');
-      const track = document.getElementById('vis-fixed-spine');
-      spineTrackRect = track.getBoundingClientRect();
-      
-      scrubSpine(e);
-      document.addEventListener('pointermove', scrubSpine, {passive: false});
-      document.addEventListener('pointerup', stopSpineScrub);
-      document.addEventListener('pointercancel', stopSpineScrub);
-  }
-
-  function scrubSpine(e) {
-      if (!isSpineScrubbing) return;
-      if (e.cancelable) e.preventDefault();
-      
-      let clientY = e.clientY;
-      if (e.touches && e.touches.length > 0) clientY = e.touches[0].clientY;
-      
-      let y = clientY - spineTrackRect.top;
-      let pct = y / spineTrackRect.height;
-      
-      // Remap the 10% to 90% physical scrub zone back to the 0-100% scroll position
-      let scrollPct = (pct - 0.1) / 0.8;
-      scrollPct = Math.max(0, Math.min(1, scrollPct));
-      
-      const container = document.getElementById('vis-scroll-container');
-      container.scrollTop = scrollPct * (container.scrollHeight - container.clientHeight);
-      updateWave();
-  }
-
-  function stopSpineScrub() {
-      isSpineScrubbing = false;
-      document.getElementById('vis-scroll-container').classList.remove('no-snap');
-      document.removeEventListener('pointermove', scrubSpine);
-      document.removeEventListener('pointerup', stopSpineScrub);
-      document.removeEventListener('pointercancel', stopSpineScrub);
-  }
-
-  function toggleVisualizer() {
-      vibrate(2); playSnap();
-      const btn = document.getElementById('vis-toggle-btn');
-      
-      if (!visIsOpen) {
-          visIsOpen = true;
-          document.body.classList.remove('vis-closing');
-          document.body.classList.add('vis-active');
-          btn.classList.add('deactivate');
-          btn.innerHTML = '▼ CLOSE VISUALIZER';
-          focusedIndex = -1;
-          shouldRestoreScroll = true;
-          renderVisualizer();
-      } else {
-          visIsOpen = false;
-          savedVisScroll = document.getElementById('vis-scroll-container').scrollTop;
-          document.body.classList.remove('vis-active');
-          document.body.classList.add('vis-closing');
-          btn.classList.remove('deactivate');
-          btn.innerHTML = '▲ ACTIVATE VISUALIZER';
-          focusedIndex = -1;
-          setTimeout(() => {
-              if(!visIsOpen) document.body.classList.remove('vis-closing');
-          }, 350);
-      }
-  }
-
-  function updateWave() {
-      if(!visIsOpen) return;
-      const container = document.getElementById('vis-scroll-container');
-      const cards = container.querySelectorAll('.vis-snap-point'); 
-      if(cards.length === 0) return;
-
-      const containerRect = container.getBoundingClientRect();
-      const centerY = containerRect.top + (containerRect.height / 2); 
-      
-      const scrollHeight = container.scrollHeight;
-      const clientHeight = container.clientHeight;
-      let scrollPct = 0;
-      if (scrollHeight > clientHeight) {
-          scrollPct = container.scrollTop / (scrollHeight - clientHeight);
-      }
-      
-      // Calculate 10% to 90% bounded position for the scrubber
-      const physicalDotY = 10 + (scrollPct * 80);
-
-      // Timeline Scrubber Elements
-      const dot = document.getElementById('spine-dot');
-      if (dot) {
-          dot.style.setProperty('--dot-y', `${physicalDotY}%`);
-      }
-      const comet = document.getElementById('spine-comet');
-      if (comet) {
-          comet.style.setProperty('--dot-y', `${physicalDotY}%`);
-      }
-
-      // Proximity Fade for Roman Numerals
-      const pips = document.querySelectorAll('.phase-pip');
-      pips.forEach(pip => {
-          let pipPct = parseFloat(pip.getAttribute('data-pct'));
-          let dist = Math.abs(pipPct - physicalDotY);
-          if (dist < 5) { 
-              let opacity = Math.max(0, (dist - 1.5) / 3.5); 
-              pip.style.opacity = opacity;
-          } else {
-              pip.style.opacity = 1;
-          }
-      });
-      
-      let closestIdx = -1; 
-      let closestCard = null; let closestDist = Infinity;
-      let secondClosestCard = null; let secondClosestDist = Infinity;
-
-      cards.forEach((card, i) => {
-          const rect = card.getBoundingClientRect();
-          const cardCenter = rect.top + (rect.height / 2);
-          const dist = Math.abs(centerY - cardCenter);
-          
-          if(dist < closestDist) { 
-              secondClosestCard = closestCard;
-              secondClosestDist = closestDist;
-              closestCard = card;
-              closestDist = dist;
-              closestIdx = i; 
-          } else if (dist < secondClosestDist) {
-              secondClosestCard = card;
-              secondClosestDist = dist;
-          }
-      });
-
-      if(closestIdx !== focusedIndex && closestIdx !== -1) {
-          focusedIndex = closestIdx;
-          if(!isSpineScrubbing) { vibrate(2); playPaperSlide(); }
-      }
-
-      cards.forEach((item, i) => {
-          if(i === focusedIndex) {
-              item.classList.add('focused-card');
-          } else {
-              item.classList.remove('focused-card');
-          }
-      });
-  }
-
-  document.getElementById('vis-scroll-container').addEventListener('scroll', () => {
-      cancelAnimationFrame(visScrollRAF); visScrollRAF = requestAnimationFrame(updateWave);
-  }, {passive: true});
-
-  function renderVisualizer() {
-      if(!visIsOpen) return;
-      const container = document.getElementById('vis-scroll-container');
-      
-      let html = `<div id="vis-top-pad"></div>`;
-      
-      currentVisualStack.forEach((item) => {
-          if (item.type === 'divider') {
-              html += `<div class="vis-divider-wrapper" data-label="${item.text}"><div class="vis-divider-line"></div><div class="vis-divider"><span class="pip"></span> ${item.text} <span class="pip"></span></div><div class="vis-divider-line"></div></div>`; return;
-          }
-          if (item.type === 'proof') {
-              html += `<div class="vis-note-wrapper"><div class="vis-proof glass-panel ${item.class}">${item.html}</div></div>`; return;
-          }
-          
-          html += `
-          <div class="vis-snap-point" data-color="${item.originColor}">
-              <div class="vis-slab glass-panel">
-                  <div class="vis-art" style="background-image: url('${item.img}');" onclick="showCardArt('${item.img}')"></div>
-                  <div class="vis-panel">
-                      <div class="vis-panel-header">
-                          <div class="vis-pill" style="color: ${item.color};">${item.ribbon}</div>
-                          <div class="vis-index">#${item.idxStr}</div>
-                      </div>
-                      <div class="vis-title">${item.title}</div>
-                      ${item.origin ? `<div class="vis-origin-text" style="color: ${item.originColor};">${item.origin.toUpperCase()}</div>` : ''}
-                      ${item.shortContext ? `<div class="vis-short-context">${item.shortContext}</div>` : ''}
-                  </div>
-              </div>
-          </div>`;
-      });
-      html += `<div id="vis-bottom-pad"></div>`;
-      container.innerHTML = html;
-      
-      requestAnimationFrame(() => {
-          const cards = container.querySelectorAll('.vis-snap-point');
-          if(cards.length > 0) {
-              document.getElementById('vis-top-pad').style.height = '0px';
-              document.getElementById('vis-bottom-pad').style.height = '0px';
-              void container.offsetHeight; 
-              
-              const cHeight = container.clientHeight;
-              const centerY = cHeight / 2;
-              
-              const firstCard = cards[0];
-              const firstCenter = firstCard.offsetTop + (firstCard.offsetHeight / 2);
-              let topPad = Math.max(0, centerY - firstCenter);
-              
-              const lastCard = cards[cards.length - 1];
-              const lastCenter = lastCard.offsetTop + (lastCard.offsetHeight / 2);
-              let bottomPad = Math.max(0, centerY - (container.scrollHeight - lastCenter));
-              
-              document.getElementById('vis-top-pad').style.height = `${topPad}px`;
-              document.getElementById('vis-bottom-pad').style.height = `${bottomPad}px`;
-              
-              // Place Roman Numeral Pips & Dynamic Track Mask
-              const spine = document.getElementById('vis-fixed-spine');
-              const track = document.querySelector('.spine-track');
-              if (spine && track) {
-                  spine.querySelectorAll('.phase-pip').forEach(p => p.remove());
-                  const dividers = container.querySelectorAll('.vis-divider-wrapper');
-                  let firstPhysicalPct = null;
-                  let pipPcts = [];
-                  
-                  dividers.forEach((div, index) => {
-                      let focusScrollTop = div.offsetTop + (div.offsetHeight / 2) - (container.clientHeight / 2);
-                      let rawPct = (container.scrollHeight > container.clientHeight) ? focusScrollTop / (container.scrollHeight - container.clientHeight) : 0;
-                      let clampedPct = Math.max(0, Math.min(1, rawPct));
-                      let physicalPct = 10 + (clampedPct * 80);
-                      
-                      let labelTxt = div.getAttribute('data-label') || "";
-                      let numeralMatch = labelTxt.match(/^([IVX]+):/);
-                      if (numeralMatch) {
-                          if (firstPhysicalPct === null) firstPhysicalPct = physicalPct;
-                          pipPcts.push(physicalPct);
-
-                          let pip = document.createElement('div');
-                          pip.className = 'phase-pip';
-                          pip.style.top = `${physicalPct}%`;
-                          pip.innerText = numeralMatch[1];
-                          pip.setAttribute('data-pct', physicalPct);
-                          spine.appendChild(pip);
-                      }
-                  });
-                  
-                  // Construct Dynamic Linear Gradient Mask to perfectly cut the line around the numerals
-                  if (pipPcts.length > 0) {
-                      let maskStops = [];
-                      maskStops.push(`transparent 0%`);
-                      maskStops.push(`transparent calc(${pipPcts[0]}% + 8px)`);
-                      maskStops.push(`black calc(${pipPcts[0]}% + 24px)`);
-                      
-                      for (let i = 1; i < pipPcts.length; i++) {
-                          maskStops.push(`black calc(${pipPcts[i]}% - 24px)`);
-                          maskStops.push(`transparent calc(${pipPcts[i]}% - 8px)`);
-                          maskStops.push(`transparent calc(${pipPcts[i]}% + 8px)`);
-                          maskStops.push(`black calc(${pipPcts[i]}% + 24px)`);
-                      }
-                      maskStops.push(`black 95%`);
-                      maskStops.push(`transparent 100%`);
-                      
-                      let gradientStr = `linear-gradient(to bottom, ${maskStops.join(', ')})`;
-                      track.style.webkitMaskImage = gradientStr;
-                      track.style.maskImage = gradientStr;
-                      track.style.top = `0`;
-                      track.style.bottom = `0`;
-                  }
-              }
-              
-              if (shouldRestoreScroll) {
-                  container.scrollTop = savedVisScroll;
-                  shouldRestoreScroll = false;
-              }
-          }
-          updateWave();
-      });
-  }
-
-  // ==========================================
-  // SCRYFALL SPELL SELECTOR ENGINE
-  // ==========================================
-  let barHoldTimer; let barIsHolding = false;
-  
-  function showCardArt(url) {
-      if(!url) return;
-      vibrate(2); playSnap();
-      const overlay = document.getElementById('scryfall-overlay');
-      document.getElementById('scryfall-img').src = url;
-      document.getElementById('scryfall-img').style.display = 'block';
-      overlay.classList.add('active');
-  }
-  
-  let boardHoldTimer; let boardIsHolding = false;
-  function onBoardCardDown(e, key) {
-      if(e.button !== 0 && e.type !== 'touchstart') return;
-      boardIsHolding = false;
-      boardHoldTimer = setTimeout(() => {
-          boardIsHolding = true;
-          let url = ART_CACHE[key];
-          if(url) showCardArt(url);
-      }, 400);
-  }
-  function onBoardCardUp() { 
-      clearTimeout(boardHoldTimer); 
-      boardIsHolding = false; 
-  }
-  
-  function onSpellBarDown(e) {
-      if(e.button !== 0 && e.type !== 'touchstart') return;
-      barIsHolding = false; if(!selectedSpellCard) return; 
-      barHoldTimer = setTimeout(() => {
-          barIsHolding = true; vibrate(); playSnap();
-          const imgUrl = selectedSpellCard.image_uris?.normal || selectedSpellCard.card_faces?.[0]?.image_uris?.normal;
-          if(imgUrl) {
-              const overlay = document.getElementById('scryfall-overlay');
-              document.getElementById('scryfall-img').src = imgUrl; document.getElementById('scryfall-img').style.display = 'block';
-              overlay.classList.add('active');
-          }
-      }, 400); 
-  }
-  function onSpellBarUp(e) { clearTimeout(barHoldTimer); if(!barIsHolding && !e.target.closest('.ss-clear')) openSpellSearch(); barIsHolding = false; }
-  function onSpellBarCancel(e) { clearTimeout(barHoldTimer); if(barIsHolding) hideScryfall(); }
-
-  function parseSpellData(card) {
-      spellCastSpawns = 0; spellResoSpawns = 0; spellTriggersUnsealing = false; spellDrawsCards = false;
-      if(!card) { spellTriggersUnsealing = true; return; }
-      let oText = (card.oracle_text || (card.card_faces ? card.card_faces[0].oracle_text : "")).toLowerCase(); let lines = oText.split('\n');
-      const numMap = {"a":1, "one":1, "1":1, "two":2, "2":2, "three":3, "3":3, "four":4, "4":4, "five":5, "5":5, "six":6, "6":6};
-      for(let line of lines) {
-          let match = line.match(/(?:create|put|creates) (a|one|1|two|2|three|3|four|4|five|5|six|6).* (?:spawn|scion)/i);
-          if(match) { let qty = numMap[match[1]] || 0; if (line.includes("when you cast") || line.includes("whenever you cast")) spellCastSpawns += qty; else spellResoSpawns += qty; }
-      }
-      if (card.type_line && card.type_line.includes('Creature')) { 
-          if (card.cmc >= 4 && card.cmc <= 6) spellTriggersUnsealing = true; 
-          if (card.cmc >= 7) {
-              spellTriggersUnsealing = true; // 7+ also triggers the 4-6 spawn effect
-              spellDrawsCards = true; 
-          }
-      }
-  }
-
-  function fetchEldraziList(query = "") {
-      const resultsDiv = document.getElementById('spell-search-results');
-      resultsDiv.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:#64748b; padding:20px 0; font-size:0.85rem; letter-spacing:0.1em; text-transform:uppercase;">Fetching from Scryfall...</div>`;
-      let qStr = `type:eldrazi legal:commander`; if(query.length > 0) qStr += ` ${query}`;
-      fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(qStr)}&order=name`)
-      .then(r => r.json()).then(data => {
-          if(!data.data || data.data.length === 0) { resultsDiv.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:#ef4444; padding:20px 0; font-size:0.85rem; letter-spacing:0.1em; text-transform:uppercase;">No cards found.</div>`; return; }
-          currentSearchResults = data.data.slice(0, 50); renderSearchGrid();
-      }).catch(() => { resultsDiv.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:#ef4444; padding:20px 0; font-size:0.85rem; letter-spacing:0.1em; text-transform:uppercase;">Search failed.</div>`; });
-  }
-
-  function openSpellSearch() { vibrate(2); playSnap(); document.getElementById('spell-search-modal').classList.add('active'); const input = document.getElementById('spell-search-input'); input.value = ""; input.focus(); fetchEldraziList(); }
-  function closeSpellSearch(e) { if(e && e.target !== e.currentTarget) return; document.getElementById('spell-search-modal').classList.remove('active'); }
-  let searchDebounce; function onSpellSearchInput(query) { clearTimeout(searchDebounce); searchDebounce = setTimeout(() => { fetchEldraziList(query); }, 350); }
-
-  function renderSearchGrid() {
-      const resultsDiv = document.getElementById('spell-search-results'); let html = "";
-      currentSearchResults.forEach((card, i) => {
-          let imgUrl = card.image_uris ? card.image_uris.normal : (card.card_faces && card.card_faces[0].image_uris ? card.card_faces[0].image_uris.normal : '');
-          if(imgUrl) html += `<img src="${imgUrl}" class="grid-card" onclick="selectEldraziCardIndex(${i})" loading="lazy">`;
-      });
-      resultsDiv.innerHTML = html;
-  }
-
-  function updateSpellBadge() {
-      const cBadge = document.getElementById('ss-cast-badge'); const rBadge = document.getElementById('ss-reso-badge');
-      if(spellCastSpawns > 0) { cBadge.innerText = `${spellCastSpawns} CAST SPAWN${spellCastSpawns > 1 ? 'S' : ''}`; cBadge.style.display = 'inline-block'; } else cBadge.style.display = 'none';
-      if(spellResoSpawns > 0) { rBadge.innerText = `${spellResoSpawns} RESO SPAWN${spellResoSpawns > 1 ? 'S' : ''}`; rBadge.style.display = 'inline-block'; } else rBadge.style.display = 'none';
-  }
-
-  function selectEldraziCardIndex(i) {
-      vibrate(2); playSnap(); document.getElementById('spell-search-modal').classList.remove('active');
-      let card = currentSearchResults[i]; selectedSpellCard = card; parseSpellData(card);
-      let imgUrl = card.image_uris ? card.image_uris.art_crop : (card.card_faces && card.card_faces[0].image_uris ? card.card_faces[0].image_uris.art_crop : '');
-      document.getElementById('ss-icon-container').innerHTML = imgUrl ? `<img src="${imgUrl}" style="width:34px; height:34px; object-fit:cover; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">` : `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="8" x2="20" y2="8"></line></svg>`;
-      document.getElementById('ss-selected-title').innerText = card.name; document.getElementById('ss-clear-btn').style.display = 'block';
-      updateSpellBadge();
-      let totalNativeSpawns = spellCastSpawns + spellResoSpawns; state2.spawns = totalNativeSpawns; state3.spawns = totalNativeSpawns;
-      if(card.cmc) state2.spellcost = Math.floor(card.cmc);
-      updateAllDisplays(); calcCurrent(); saveState();
-  }
-
-  function clearSelectedSpell(e) {
-      if(e) e.stopPropagation(); vibrate(2); playSnap(); selectedSpellCard = null; parseSpellData(null);
-      document.getElementById('ss-icon-container').innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="4" y1="8" x2="20" y2="8"></line></svg>`;
-      document.getElementById('ss-selected-title').innerText = "Generic Eldrazi Spell"; document.getElementById('ss-clear-btn').style.display = 'none';
-      updateSpellBadge(); calcCurrent(); saveState();
-  }
-
-  function hideScryfall() { document.getElementById('scryfall-overlay').classList.remove('active'); }
-
-  // ==========================================
-  // LOCALSTORAGE
-  // ==========================================
-  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v71', JSON.stringify(data)); }
-  function loadState() {
-      const saved = localStorage.getItem('ulalek_save_v71');
-      if(saved) {
-          try {
-              const parsed = JSON.parse(saved); Object.assign(state1, parsed.state1); Object.assign(state2, parsed.state2); Object.assign(state3, parsed.state3);
-              if(parsed.selectedSpellCard) {
-                  selectedSpellCard = parsed.selectedSpellCard; parseSpellData(selectedSpellCard);
-                  document.getElementById('ss-selected-title').innerText = selectedSpellCard.name; document.getElementById('ss-clear-btn').style.display = 'block'; updateSpellBadge();
-                  let imgUrl = selectedSpellCard.image_uris ? selectedSpellCard.image_uris.art_crop : (selectedSpellCard.card_faces && selectedSpellCard.card_faces[0].image_uris ? selectedSpellCard.card_faces[0].image_uris.art_crop : '');
-                  if(imgUrl) document.getElementById('ss-icon-container').innerHTML = `<img src="${imgUrl}" style="width:34px; height:34px; object-fit:cover; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">`;
-              } else { parseSpellData(null); updateSpellBadge(); }
-          } catch(e){}
-      } else parseSpellData(null);
-      updateAllDisplays(); calcCurrent();
-  }
-
-  // ==========================================
-  // CORE UI & EVENT LISTENERS
-  // ==========================================
-  let finalSpawns = 0; let finalMana = 0;
-  let showRemainingBreakdown = false;
-
-  function toggleRemainingBreakdown() {
-    if(currentMode !== 1 || isInfCurrent) return; 
-    vibrate(2);
-    showRemainingBreakdown = !showRemainingBreakdown;
-    renderRemainingBreakdown();
-  }
-
-  function renderRemainingBreakdown() {
-    const el = document.getElementById('out-leftover');
-    if(!el) return;
-    if(isInfCurrent) { el.innerHTML = symInf; el.style.fontSize = ''; return; }
-    
-    if(showRemainingBreakdown) {
-        el.innerHTML = `<span style="color:#10b981">${finalSpawns}</span><span style="color:#64748b; font-size:0.8em; margin:0 6px;">/</span><span style="color:#8b5cf6">${finalMana}</span>`;
-        el.style.fontSize = '1.1rem';
-    } else {
-        el.innerHTML = (finalSpawns + finalMana).toString();
-        el.style.fontSize = '';
-    }
-    triggerPop('out-leftover', false);
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('tut-checkbox').checked = false;
-    if (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone) {
-      const installBtn = document.getElementById('install-btn-container'); if(installBtn) installBtn.style.display = 'none';
-    }
-    if(localStorage.getItem('hideSwipeTut') !== 'true') { const tut = document.getElementById('swipe-tut'); tut.style.display = 'flex'; setTimeout(() => { tut.style.opacity = '1'; }, 100); }
-    if(localStorage.getItem('ulalekHaptics') === 'off') { document.body.classList.add('haptics-off'); hapticsEnabled = false; }
-    if(localStorage.getItem('ulalekAudio') === 'on') { document.body.classList.remove('audio-off'); audioEnabled = true; } 
-    loadState();
-  });
-
-  function dismissTut(e) {
-    const tut = document.getElementById('swipe-tut'); if(!tut || tut.style.display === 'none') return;
-    if (e && e.target && e.target.closest && e.target.closest('.tut-check-container')) return; 
-    if(document.getElementById('tut-checkbox').checked) localStorage.setItem('hideSwipeTut', 'true');
-    tut.style.opacity = '0'; setTimeout(() => { tut.style.display = 'none'; }, 400);
-  }
-  document.addEventListener('pointerdown', dismissTut, {passive: true}); document.addEventListener('touchstart', dismissTut, {passive: true});
-
-  let touchStartX = 0; let touchEndX = 0;
-  document.getElementById('swipe-area').addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
-  document.getElementById('swipe-area').addEventListener('touchend', e => {
-    if(document.body.classList.contains('vis-active')) return;
-    if (e.target.tagName.toLowerCase() === 'button') return; touchEndX = e.changedTouches[0].screenX;
-    if (touchEndX < touchStartX - 70) { switchMode(currentMode === 1 ? 2 : currentMode === 2 ? 3 : 1, currentMode === 1 ? "CAST FEASIBILITY" : currentMode === 2 ? "KOZILEK OPTIMIZER" : "ULALEK STACK ENGINE"); }
-    if (touchEndX > touchStartX + 70) { switchMode(currentMode === 1 ? 3 : currentMode === 2 ? 1 : 2, currentMode === 1 ? "KOZILEK OPTIMIZER" : currentMode === 2 ? "ULALEK STACK ENGINE" : "CAST FEASIBILITY"); }
-  }, {passive: true});
-
-  function vibrate(ms=2) { if (hapticsEnabled && navigator.vibrate) navigator.vibrate(ms); }
-  function toggleHaptics() { hapticsEnabled = !hapticsEnabled; if(hapticsEnabled) vibrate(); playSnap(); if (!hapticsEnabled) { document.body.classList.add('haptics-off'); localStorage.setItem('ulalekHaptics', 'off'); } else { document.body.classList.remove('haptics-off'); localStorage.setItem('ulalekHaptics', 'on'); } }
-  function toggleAudio() { audioEnabled = !audioEnabled; initAudioCtx(); if(audioEnabled) playSnap(); vibrate(); if (!audioEnabled) { document.body.classList.add('audio-off'); localStorage.setItem('ulalekAudio', 'off'); } else { document.body.classList.remove('audio-off'); localStorage.setItem('ulalekAudio', 'on'); } }
-
-  function openMenu(id) { vibrate(2); playSnap(); document.getElementById(id).classList.add('active'); }
-  function closeMenu(e, id) { if (e && e.target !== e.currentTarget) return; vibrate(2); document.getElementById(id).classList.remove('active'); }
-  function toggleAccordion(id) { vibrate(2); playSnap(); document.getElementById(id).classList.toggle('open'); }
-
-  function openInfoModal() {
-    vibrate(2); playSnap();
-    const title = currentMode === 1 ? "ULALEK STACK ENGINE" : currentMode === 2 ? "CAST FEASIBILITY" : "KOZILEK OPTIMIZER";
-    const themeColor = currentMode === 1 ? "#10b981" : currentMode === 2 ? "#06b6d4" : "#f43f5e";
-    const guideCard = document.getElementById('info-card-container');
-    guideCard.style.borderLeftColor = themeColor;
-    document.getElementById('guide-title').style.color = themeColor; document.getElementById('guide-title').innerText = title + " GUIDE";
-
-    let dHTML = "";
-    if (currentMode === 1) dHTML = `<div style="color:#fff; font-size:0.85rem; line-height:1.5; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:300;">Tracks lethal ETB damage, infinite loop requirements, and exact stack trigger sequences.</div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">Select Eldrazi Spell</div><div style="font-weight:300;">Search Scryfall to select your spell. The engine auto-parses Cast vs Resolution spawns. With Echoes of Eternity, the engine can resolve a spell copy *before* Ulalek to use its Resolution Spawns!</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">Permanents on Board</div><div style="font-weight:300;">For <b style="font-weight:600; color:#cbd5e1;">Echoes</b>, <b style="font-weight:600; color:#cbd5e1;">Fleshraker</b>, <b style="font-weight:600; color:#cbd5e1;">Throne</b>, and <b style="font-weight:600; color:#cbd5e1;">Unsealing</b>: Input the exact number currently under your control.</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">Extra Spawns (Misc)</div><div style="font-weight:300;">Manually add independent Spawns generating cast triggers from other board state sources.</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">${symC} Pool</div><div style="font-weight:300;">Floating colorless mana available <b style="font-weight:600; color:#cbd5e1;">before</b> jumping into the loop.</div></div><div><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">Remaining ${symC}</div><div style="font-weight:300;">Total liquid resources (Spawns + Mana) left after resolution.<br><b style="font-weight:600; color:#cbd5e1;">Click</b> the number to toggle the breakdown.</div></div>`;
-    else if (currentMode === 2) dHTML = `<div style="color:#fff; font-size:0.85rem; line-height:1.5; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:300;">Calculates if you can afford to cast and copy a spell while retaining enough mana for a specific follow-up play.</div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">New Spell MV</div><div style="font-weight:300;">The total Mana Value of the spell you are attempting to cast and copy.</div></div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">Colored / ${symC} Pool</div><div style="font-weight:300;">The engine spends <b style="font-weight:600; color:#cbd5e1;">Colored Mana</b> first, preserving ${symC} for the Ulalek copy tax.</div></div><div><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">Target Leftover ${symC}</div><div style="font-weight:300;">Exact amount of liquid mana you want remaining AFTER this entire stack resolves.</div></div>`;
-    else dHTML = `<div style="color:#fff; font-size:0.85rem; line-height:1.5; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:300;">Optimizes Kozilek's Command X value against your mana pool while managing the Ulalek copy tax.</div><div style="margin-bottom:14px;"><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">Target MV (Min X)</div><div style="font-weight:300;">Minimum value of X required to exile your opponent's target threat.</div></div><div><div style="color:#fff; font-family:'Outfit'; font-size:1.05rem; margin-bottom:2px; font-weight:500;">Colored / ${symC} Pool</div><div style="font-weight:300;">Colored mana is dumped directly into X. The engine calculates if you have enough ${symC} to cast AND copy.</div></div>`;
-    document.getElementById('dynamic-info').innerHTML = dHTML; document.getElementById('info-modal').classList.add('active');
-  }
-
-  function triggerPop(elementId, isExtreme = false) {
-    const el = document.getElementById(elementId); if (!el) return;
-    const target = el.tagName === 'H1' ? el.querySelector('span') || el : el;
-    target.classList.remove('pop'); void target.offsetWidth; target.classList.add('pop');
-  }
-
-  function switchMode(mode, title) {
-    currentMode = mode; document.getElementById('sys-mode-text').innerText = title;
-    
-    document.getElementById('main-pulse').className = 'mode-sliver mode-' + mode;
-    document.getElementById('mode-menu').classList.remove('active');
-    document.querySelectorAll('.mode-container').forEach(c => c.classList.remove('active'));
-    document.getElementById('mode' + mode).classList.add('active');
-    document.querySelectorAll('.mode-card').forEach((c, i) => { if(i === mode - 1) c.classList.add('active'); else c.classList.remove('active'); });
-    vibrate(2); playSnap(); calcCurrent();
-  }
-
-  function resetCurrentMode() {
-    vibrate(2); playSnap();
-    let s = currentMode === 1 ? state1 : currentMode === 2 ? state2 : state3; let changedKeys = [];
-    for (let k in s) { if (Number(s[k]) > 0 || (k === 'max_pay' && Number(s[k]) !== -1)) changedKeys.push(k); s[k] = (k === 'max_pay') ? -1 : 0; }
-    
-    Object.keys(s).forEach(k => { 
-        let el = document.getElementById(`val${currentMode}-${k}`); 
-        if(el) {
-            el.innerText = (k === 'max_pay' && s[k] === -1) ? "ALL" : "0"; 
-            let cardEl = el.closest('.card');
-            if(cardEl) { cardEl.classList.remove('active'); }
-        }
-    });
-    calcCurrent(); saveState();
-  }
-
-  // ==========================================
-  // SWIPE-SAFE INPUT ENGINE & RIPPLE
-  // ==========================================
-  let holdTimer = null, holdInterval = null;
-  let actionPending = false;
-  let actionData = null;
-
-  function startUpdate(e, mode, key, delta) {
-    // Native Browser Intercept: Blocks ghost mouse events causing double taps
-    if (e && e.cancelable && e.type !== 'mousedown') e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
-    if (e && e.pointerType === 'mouse' && e.button !== 0) return;
-
-    if (actionData) stopUpdate();
-
-    let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
-    
-    // JS Ripple Handling
-    if (cardEl && e) {
-        let rect = cardEl.getBoundingClientRect();
-        let clientX = e.clientX || (e.touches && e.touches[0].clientX) || rect.left + rect.width/2;
-        let clientY = e.clientY || (e.touches && e.touches[0].clientY) || rect.top + rect.height/2;
-        cardEl.style.setProperty('--tx', (clientX - rect.left) + 'px');
-        cardEl.style.setProperty('--ty', (clientY - rect.top) + 'px');
-        cardEl.classList.add(delta === -1 ? 'press-left' : 'press-right');
-    }
-
-    let x = e ? (e.clientX || (e.touches && e.touches[0].clientX) || 0) : 0;
-    let y = e ? (e.clientY || (e.touches && e.touches[0].clientY) || 0) : 0;
-    
-    actionData = { mode, key, delta, x, y, valid: true };
-    actionPending = true;
-
-    clearTimeouts();
-
-    holdTimer = setTimeout(() => {
-        if (actionData && actionData.valid) {
-            actionPending = false; 
-            holdInterval = setInterval(() => {
-                applyDelta(actionData.mode, actionData.key, actionData.delta);
-            }, 80);
-        }
-    }, 350);
-  }
-
-  document.addEventListener('pointermove', (e) => {
-    if (actionData && actionData.valid) {
-        let cx = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-        let cy = e.clientY || (e.touches && e.touches[0].clientY) || 0;
-        if (Math.abs(cx - actionData.x) > 15 || Math.abs(cy - actionData.y) > 15) {
-            actionData.valid = false;
-            clearTimeouts();
-            document.querySelectorAll('.press-left, .press-right').forEach(el => {
-                el.classList.remove('press-left', 'press-right');
-            });
-        }
-    }
-  });
-
-  function stopUpdate(e) {
-    if (actionPending && actionData && actionData.valid) {
-        applyDelta(actionData.mode, actionData.key, actionData.delta);
-    }
-    
-    document.querySelectorAll('.press-left, .press-right').forEach(el => {
-        el.classList.remove('press-left', 'press-right');
-    });
-    
-    actionPending = false;
-    actionData = null;
-    clearTimeouts();
-    saveState();
-  }
-
-  document.addEventListener('pointerup', stopUpdate);
-  document.addEventListener('pointercancel', stopUpdate);
-
-  function clearTimeouts() {
-    if (holdTimer) clearTimeout(holdTimer);
-    if (holdInterval) clearInterval(holdInterval);
-    holdTimer = null;
-    holdInterval = null;
-  }
-
-  function applyDelta(mode, key, delta) {
-    let s = mode === 1 ? state1 : mode === 2 ? state2 : state3;
-    let val = Number(s[key]) || 0;
-    if (key === 'max_pay' && s[key] === -1) val = -1;
-    
-    if (key === 'max_pay') {
-        if (val === -1 && delta === -1) val = 10;
-        else if (val === 10 && delta === 1) val = -1;
-        else if (val === -1 && delta === 1) val = -1;
-        else val = Math.max(0, val + delta);
-        s[key] = val; 
-        let textVal = val === -1 ? 'ALL' : val;
-        let el = document.getElementById(`val${mode}-${key}`);
-        el.innerText = textVal;
-        if(textVal === 'ALL') el.style.fontSize = '2.4rem'; else el.style.fontSize = '2.6rem';
-    } else {
-        val = Math.max(0, val + delta);
-        s[key] = val; 
-        document.getElementById(`val${mode}-${key}`).innerText = val;
-    }
-    
-    let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
-    if (cardEl) {
-         if (val === 'ALL' || val > 0) cardEl.classList.add('active');
-         else cardEl.classList.remove('active');
-    }
-    
-    triggerPop(`val${mode}-${key}`, false); vibrate(2); playTick(); calcCurrent();
-  }
-
-  function updateAllDisplays() {
-    Object.keys(state1).forEach(k => { 
-        let el = document.getElementById(`val1-${k}`); 
-        if(el) {
-            let val = (k === 'max_pay' && Number(state1[k]) === -1) ? 'ALL' : Number(state1[k]) || 0;
-            el.innerText = val; 
-            if(val === 'ALL') el.style.fontSize = '2.4rem'; else el.style.fontSize = '2.6rem';
-            let cardEl = el.closest('.card');
-            if (cardEl) {
-                if (val === 'ALL' || val > 0) cardEl.classList.add('active');
-                else cardEl.classList.remove('active');
-            }
-        }
-    });
-    Object.keys(state2).forEach(k => { 
-        let el = document.getElementById(`val2-${k}`); 
-        if(el) {
-            let val = Number(state2[k]) || 0;
-            el.innerText = val; 
-            let cardEl = el.closest('.card');
-            if (cardEl) {
-                if (val > 0) cardEl.classList.add('active');
-                else cardEl.classList.remove('active');
-            }
-        }
-    });
-    Object.keys(state3).forEach(k => { 
-        let el = document.getElementById(`val3-${k}`); 
-        if(el) {
-            let val = Number(state3[k]) || 0;
-            el.innerText = val; 
-            let cardEl = el.closest('.card');
-            if (cardEl) {
-                if (val > 0) cardEl.classList.add('active');
-                else cardEl.classList.remove('active');
-            }
-        }
-    });
-  }
-
-  function calcCurrent() { if (currentMode === 1) calcMode1(); else if (currentMode === 2) calcMode2(); else if (currentMode === 3) calcMode3(); }
-
-  // ==========================================
-  // STATE-MACHINE SIMULATOR ENGINE
-  // ==========================================
-  
-  function calcMode1() {
-    const E = Number(state1.echoes) || 0;
-    const F = Number(state1.fleshraker) || 0;
-    const R = Number(state1.throne) || 0;
-    const K = Number(state1.unsealing) || 0;
-    const C = Number(state1.cast) || 0;
-    const M = Number(state1.mana) || 0;
-    const MP = Number(state1.max_pay) || -1;
-    
-    const allowed_payments = MP === -1 ? Infinity : MP;
-    const spellName = selectedSpellCard ? selectedSpellCard.name : "Eldrazi Spell";
-    const spellImg = selectedSpellCard?.image_uris?.normal || selectedSpellCard?.card_faces?.[0]?.image_uris?.normal || '';
-    
-    let spellIsCreature = !selectedSpellCard || (selectedSpellCard.type_line && selectedSpellCard.type_line.includes('Creature'));
-    
-    const unsealCastYield = spellTriggersUnsealing ? 2 : 0;
-    const unsealDraws = spellDrawsCards ? K * (1 + E) : 0;
-
-    let flat_manaGens = [];
-    if(spellCastSpawns > 0) {
-        flat_manaGens.push({id: 'spell_cast_spawn', yield: spellCastSpawns, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: spellImg || ART_CACHE['Spawn'], origin: 'Original', originColor: '#10b981'});
-        for(let i=0; i<E; i++) flat_manaGens.push({id: 'spell_cast_spawn', yield: spellCastSpawns, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: spellImg || ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#be123c'});
-    }
-    if(C > 0) {
-        flat_manaGens.push({id: 'misc_cast_spawn', yield: C, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Spawn'], origin: 'Original', originColor: '#10b981'});
-        for(let i=0; i<E; i++) flat_manaGens.push({id: 'misc_cast_spawn', yield: C, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#be123c'});
-    }
-    if(unsealCastYield > 0) {
-        for(let k=0; k<K; k++) {
-            flat_manaGens.push({id: 'unseal_spawn', yield: unsealCastYield, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Unsealing'], origin: 'Original', originColor: '#10b981'});
-            for(let i=0; i<E; i++) flat_manaGens.push({id: 'unseal_spawn', yield: unsealCastYield, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#be123c'});
-        }
-    }
-    if(F > 0) {
-        for(let f=0; f<F; f++) {
-            flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Original', originColor: '#10b981'});
-            for(let i=0; i<E; i++) flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Echoes Copy', originColor: '#be123c'});
-            for(let i=0; i<R; i++) flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Throne Copy', originColor: '#cbd5e1'});
-        }
-    }
-
-    function extractOptimal(gens, req) {
-        gens.sort((a,b) => { return a.yield - b.yield; });
-        if (req <= 0) return [];
-        if (req === 1) return [gens.shift()];
-        if (req >= 2) {
-            let ones = gens.filter(g => g.yield === 1);
-            let twos = gens.filter(g => g.yield === 2);
-            if (ones.length >= 2) {
-                let res = [];
-                res.push(gens.splice(gens.indexOf(ones[0]), 1)[0]);
-                res.push(gens.splice(gens.indexOf(ones[1]), 1)[0]);
-                return res;
-            } else if (twos.length >= 1) {
-                return [gens.splice(gens.indexOf(twos[0]), 1)[0]];
-            } else {
-                let g2 = gens.find(g => g.yield >= 2);
-                if (g2) { return [gens.splice(gens.indexOf(g2), 1)[0]]; }
-                let res = []; let sum = 0;
-                while(sum < req && gens.length > 0) {
-                    let popped = gens.shift();
-                    res.push(popped); sum += popped.yield;
-                }
-                return res;
-            }
-        }
-        return [];
-    }
-
-    let running_M = M;
-    let ulalek_blocks = [];
-    let payments_budget = allowed_payments;
-    
-    let ulalek_sources = [{origin: 'Original', originColor: '#10b981'}];
-    for(let i=0; i<E; i++) ulalek_sources.push({origin: 'Echoes Copy', originColor: '#be123c'});
-    for(let i=0; i<R; i++) ulalek_sources.push({origin: 'Throne Copy', originColor: '#cbd5e1'});
-
-    for(let i=0; i<ulalek_sources.length; i++) {
-        let req = 2 - running_M;
-        let block_gens = [];
-        if (req > 0 && flat_manaGens.length > 0 && payments_budget > 0) {
-            let extracted = extractOptimal(flat_manaGens, req);
-            block_gens.push(...extracted);
-            running_M += extracted.reduce((s, g) => s + g.yield, 0);
-        }
-        if(running_M >= 2 && payments_budget > 0) {
-            running_M -= 2; 
-            payments_budget--;
-            ulalek_blocks.push({ canPay: true, missing: 0, gens: block_gens, origin: ulalek_sources[i].origin, originColor: ulalek_sources[i].originColor});
-        } else {
-            ulalek_blocks.push({ canPay: false, missing: (payments_budget <= 0) ? "Limit" : 2 - running_M, gens: block_gens, origin: ulalek_sources[i].origin, originColor: ulalek_sources[i].originColor});
-            running_M = 0; 
-        }
-    }
-
-    let stack = [];
-    stack.push({id: 'spell', yield: spellResoSpawns, isCreature: spellIsCreature, title: 'Original Spell', shortContext: spellResoSpawns > 0 ? `Yields ${spellResoSpawns} Reso Spawns.` : '', img: spellImg || ART_CACHE['Spawn'], origin: 'Original', originColor: '#10b981'});
-    
-    let payload = [];
-    for(let i=0; i<flat_manaGens.length; i++) {
-        payload.push(flat_manaGens[i]);
-        stack.push(flat_manaGens[i]);
-    }
-    
-    if(unsealDraws > 0) {
-        for(let k=0; k<K; k++) {
-            stack.push({id: 'unseal_draw', title: 'Cast Trigger', shortContext: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Original', originColor: '#10b981'});
-            for(let i=0; i<E; i++) stack.push({id: 'unseal_draw', title: 'Cast Trigger', shortContext: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#be123c'});
-        }
-    }
-    
-    for(let i = ulalek_blocks.length - 1; i >= 0; i--) {
-        let block = ulalek_blocks[i];
-        stack.push({id: 'ulalek_trigger', title: 'Triggered Ability', canPay: block.canPay, missing: block.missing, img: ART_CACHE['Ulalek'], origin: block.origin, originColor: block.originColor});
-        for(let j=0; j<block.gens.length; j++) {
-            stack.push(block.gens[j]);
-        }
-    }
-
-    let state = { M: M, S: 0, damage: 0, spells: 0, payments: 0, draws: 0, infinite: false };
-    let loops = 0;
-    let simStack = [...stack]; 
-    let F_mult = F * (1 + E + R);
-    let U = 1 + E + R;
-    
-    function addSpawns(n) {
-        state.S += n;
-        if (F > 0) state.damage += n * F_mult;
-    }
-    
-    let topUlalekIndex = -1;
-    for(let i = stack.length - 1; i >= 0; i--) {
-        if(stack[i].id === 'ulalek_trigger' && stack[i].canPay) {
-            topUlalekIndex = i;
-            break;
-        }
-    }
-    
-    let truePayloadSpawns = 0;
-    let extraUlaleks = 0;
-    if (topUlalekIndex !== -1) {
-        for(let i = 0; i < topUlalekIndex; i++) {
-            if (stack[i].yield) truePayloadSpawns += stack[i].yield;
-            if (stack[i].id === 'ulalek_trigger') extraUlaleks++;
-        }
-    }
-
-    while (simStack.length > 0 && loops < 20000) {
-        loops++;
-        let item = simStack.pop();
-        
-        if (item.id === 'fleshraker_cast' || item.id === 'unseal_spawn' || item.id === 'spell_cast_spawn' || item.id === 'misc_cast_spawn') {
-            addSpawns(item.yield || 0);
-        } else if (item.id === 'unseal_draw') {
-            state.draws += 3;
-        } else if (item.id === 'ulalek_trigger') {
-            if (state.M + state.S >= 2 && state.payments < allowed_payments) {
-                let payM = Math.min(state.M, 2);
-                state.M -= payM;
-                state.S -= (2 - payM);
-                state.payments++;
-                
-                let copies = simStack.map(obj => ({...obj}));
-                copies.forEach(c => { 
-                    c.origin = 'Ulalek Copy'; 
-                    c.originColor = '#9333ea'; 
-                });
-                simStack.push(...copies);
-            }
-        } else if (item.id === 'echoes_trigger') {
-            simStack.push({id: 'spell', yield: spellResoSpawns, isCreature: spellIsCreature, title: 'Spell Copy', shortContext: spellResoSpawns > 0 ? `Yields ${spellResoSpawns} Reso Spawns.` : '', img: spellImg || ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#be123c'});
-        } else if (item.id === 'spell') {
-            state.spells++;
-            addSpawns(item.yield || 0);
-            if (item.isCreature && F > 0) {
-                state.damage += 1 * F_mult;
-            }
-        }
-    }
-
-    if (loops >= 20000) {
-        state.infinite = true;
-    }
-
-    isInfCurrent = state.infinite;
-    finalSpawns = isInfCurrent ? "∞" : state.S;
-    finalMana = isInfCurrent ? "∞" : state.M;
-    let P = isInfCurrent ? "∞" : state.payments;
-    let currentSpells = isInfCurrent ? "INFINITE" : state.spells;
-    let damage = isInfCurrent ? Infinity : state.damage;
-
-    // True Seamless Organic Purple Pulse Propagation
-    if (isInfCurrent && !prevIsInf) {
-        document.getElementById('hero-dash').classList.add('infinite-bloom');
-    } else if (!isInfCurrent) {
-        document.getElementById('hero-dash').classList.remove('infinite-bloom');
-    }
-    
-    // Explicitly add/remove inf-warp purely to handle class toggling without disjointed animations
-    if (isInfCurrent && !prevIsInf) {
-        const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
-        spellsEl.classList.remove('inf-warp'); void spellsEl.offsetWidth; spellsEl.classList.add('inf-warp');
-    } else if (!isInfCurrent) {
-        const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
-        spellsEl.classList.remove('inf-warp');
-    }
-
-    prevIsInf = isInfCurrent;
-
-    const damageBox = document.getElementById('damage-box');
-    if (F > 0) {
-      damageBox.style.display = 'block'; 
-      const newDamageText = isInfCurrent ? symInf : damage.toString();
-      const dEl = document.getElementById('out-damage');
-      if (dEl.innerHTML !== newDamageText) { dEl.innerHTML = newDamageText; if(!isInfCurrent) triggerPop('out-damage', false); }
-    } else { damageBox.style.display = 'none'; }
-    
-    const newSpellsText = isInfCurrent ? "INFINITE" : currentSpells.toString();
-    const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
-    if (spellsEl.innerHTML !== newSpellsText) { 
-        spellsEl.innerHTML = newSpellsText; 
-        if(!isInfCurrent) triggerPop('out-spells', false); 
-    }
-    
-    const newPaymentsText = isInfCurrent ? symInf : P.toString();
-    const pEl = document.getElementById('out-payments');
-    if (pEl.innerHTML !== newPaymentsText) { pEl.innerHTML = newPaymentsText; if(!isInfCurrent) triggerPop('out-payments', false); }
-    
-    renderRemainingBreakdown();
-    
-    let visItems = [];
-    let currentGroup = null;
-    
-    // Build Base Stack Visuals
-    for (let i = stack.length - 1; i >= 0; i--) {
-        let item = stack[i];
-        let zone = '';
-        let color = '';
-        
-        if (item.id === 'spell') {
-            zone = 'BASE SPELL'; color = '#94a3b8';
-        } else if (i < topUlalekIndex) {
-            zone = 'PAYLOAD'; color = '#3b82f6';
-        } else if (item.id === 'ulalek_trigger') {
-            if (item.canPay) { zone = 'COPY ENGINE'; color = '#9333ea'; }
-            else { zone = 'TAX UNPAID'; color = '#ef4444'; }
-        } else {
-            zone = 'RESOLVING NOW'; color = '#10b981';
-        }
-        
-        if (!currentGroup || currentGroup.id !== item.id || currentGroup.zone !== zone || currentGroup.shortContext !== item.shortContext || currentGroup.missing !== item.missing || currentGroup.origin !== item.origin) {
-            if (currentGroup) visItems.push(currentGroup);
-            currentGroup = { ...item, count: 1, zone: zone, ribbon: zone, color: color };
-        } else {
-            currentGroup.count++;
-        }
-    }
-    if (currentGroup) visItems.push(currentGroup);
-    
-    // Build Phase 2 Visuals
-    let phase2Items = [];
-    if (topUlalekIndex !== -1) {
-        let currCopyGrp = null;
-        for (let i = topUlalekIndex - 1; i >= 0; i--) {
-            let item = { ...stack[i], origin: 'Ulalek Copy', originColor: '#9333ea' };
-            if (!currCopyGrp || currCopyGrp.id !== item.id || currCopyGrp.shortContext !== item.shortContext || currCopyGrp.missing !== item.missing || currCopyGrp.origin !== item.origin) {
-                if (currCopyGrp) phase2Items.push(currCopyGrp);
-                currCopyGrp = { ...item, count: 1, zone: 'PHASE 2', ribbon: 'NEW COPY', color: '#9333ea' };
-            } else {
-                currCopyGrp.count++;
-            }
-        }
-        if (currCopyGrp) phase2Items.push(currCopyGrp);
-        
-        let currOrigGrp = null;
-        for (let i = topUlalekIndex - 1; i >= 0; i--) {
-            let item = stack[i];
-            let ribbon = item.id === 'spell' ? 'BASE SPELL' : 'PENDING PAYLOAD';
-            let color = item.id === 'spell' ? '#94a3b8' : '#3b82f6';
-            if (!currOrigGrp || currOrigGrp.id !== item.id || currOrigGrp.ribbon !== ribbon || currOrigGrp.shortContext !== item.shortContext || currOrigGrp.missing !== item.missing || currOrigGrp.origin !== item.origin) {
-                if (currOrigGrp) phase2Items.push(currOrigGrp);
-                currOrigGrp = { ...item, count: 1, zone: 'PHASE 2', ribbon: ribbon, color: color };
-            } else {
-                currOrigGrp.count++;
-            }
-        }
-        if (currOrigGrp) phase2Items.push(currOrigGrp);
-    }
-    
-    currentVisualStack = [];
-    let currentZone = '';
-    let visualIndex = 1;
-    function getIdx() { let s = visualIndex.toString().padStart(2, '0'); visualIndex++; return s; }
-    
-    function injectGroup(group) {
-        if (group.zone !== currentZone) {
-            if (group.zone === 'RESOLVING NOW') currentVisualStack.push({ type: 'divider', text: 'I: TOP OF THE STACK' });
-            if (group.zone === 'COPY ENGINE') currentVisualStack.push({ type: 'divider', text: `II: COPY ENGINE` });
-            if (group.zone === 'PAYLOAD') currentVisualStack.push({ type: 'divider', text: 'III: BASE PAYLOAD' });
-            if (group.zone === 'NORMAL RESOLUTION' || group.zone === 'TAX UNPAID') {
-                if (currentZone === '') currentVisualStack.push({ type: 'divider', text: 'I: STACK RESOLUTION' });
-            }
-            if (group.zone === 'PHASE 2') { 
-                currentVisualStack.push({ type: 'divider', text: `IV: NEW RESOLVING STACK` });
-                visualIndex = 1; // True Reset
-            }
-            currentZone = group.zone;
-        }
-        
-        let contextText = group.shortContext;
-        if (group.zone === 'COPY ENGINE') {
-            contextText = "Copies all spells and abilities below it.";
-        }
-        else if (group.zone === 'TAX UNPAID') {
-            if (group.missing === 'Limit') contextText = `Payment limit reached. Resolves without copying.`;
-            else contextText = `Cannot pay tax. Resolves without copying.`;
-        } else if (group.origin === 'Echoes Copy' && group.id === 'spell') {
-            contextText = `Copies ${spellName} spell.`;
-        }
-        
-        if (contextText && contextText.includes('{Y}')) {
-            let totalYield = (group.yield || 0) * group.count;
-            contextText = contextText.replace('{Y}', totalYield);
-            contextText = contextText.replace('Spawn(s)', totalYield === 1 ? 'Spawn' : 'Spawns');
-        }
-                       
-        currentVisualStack.push({
-            idxStr: getIdx(),
-            color: group.color,
-            ribbon: group.ribbon,
-            title: group.count > 1 ? `${group.count}x ${group.title}` : group.title,
-            shortContext: contextText,
-            img: group.img,
-            origin: group.origin,
-            originColor: group.originColor
-        });
-    }
-    
-    visItems.forEach(injectGroup);
-    phase2Items.forEach(injectGroup);
-    
-    let proofHTML = "";
-
-    if (isInfCurrent) {
-        proofHTML = `<b>∞ INFINITE LOOP PROOF:</b><br><br>
-        <b>1. Initialization:</b> The top-most triggers resolve to generate mana. This provides the ${symC}${symC} needed to pay for the first Ulalek trigger.<br>
-        <b>2. The Copy:</b> Paying the tax copies the entire stack beneath it. This copied payload contains ${extraUlaleks} extra Ulalek trigger(s) and generators that yield ${truePayloadSpawns} Spawn(s).<br>
-        <b>3. The Cascade:</b> When the copied payload resolves, it generates ${truePayloadSpawns} mana. You sacrifice 2 of these Spawns to pay for the next copied Ulalek trigger, netting you ${truePayloadSpawns - 2 > 0 ? '+' : ''}${truePayloadSpawns - 2} ${symC} every cycle.<br>
-        Because you continually generate enough mana to pay the tax for the copied Ulalek triggers, the stack copies itself endlessly.`;
-        if (F > 0) proofHTML += `<br><br><i>Each of the infinite Spawns entering the battlefield triggers Glaring Fleshraker, dealing infinite damage.</i>`;
-        
-        currentVisualStack.push({ type: 'proof', class: 'infinite', html: proofHTML });
-    } else if (U > 0 && P >= 1) {
-        proofHTML = `<b>✓ RESOLUTION TRACE:</b><br><br>
-        <b>1. Initialization:</b> The top-most triggers resolve to generate mana, providing the ${symC}${symC} needed to pay for the first Ulalek trigger.<br>
-        <b>2. The Engine:</b> Ulalek copies the payload beneath it, which yields ${truePayloadSpawns} Spawn(s) and contains ${extraUlaleks} extra Ulalek trigger(s).<br>
-        <b>3. The Collapse:</b><br>`;
-        
-        if (MP !== -1 && P >= MP) proofHTML += `The loop stops intentionally because you reached your manual limit of ${MP} payment(s).<br>`;
-        else if (extraUlaleks === 0) proofHTML += `Because there are no extra Ulalek triggers in the payload (via Echoes or Throne), the stack can only be copied once.<br>`;
-        else if (truePayloadSpawns < 2) proofHTML += `The copied payload only yields ${truePayloadSpawns} ${symC}, which means you slowly bleed mana cycle until you can no longer afford the ${symC}${symC} tax.<br>`;
-        else proofHTML += `The chain breaks when you exhaust your floating mana and triggers.<br>`;
-        
-        proofHTML += `<br><b>4. Final Yield:</b> The chain collapses after ${P} payments. All remaining copies resolve, leaving you with ${currentSpells} total spells, ${finalSpawns} Spawns, and ${finalMana} floating ${symC}.`;
-        
-        currentVisualStack.push({ type: 'proof', class: 'finite', html: proofHTML });
-    } else if (U > 0 && P === 0) {
-        let manaGained = M;
-        for(let i=0; i<ulalek_blocks.length; i++) manaGained += ulalek_blocks[i].gens.reduce((s, g) => s + (g.yield || 0), 0);
-        
-        proofHTML = `<b>⚠️ RESOLUTION TRACE:</b><br><br>
-        You generate a total of ${manaGained} ${symC} before the first Ulalek trigger attempts to resolve.<br><br>`;
-        if (MP === 0) proofHTML += `Because your payment limit is set to 0, you decline to pay the tax. The remaining stack resolves normally without copying anything.`;
-        else proofHTML += `Because you are short of the 2 ${symC} tax, the Ulalek trigger fizzles. The remaining stack resolves normally without copying anything.`;
-        
-        currentVisualStack.push({ type: 'proof', class: 'fizzle', html: proofHTML });
-    }
-    
-    if(visIsOpen) renderVisualizer();
-  }
-
-  function calcMode2() {
-    const Col = Number(state2.colored) || 0;
-    const C = Number(state2.colorless) || 0;
-    const Cost = Number(state2.spellcost) || 0;
-    const SS = Number(state2.spawns) || 0;
-    const L = Number(state2.leftover) || 0;
-
-    const Total = Col + C; let res = "";
-    if (Total < Cost) res = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div class="dash-sum-header"><span style="color:#ef4444; font-family:'Outfit'; font-size:1.1rem; letter-spacing:0.05em;">CANNOT CAST</span></div><div class="stat-val red" style="font-family:'Outfit'; font-size:1.3rem;">Need ${Cost} mana (Have ${Total})</div></div></div>`;
-    else {
-      const RemTotal = Total - Cost; const RemC = C - Math.max(0, Cost - Col); let copyHTML = "";
-      if (RemC >= 2) {
-        const Net = RemTotal - 2 + (SS * 2); const MaxAffordable = Math.max(0, Total - 2 + (SS * 2) - L);
-        const badge = Net - L >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${Net - L} SHORT</span>`;
-        copyHTML = `<div class="dash highlight smooth-accordion" id="d2a"><div class="dash-header acc-header" onclick="toggleAccordion('d2a')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">COPIED (STACK UNDER)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Net Remaining</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${Net} ${badge}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Max Allowed MV</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">${MaxAffordable}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Optimal Path:</b> Ulalek tax paid via floating mana. Spell & Cast Triggers are copied safely. (+${SS*2} Spawns generated).</div></div></div></div>`;
-      } else if (RemC + SS >= 2) {
-        const Net = RemTotal + SS - 2; const MaxAffordable = Math.max(0, Total + SS - 2 - L);
-        const badge = Net - L >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${Net - L} SHORT</span>`;
-        copyHTML = `<div class="dash highlight smooth-accordion" id="d2b"><div class="dash-header acc-header" onclick="toggleAccordion('d2b')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">COPIED (STACK OVER)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Net Remaining</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${Net} ${badge}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Max Allowed MV</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">${MaxAffordable}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Sacrifice Path:</b> Spawns are consumed to pay tax. Only the original Spell is copied.</div></div></div></div>`;
-      } else copyHTML = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div style="font-family:'Outfit'; font-size:1.05rem; color:#fca5a5; letter-spacing:0.05em; margin-bottom:4px;">CANNOT AFFORD ${symC}${symC} COPY</div><div style="color:#ef4444; font-size:0.85rem;">Short on resources mid-resolution</div></div></div>`;
-      const NetNoCopy = RemTotal + SS; const MaxAffordableNoCopy = Math.max(0, Total + SS - L);
-      const badgeNoCopy = NetNoCopy - L >= 0 ? `<span class="badge badge-ok">✓ TARGET MET</span>` : `<span class="badge badge-short">${NetNoCopy - L} SHORT</span>`;
-      const noCopyHTML = `<div class="dash smooth-accordion" id="d2c"><div class="dash-header acc-header" onclick="toggleAccordion('d2c')"><div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><span style="font-family:'Outfit'; font-size:1.05rem; color:#fff; letter-spacing:0.05em;">SINGLE CAST (NO COPY)</span><svg class="acc-arrow" viewBox="0 0 24 24" width="18" height="18" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; flex-direction:column; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Net Remaining</span><div style="font-family:'Outfit'; font-size:1.6rem; color:#fff; display:flex; align-items:center; gap:8px;">${NetNoCopy} ${badgeNoCopy}</div></div><div style="display:flex; flex-direction:column; text-align:right; gap:4px;"><span style="font-size:0.65rem; color:#94a3b8; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">Max Allowed MV</span><span style="font-family:'Outfit'; font-size:1.6rem; color:#3b82f6;">${MaxAffordableNoCopy}</span></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><b>Bypass Path:</b> Cast spell normally. Ignore the Ulalek tax to save remaining mana.</div></div></div></div>`;
-      res = copyHTML + noCopyHTML;
-    }
-    document.getElementById('m2-result-container').innerHTML = res;
-  }
-
-  function calcMode3() {
-    const Col = Number(state3.colored) || 0;
-    const C = Number(state3.colorless) || 0;
-    const SC = Number(state3.spawns) || 0;
-    const MV = Number(state3.targetmv) || 0;
-
-    let res = "";
-    if (C < 2) { document.getElementById('m3-result-container').innerHTML = `<div class="dash"><div class="dash-header" style="cursor:default; padding:16px;"><div class="dash-sum-header"><span style="color:#ef4444;">CANNOT CAST</span></div><div class="stat-val red">Requires ${symC}${symC} base cost</div></div></div>`; return; }
-    const cToReserveForTax = Math.max(0, 2 - SC); let validA1 = false; let xA1 = 0, yieldA1 = 0, strA1 = "";
-    if (C >= 4) {
-        xA1 = Col + (C - 4);
-        if (xA1 >= MV) { validA1 = true; yieldA1 = (xA1 * 2) + (SC * 2); 
-            strA1 = `<div class="dash highlight smooth-accordion" id="d3a"><div class="dash-header acc-header" onclick="toggleAccordion('d3a')"><div class="dash-sum-header">OPTIMAL YIELD (STACK UNDER) <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="dash-sum-stats"><div class="stat-col"><div class="stat-label">Total Tokens</div><div class="stat-val">${yieldA1}</div></div><div class="stat-col right"><div class="stat-label">Cast For</div><div class="stat-val blue">X=${xA1}</div></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><div class="yield-breakdown">Breakdown: ${xA1*2} Scions + ${SC*2} Spawns + 2 Exiles.<br/>Leftovers: ${cToReserveForTax + SC - 2} ${symC}</div></div></div></div></div>`;
-        }
-    }
-    let validA2 = false; let xA2 = 0, yieldA2 = 0, strA2 = "";
-    let holdForTax = Math.max(0, 2 - SC); let upfrontLeft = (C - 2) - holdForTax;
-    if (upfrontLeft >= 0) {
-        xA2 = Col + upfrontLeft;
-        if (xA2 >= MV) { validA2 = true; yieldA2 = (xA2 * 2) + SC - 2; 
-            strA2 = `<div class="dash highlight smooth-accordion" id="d3b"><div class="dash-header acc-header" onclick="toggleAccordion('d3b')"><div class="dash-sum-header">MAX X SCALE (STACK OVER) <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="dash-sum-stats"><div class="stat-col"><div class="stat-label">Total Tokens</div><div class="stat-val">${yieldA2}</div></div><div class="stat-col right"><div class="stat-label">Cast For</div><div class="stat-val blue">X=${xA2}</div></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><div class="yield-breakdown">Breakdown: ${xA2*2} Scions + ${SC} Spawns - 2 Tax + 2 Exiles.</div></div></div></div></div>`;
-        }
-    }
-    let finalPathA = "";
-    if (validA1 && validA2) {
-        if (yieldA2 > yieldA1 || (yieldA2 === yieldA1 && xA2 > xA1)) finalPathA = strA2; 
-        else { finalPathA = strA1; if (xA2 > xA1) finalPathA += `<div class="alt-note" style="margin-top:0;"><b>Need a bigger X?</b> Expand MAX X SCALE instead for X=${xA2} (Yields ${yieldA2} tokens).</div>`; }
-    } else if (validA1) finalPathA = strA1; else if (validA2) finalPathA = strA2; 
-      else finalPathA = `<div class="dash"><div class="dash-header" style="cursor:default;"><div class="dash-sum-header"><span style="color:#fca5a5;">CANNOT COPY & EXILE MV ${MV}</span></div><div class="stat-val red">Short on resources</div></div></div>`;
-
-    let maxScaleX = Col + (C - 2); let strB = "";
-    if (maxScaleX >= MV) {
-        let yieldB = maxScaleX + SC;
-        strB = `<div class="dash smooth-accordion" id="d3c"><div class="dash-header acc-header" onclick="toggleAccordion('d3c')"><div class="dash-sum-header">SINGLE TARGET (NO COPY) <svg class="acc-arrow" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="dash-sum-stats"><div class="stat-col"><div class="stat-label">Total Tokens</div><div class="stat-val">${yieldB}</div></div><div class="stat-col right"><div class="stat-label">Cast For</div><div class="stat-val blue">X=${maxScaleX}</div></div></div></div><div class="acc-content-wrapper"><div class="acc-content-inner"><div class="dash-body"><div class="yield-breakdown">Breakdown: ${maxScaleX} Scions + ${SC} Spawns. (Tax ignored).</div></div></div></div></div>`;
-    } else strB = `<div class="dash"><div class="dash-header" style="cursor:default;"><div class="dash-sum-header"><span style="color:#fca5a5;">TARGET TOO LARGE</span></div><div class="stat-val red">Max possible X=${maxScaleX}</div></div></div>`;
-
-    document.getElementById('m3-result-container').innerHTML = finalPathA + strB;
-  }
-</script>
-</body>
-</html>
+Claude's suggestions are **substantially better than the fixes I proposed earlier**, particularly for Bugs 1 and 2. I would not blindly apply all three, though. There are a couple of details I'd change.
+
+### Bug 1 — Infinity glow: Claude is right
+
+This is the strongest diagnosis.
+
+There are actually **two independent problems**:
+
+1. `symInf` doesn't get `.inf-glow-small`, despite the CSS existing for it.
+2. More importantly, if the SVG is being replaced during every recalculation while already infinite, **any CSS animation attached to that SVG gets restarted**.
+
+That second point explains the "why does the glow keep losing its organic pulse?" behaviour much better than simply saying Safari doesn't like the filter.
+
+I particularly agree with Claude's observation about:
+
+> `dEl.innerHTML !== newDamageText`
+
+That's a bad way to determine whether an SVG needs replacing. You're comparing your source representation against the browser's parsed/serialized DOM representation. **DOM equality is not string equality.**
+
+The transition guard is much more robust:
+
+```js
+if (isInfCurrent) {
+    if (!prevIsInf) dEl.innerHTML = symInf;
+}
+```
+
+So the SVG gets created **once when entering infinity**, then remains alive while the user changes the numbers.
+
+I'd use Claude's fix here essentially as written.
+
+One additional thing I'd do: **don't animate the SVG's actual `stroke` or `filter`**. Keep the SVG itself stable and animate a wrapper/pseudo-element aura. That's much more likely to remain smooth on iOS.
+
+---
+
+# Bug 2 — I strongly agree with Claude
+
+This is the one I'd be most concerned about.
+
+The key problem isn't really:
+
+> "Safari generates ghost clicks."
+
+That's only part of the story.
+
+The deeper problem is that the application has a **single global press state** which doesn't have robust ownership of a specific pointer.
+
+Claude's:
+
+```js
+activePress = {
+    pointerId,
+    mode,
+    key,
+    delta,
+    ...
+}
+```
+
+is conceptually the correct architecture.
+
+The crucial improvement is this:
+
+> **A pointer-up belonging to pointer B can never terminate pointer A's operation.**
+
+And this:
+
+> **If a stale pointer state exists when a new press arrives, discard the stale state rather than trying to resolve it.**
+
+That's exactly what you want.
+
+### One part I would change, though
+
+Claude suggests cancelling the press if the finger moves more than 15px:
+
+```js
+if (Math.abs(e.clientX - activePress.x) > 15 ||
+    Math.abs(e.clientY - activePress.y) > 15) {
+    activePress.valid = false;
+}
+```
+
+I **wouldn't necessarily do that**.
+
+For a numeric control, a slight finger movement is extremely normal on a touchscreen. You don't want:
+
+> tap + → finger moves 16px → input silently doesn't happen
+
+That can feel like the app is dropping taps.
+
+I'd instead use a slightly larger movement threshold, perhaps **20–25px**, and only use movement cancellation if we actually need it to distinguish a scroll gesture from a tap.
+
+Also, I would preserve your existing visual press/ripple behaviour exactly rather than replacing it unnecessarily.
+
+So:
+
+**Claude's architecture: yes.**
+
+**Claude's exact implementation: 90% yes.**
+
+---
+
+# Bug 3 — Claude's diagnosis is good, but I would test their fix carefully
+
+This is the most interesting one.
+
+Claude correctly identifies the actual compositing problem:
+
+> focused card scales without changing layout → visually overlaps neighbour → neighbour's `backdrop-filter` samples the enlarged focused card → bright edge gets incorporated into the blur.
+
+That's a much better explanation than simply saying "the focused card needs a backdrop-filter fix."
+
+And I agree with this:
+
+```css
+.vis-snap-point.blur-feathered .vis-slab {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+}
+```
+
+**as a first surgical solution.**
+
+It preserves glass.
+
+That's important.
+
+I would **not** increase the gap between cards.
+
+I would **not** reduce the focused card from `scale(1.05)`.
+
+And I would **not** remove blur from the entire visualizer.
+
+### But there's one thing I'd alter
+
+Claude says:
+
+> "6px isn't enough radius for the kernel to reach the boundary"
+
+I wouldn't assume that.
+
+Whether 6px is sufficient depends on the actual geometry, compositing layer and WebKit implementation. It may be perfect. It may still show a tiny halo.
+
+I'd treat 6px as a **controlled test value**, not a guaranteed mathematical solution.
+
+I'd start at:
+
+**6px → 8px → 10px**
+
+and use the smallest value that eliminates the edge artifact.
+
+That's preferable to immediately adding a complicated mask.
+
+---
+
+# The mask-image idea is interesting, but I'd leave it out
+
+I agree with Claude here too:
+
+> optional hardening, not something to add blind.
+
+A mask could solve the artifact beautifully, but it introduces another compositing layer and potentially causes its own Safari quirks.
+
+For this app I'd much rather have:
+
+**focused card = crisp glass**
+
+**immediate neighbours = slightly tighter glass blur**
+
+**distant cards = normal blur**
+
+That's actually a pretty natural visual hierarchy anyway.
+
+It subtly reinforces:
+
+> **this is the card I'm examining; the surrounding cards are contextual.**
+
+So the fix also has a UX benefit.
+
+---
+
+# There's one thing Claude didn't mention that I would definitely preserve
+
+Your **focus calculation**.
+
+The existing visualizer's fundamental behaviour is:
+
+> find the card closest to the focus point → treat it as the focused card.
+
+I would **not** couple the `blur-feathered` behaviour to some separate scroll state.
+
+It should derive from the exact same `focusedIndex` that drives:
+
+* scale
+* opacity
+* saturation
+* z-index
+* explanation
+* spine focus
+* card colour
+
+So conceptually:
+
+```text
+              focusedIndex
+                   │
+       ┌───────────┼────────────┐
+       ↓           ↓            ↓
+    scaling     opacity      spine
+       │           │            │
+       └───────────┼────────────┘
+                   ↓
+             neighbouring
+             blur treatment
+```
+
+That gives you **one source of truth**.
+
+---
+
+# My verdict on the three
+
+| Claude suggestion                        | My verdict                             |
+| ---------------------------------------- | -------------------------------------- |
+| Infinity SVG class fix                   | **Yes, absolutely**                    |
+| Infinity transition-only DOM replacement | **Yes, definitely**                    |
+| PointerId-owned touch state              | **Yes, strongly**                      |
+| `setPointerCapture()`                    | **Yes**                                |
+| Discard stale pointer state              | **Yes**                                |
+| 15px movement cancellation               | **I'd increase/adjust this**           |
+| Focused-card blur solution               | **Yes, but test the exact blur value** |
+| Neighbour `blur(6px)`                    | **Excellent first attempt**            |
+| Mask-image solution                      | **Not initially**                      |
+| Dead `mousedown` condition cleanup       | **Yes, harmless cleanup**              |
+
+### Overall
+
+I'd say Claude has correctly identified that these aren't really three unrelated CSS/JS annoyances. They're three **different classes of underlying engineering problem**:
+
+**Bug 1:** DOM lifecycle / animation lifecycle
+**Bug 2:** pointer state ownership / event lifecycle
+**Bug 3:** GPU compositing / backdrop-filter sampling
+
+That's why their fixes feel more surgical than just throwing CSS at the symptoms.
+
+**I would use Claude's approach as the basis for the next build**, with my two modifications:
+
+1. Don't cancel legitimate taps at an overly aggressive 15px movement threshold.
+2. Treat `6px` blur as a starting point that we verify visually rather than assuming it is universally sufficient.
+
+And importantly, **I wouldn't make any other visual/design changes in that build**. This should be a pure bug-fix pass against your latest `<!DOCTYPE html>` version so that if something changes, we know exactly which of these three interventions caused it.
