@@ -44,7 +44,6 @@
       background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 30%, rgba(0,0,0,0.2) 100%);
       box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(0,0,0,0.4), 0 10px 24px rgba(0,0,0,0.6);
       backdrop-filter: blur(32px);
-      -webkit-backdrop-filter: blur(32px);
       border: 1px solid var(--panel-border);
   }
 
@@ -150,37 +149,19 @@
   body.vis-active .metric-box span.hero-label { font-size: 0.45rem; margin-bottom: 0; opacity: 0.7; display: flex; white-space: nowrap;}
   body.vis-active .metric-box strong { font-size: 1.3rem; margin-top: 2px; }
 
-  /* ------------------------------------------------------------------- */
-  /* THE AUTHENTIC INFINITY GLOW (PERFECTLY RESTORED & SEAMLESSLY CHAINED) */
-  /* ------------------------------------------------------------------- */
-  
-  /* The continuous pulse loop for both text and SVGs */
-  @keyframes pulseMainText {
-      0% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.5), 0 0 30px rgba(6, 182, 212, 0.3); }
-      50% { text-shadow: 0 0 30px rgba(192, 38, 211, 0.9), 0 0 60px rgba(6, 182, 212, 0.6); }
-      100% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.5), 0 0 30px rgba(6, 182, 212, 0.3); }
+  /* Aetheric Bloom Infinity Animations - TRUE ORGANIC PURPLE PULSE */
+  @keyframes aetherPulseText {
+      0%, 100% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.6), 0 0 30px rgba(192, 38, 211, 0.3); color: #fdf4ff; }
+      50% { text-shadow: 0 0 25px rgba(192, 38, 211, 1), 0 0 50px rgba(192, 38, 211, 0.8), 0 0 75px rgba(6, 182, 212, 0.5); color: #ffffff; }
   }
+  .inf-warp { animation: aetherPulseText 3s infinite ease-in-out !important; }
 
-  /* The seamless entrance specifically engineered to hand off perfectly into pulseMainText */
-  @keyframes aetherBloomEntrance {
-      0% { opacity: 0; filter: blur(6px); transform: scale(0.95); text-shadow: none; }
-      100% { opacity: 1; filter: blur(0px); transform: scale(1); text-shadow: 0 0 15px rgba(192, 38, 211, 0.5), 0 0 30px rgba(6, 182, 212, 0.3); }
+  @keyframes aetherPulseSvg {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(192, 38, 211, 0.8)) drop-shadow(0 0 15px rgba(192, 38, 211, 0.4)); color: #fdf4ff; }
+      50% { filter: drop-shadow(0 0 15px rgba(192, 38, 211, 1)) drop-shadow(0 0 25px rgba(192, 38, 211, 0.8)) drop-shadow(0 0 35px rgba(6, 182, 212, 0.6)); color: #ffffff; }
   }
-
-  .inf-warp { 
-      color: #fdf4ff !important; 
-      animation: aetherBloomEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards, pulseMainText 2.5s infinite ease-in-out 0.6s !important; 
-  }
-
-  /* Authentic drop-shadow for SVGs (No scaling, pure organic light) */
-  @keyframes pulseSmallSvg {
-      0% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.5)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.4)); }
-      50% { filter: drop-shadow(0 0 12px rgba(192, 38, 211, 0.9)) drop-shadow(0 0 24px rgba(6, 182, 212, 0.7)); }
-      100% { filter: drop-shadow(0 0 4px rgba(192, 38, 211, 0.5)) drop-shadow(0 0 8px rgba(6, 182, 212, 0.4)); }
-  }
-  
-  .inf-glow-small { display: inline-block; color: #fdf4ff !important; }
-  .inf-glow-small svg { animation: pulseSmallSvg 2.5s infinite ease-in-out !important; color: #fdf4ff !important; overflow: visible; }
+  .inf-glow-small { color: #fdf4ff !important; display: inline-block; }
+  .inf-glow-small svg { animation: aetherPulseSvg 3s infinite ease-in-out !important; overflow: visible !important; }
 
   /* Flash and Settle */
   @keyframes valFlash {
@@ -293,13 +274,15 @@
       left: 50%; transform: translateX(-50%);
   }
 
-  /* Inline Roman Numeral Phase Markers (Perfectly Centered, No letter-spacing) */
+  /* Inline Roman Numeral Phase Markers (No Black Boxes) */
   .phase-pip {
       position: absolute; left: 50%; transform: translate(-50%, -50%);
       font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: #94a3b8;
       display: flex; align-items: center; justify-content: center; z-index: 9;
       pointer-events: none; transition: opacity 0.2s ease;
-      width: 30px; text-align: center; 
+      width: 30px; text-align: center; letter-spacing: 2px; 
+      /* Counterbalance letter-spacing right-bias */
+      padding-left: 2px; 
   }
   
   /* Fiber-Optic Spill */
@@ -330,29 +313,35 @@
       scroll-snap-type: none !important;
   }
   
-  /* Focused Cards - Fixed Overlap Blur Artifact via isolation */
+  /* Focused Cards - Fixed Overlap Blur Artifact via translateZ & z-index */
   .vis-snap-point { 
       scroll-snap-align: center; width: 100%; flex-shrink: 0; padding: 14px 0; 
       display: flex; justify-content: center; 
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; 
-      transform: scale(0.85); opacity: 0.35; position: relative; z-index: 1; 
-      isolation: isolate; will-change: transform, opacity;
+      transform: scale(0.85) translateZ(0); 
+      opacity: 0.35; position: relative; z-index: 1; 
+      will-change: transform, opacity;
   }
+  
+  /* Overrides Blur kernel completely on focus to prevent edge-glow bleed */
   .vis-snap-point.focused-card { 
-      transform: scale(1.05); 
+      transform: scale(1.05) translateZ(0); 
       opacity: 1; z-index: 50; 
+  }
+  .vis-snap-point.focused-card .vis-slab {
+      backdrop-filter: none !important; 
+      background: linear-gradient(135deg, #161e2e 0%, #0b0f19 100%) !important;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), 0 15px 40px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.05);
   }
   
   #vis-top-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
   #vis-bottom-pad { height: 0px; flex-shrink: 0; pointer-events: none; scroll-snap-align: none; }
   
-  /* Slab Mask securely kills blur bleeding */
   .vis-slab { 
       position: relative; display: flex; gap: 14px; align-items: stretch; width: 100%; max-width: 280px; margin: 0 auto;
       padding: 10px 14px; transform-origin: center center; 
-      border-radius: 4px 20px 4px 20px; 
-      -webkit-mask-image: -webkit-linear-gradient(black, black);
-      mask-image: linear-gradient(black, black);
+      border-radius: 4px 20px 4px 20px; transform: translateZ(0);
+      transition: background 0.3s ease, backdrop-filter 0.3s ease;
   }
   
   .vis-art { 
@@ -885,7 +874,7 @@
       
       currentVisualStack.forEach((item) => {
           if (item.type === 'divider') {
-              html += `<div class="vis-divider-wrapper"><div class="vis-divider-line"></div><div class="vis-divider"><span class="pip"></span> ${item.text} <span class="pip"></span></div><div class="vis-divider-line"></div></div>`; return;
+              html += `<div class="vis-divider-wrapper" data-label="${item.text}"><div class="vis-divider-line"></div><div class="vis-divider"><span class="pip"></span> ${item.text} <span class="pip"></span></div><div class="vis-divider-line"></div></div>`; return;
           }
           if (item.type === 'proof') {
               html += `<div class="vis-note-wrapper"><div class="vis-proof glass-panel ${item.class}">${item.html}</div></div>`; return;
@@ -937,28 +926,28 @@
               if (spine && track) {
                   spine.querySelectorAll('.phase-pip').forEach(p => p.remove());
                   const dividers = container.querySelectorAll('.vis-divider-wrapper');
-                  const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+                  let firstPhysicalPct = null;
                   let pipPcts = [];
                   
                   dividers.forEach((div, index) => {
                       let focusScrollTop = div.offsetTop + (div.offsetHeight / 2) - (container.clientHeight / 2);
                       let rawPct = (container.scrollHeight > container.clientHeight) ? focusScrollTop / (container.scrollHeight - container.clientHeight) : 0;
                       let clampedPct = Math.max(0, Math.min(1, rawPct));
-                      
                       let physicalPct = 10 + (clampedPct * 80);
-                      pipPcts.push(physicalPct);
+                      
+                      let labelTxt = div.getAttribute('data-label') || "";
+                      let numeralMatch = labelTxt.match(/^([IVX]+):/);
+                      if (numeralMatch) {
+                          if (firstPhysicalPct === null) firstPhysicalPct = physicalPct;
+                          pipPcts.push(physicalPct);
 
-                      let pip = document.createElement('div');
-                      pip.className = 'phase-pip';
-                      pip.style.top = `${physicalPct}%`;
-                      
-                      // Extract the numeral prefix from the divider text if it exists (e.g., "IV: NEW RESOLVING STACK" -> "IV")
-                      let divText = div.innerText.trim();
-                      let numMatch = divText.match(/^([IVX]+):/);
-                      pip.innerText = numMatch ? numMatch[1] : numerals[index] || '';
-                      
-                      pip.setAttribute('data-pct', physicalPct);
-                      spine.appendChild(pip);
+                          let pip = document.createElement('div');
+                          pip.className = 'phase-pip';
+                          pip.style.top = `${physicalPct}%`;
+                          pip.innerText = numeralMatch[1];
+                          pip.setAttribute('data-pct', physicalPct);
+                          spine.appendChild(pip);
+                      }
                   });
                   
                   // Construct Dynamic Linear Gradient Mask to perfectly cut the line around the numerals
@@ -1248,18 +1237,16 @@
   let actionData = null;
   let activePointerId = null;
   
-  // Ultimate Ghost-Click Defense
-  let lastTouchEndTime = 0;
+  // Nuclear Auto-Click Defense
+  window.ulalekGlobalTouchActive = false;
   
-  window.addEventListener('touchend', () => { lastTouchEndTime = Date.now(); }, {passive: true, capture: true});
-  window.addEventListener('touchcancel', () => { lastTouchEndTime = Date.now(); }, {passive: true, capture: true});
+  window.addEventListener('touchstart', () => window.ulalekGlobalTouchActive = true, {passive: true, capture: true});
+  window.addEventListener('touchend', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
+  window.addEventListener('touchcancel', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
+  window.addEventListener('pointerup', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
 
   function startUpdate(e, mode, key, delta) {
     if (e && e.stopPropagation) e.stopPropagation();
-    
-    // Completely block synthetic mouse events fired by iOS/Android immediately after a touch
-    if (e && e.pointerType === 'mouse' && (Date.now() - lastTouchEndTime < 1000)) return;
-    
     if (e && e.pointerType === 'mouse' && e.button !== 0) return;
 
     if (activePointerId !== null) return; 
@@ -1267,6 +1254,7 @@
 
     let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
     
+    // JS Ripple Handling
     if (cardEl && e) {
         let rect = cardEl.getBoundingClientRect();
         let clientX = e.clientX || (e.touches && e.touches[0].clientX) || rect.left + rect.width/2;
@@ -1285,9 +1273,13 @@
     clearTimeouts();
 
     holdTimer = setTimeout(() => {
-        if (actionData && actionData.valid) {
+        if (actionData && actionData.valid && window.ulalekGlobalTouchActive) {
             actionPending = false; 
             holdInterval = setInterval(() => {
+                if (!window.ulalekGlobalTouchActive) {
+                    clearTimeouts();
+                    return;
+                }
                 applyDelta(actionData.mode, actionData.key, actionData.delta);
             }, 80);
         }
@@ -1325,9 +1317,6 @@
     clearTimeouts();
     saveState();
   }
-
-  document.addEventListener('pointerup', stopUpdate);
-  document.addEventListener('pointercancel', stopUpdate);
 
   function clearTimeouts() {
     if (holdTimer) clearTimeout(holdTimer);
@@ -1603,13 +1592,14 @@
     let currentSpells = isInfCurrent ? "INFINITE" : state.spells;
     let damage = isInfCurrent ? Infinity : state.damage;
 
-    // Aetheric Bloom Propagation
+    // True Seamless Organic Purple Pulse Propagation
     if (isInfCurrent && !prevIsInf) {
         document.getElementById('hero-dash').classList.add('infinite-bloom');
     } else if (!isInfCurrent) {
         document.getElementById('hero-dash').classList.remove('infinite-bloom');
     }
     
+    // Explicitly add/remove inf-warp purely to handle class toggling without disjointed animations
     if (isInfCurrent && !prevIsInf) {
         const spellsEl = document.getElementById('out-spells').querySelector('span') || document.getElementById('out-spells');
         spellsEl.classList.remove('inf-warp'); void spellsEl.offsetWidth; spellsEl.classList.add('inf-warp');
@@ -1715,7 +1705,7 @@
             }
             if (group.zone === 'PHASE 2') { 
                 currentVisualStack.push({ type: 'divider', text: `IV: NEW RESOLVING STACK` });
-                visualIndex = 1; 
+                visualIndex = 1; // True Reset
             }
             currentZone = group.zone;
         }
