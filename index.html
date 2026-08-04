@@ -149,10 +149,10 @@
   body.vis-active .metric-box span.hero-label { font-size: 0.45rem; margin-bottom: 0; opacity: 0.7; display: flex; white-space: nowrap;}
   body.vis-active .metric-box strong { font-size: 1.3rem; margin-top: 2px; }
 
-  /* Aetheric Bloom Infinity Animations - TRUE ORGANIC PURPLE PULSE */
+  /* Aetheric Bloom Infinity Animations - TRUE ORGANIC PURPLE PULSE (Toned Down for Mobile) */
   @keyframes aetherPulseText {
-      0%, 100% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.6), 0 0 30px rgba(192, 38, 211, 0.3); color: #fdf4ff; }
-      50% { text-shadow: 0 0 25px rgba(192, 38, 211, 1), 0 0 50px rgba(192, 38, 211, 0.8), 0 0 75px rgba(6, 182, 212, 0.5); color: #ffffff; }
+      0%, 100% { text-shadow: 0 0 8px rgba(192, 38, 211, 0.4), 0 0 15px rgba(192, 38, 211, 0.2); color: #fdf4ff; }
+      50% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.8), 0 0 30px rgba(192, 38, 211, 0.5), 0 0 45px rgba(6, 182, 212, 0.3); color: #ffffff; }
   }
   .inf-warp { animation: aetherPulseText 3s infinite ease-in-out !important; display: inline-block; }
 
@@ -165,8 +165,8 @@
       pointer-events: none;
   }
   @keyframes aetherPulseGlow {
-      0%, 100% { box-shadow: 0 0 12px 3px rgba(192, 38, 211, 0.6), 0 0 24px 6px rgba(192, 38, 211, 0.3); background: rgba(192, 38, 211, 0.15); }
-      50% { box-shadow: 0 0 20px 6px rgba(192, 38, 211, 1), 0 0 40px 12px rgba(192, 38, 211, 0.8), 0 0 60px 18px rgba(6, 182, 212, 0.5); background: rgba(192, 38, 211, 0.4); }
+      0%, 100% { box-shadow: 0 0 6px 2px rgba(192, 38, 211, 0.4), 0 0 12px 4px rgba(192, 38, 211, 0.2); background: rgba(192, 38, 211, 0.1); }
+      50% { box-shadow: 0 0 12px 4px rgba(192, 38, 211, 0.7), 0 0 24px 8px rgba(192, 38, 211, 0.5), 0 0 36px 10px rgba(6, 182, 212, 0.3); background: rgba(192, 38, 211, 0.25); }
   }
 
   /* Flash and Settle */
@@ -1249,22 +1249,52 @@
   // ==========================================
   let activePress = null;
 
+  function killAllPresses(e) {
+    if (activePress) {
+        // Only trigger the increment if the interaction was a clean, intentional release
+        let isIntentionalUp = e && (e.type === 'pointerup' || e.type === 'touchend');
+        if (isIntentionalUp && activePress.pending && activePress.valid) {
+            applyDelta(activePress.mode, activePress.key, activePress.delta);
+            saveState();
+        }
+        if (activePress.cardEl) activePress.cardEl.classList.remove('press-left', 'press-right');
+        clearTimeout(activePress.holdTimer);
+        clearInterval(activePress.holdInterval);
+        activePress = null;
+    }
+    // Hard sweep: wipe lingering CSS classes no matter what happened
+    document.querySelectorAll('.press-left, .press-right').forEach(el => {
+        el.classList.remove('press-left', 'press-right');
+    });
+  }
+
+  // Bind the failsafe cleanup to every possible browser interruption event
+  document.addEventListener('pointerup', killAllPresses);
+  document.addEventListener('pointercancel', killAllPresses);
+  document.addEventListener('touchend', killAllPresses);
+  document.addEventListener('touchcancel', killAllPresses);
+  window.addEventListener('blur', killAllPresses);
+  document.addEventListener('visibilitychange', killAllPresses);
+  document.addEventListener('contextmenu', killAllPresses);
+
   function startUpdate(e, mode, key, delta) {
-    // Avoid preventDefault/setPointerCapture completely; let CSS touch-action handle it organically
     if (e && e.pointerType === 'mouse' && e.button !== 0) return;
     if (activePress && e && activePress.pointerId === e.pointerId) return; 
-    if (activePress) clearPress(false); 
+    
+    // Always clear out any stale UI state before starting a new press
+    killAllPresses(null); 
 
     let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
     
     if (cardEl && e) {
       let rect = cardEl.getBoundingClientRect();
-      cardEl.style.setProperty('--tx', ((e.clientX ?? rect.left + rect.width/2) - rect.left) + 'px');
-      cardEl.style.setProperty('--ty', ((e.clientY ?? rect.top + rect.height/2) - rect.top) + 'px');
+      let clientX = e.clientX ?? (e.touches && e.touches.length > 0 ? e.touches[0].clientX : rect.left + rect.width/2);
+      let clientY = e.clientY ?? (e.touches && e.touches.length > 0 ? e.touches[0].clientY : rect.top + rect.height/2);
+      cardEl.style.setProperty('--tx', (clientX - rect.left) + 'px');
+      cardEl.style.setProperty('--ty', (clientY - rect.top) + 'px');
       cardEl.classList.add(delta === -1 ? 'press-left' : 'press-right');
     }
 
-    // Capture primitives for the closure interval independently of the activePress reference
     let pressMode = mode;
     let pressKey = key;
     let pressDelta = delta;
@@ -1272,8 +1302,8 @@
     activePress = { 
         pointerId: e ? e.pointerId : null, 
         mode, key, delta, 
-        x: e ? (e.clientX||0) : 0, 
-        y: e ? (e.clientY||0) : 0, 
+        x: e ? (e.clientX || (e.touches && e.touches.length > 0 ? e.touches[0].clientX : 0)) : 0, 
+        y: e ? (e.clientY || (e.touches && e.touches.length > 0 ? e.touches[0].clientY : 0)) : 0, 
         valid: true, pending: true, cardEl, 
         holdTimer: null, holdInterval: null 
     };
@@ -1289,37 +1319,31 @@
   }
 
   document.addEventListener('pointermove', (e) => {
-    if (!activePress || activePress.pointerId !== e.pointerId || !activePress.valid) return;
-    if (Math.abs(e.clientX - activePress.x) > 25 || Math.abs(e.clientY - activePress.y) > 25) {
+    if (!activePress || !activePress.valid) return;
+    if (activePress.pointerId !== null && activePress.pointerId !== e.pointerId) return;
+    
+    let cx = e.clientX || (e.touches && e.touches.length > 0 ? e.touches[0].clientX : 0);
+    let cy = e.clientY || (e.touches && e.touches.length > 0 ? e.touches[0].clientY : 0);
+    
+    if (Math.abs(cx - activePress.x) > 25 || Math.abs(cy - activePress.y) > 25) {
       activePress.valid = false;
       clearTimeout(activePress.holdTimer); clearInterval(activePress.holdInterval);
       activePress.cardEl?.classList.remove('press-left', 'press-right');
     }
   });
 
-  function clearPress(applyIfPending) {
-    if (!activePress) return;
-    if (applyIfPending && activePress.pending && activePress.valid) {
-        applyDelta(activePress.mode, activePress.key, activePress.delta);
+  // Explicitly handle touchmove to intercept Chrome's scrolling hijack
+  document.addEventListener('touchmove', (e) => {
+    if (!activePress || !activePress.valid || !e.touches || e.touches.length === 0) return;
+    let cx = e.touches[0].clientX;
+    let cy = e.touches[0].clientY;
+    
+    if (Math.abs(cx - activePress.x) > 25 || Math.abs(cy - activePress.y) > 25) {
+      activePress.valid = false;
+      clearTimeout(activePress.holdTimer); clearInterval(activePress.holdInterval);
+      activePress.cardEl?.classList.remove('press-left', 'press-right');
     }
-    if (activePress.cardEl) activePress.cardEl.classList.remove('press-left', 'press-right');
-    clearTimeout(activePress.holdTimer); clearInterval(activePress.holdInterval);
-    activePress = null;
-  }
-
-  function stopUpdate(e) {
-    if (activePress && (!e || e.pointerId === activePress.pointerId)) { 
-        clearPress(true); 
-        saveState(); 
-    }
-    // Hard failsafe: Sweep all pressed classes from DOM if pointer is lifted/cancelled anywhere on screen
-    document.querySelectorAll('.press-left, .press-right').forEach(el => {
-        el.classList.remove('press-left', 'press-right');
-    });
-  }
-
-  document.addEventListener('pointerup', stopUpdate);
-  document.addEventListener('pointercancel', stopUpdate);
+  }, {passive: true});
 
   function applyDelta(mode, key, delta) {
     let s = mode === 1 ? state1 : mode === 2 ? state2 : state3;
@@ -1751,12 +1775,12 @@
     let proofHTML = "";
 
     if (isInfCurrent) {
-        proofHTML = `<b style="display:flex; align-items:center; gap:6px;">${symInf} INFINITE LOOP PROOF:</b><br><br>
+        proofHTML = `<b style="display:flex; align-items:center; gap:6px;"><span class="inf-warp">${symInf} INFINITE LOOP PROOF:</span></b><br><br>
         <b>1. Initialization:</b> The top-most triggers resolve to generate mana. This provides the ${symC}${symC} needed to pay for the first Ulalek trigger.<br>
         <b>2. The Copy:</b> Paying the tax copies the entire stack beneath it. This copied payload contains ${extraUlaleks} extra Ulalek trigger(s) and generators that yield ${truePayloadSpawns} Spawn(s).<br>
         <b>3. The Cascade:</b> When the copied payload resolves, it generates ${truePayloadSpawns} mana. You sacrifice 2 of these Spawns to pay for the next copied Ulalek trigger, netting you ${truePayloadSpawns - 2 > 0 ? '+' : ''}${truePayloadSpawns - 2} ${symC} every cycle.<br>
         Because you continually generate enough mana to pay the tax for the copied Ulalek triggers, the stack copies itself endlessly.`;
-        if (F > 0) proofHTML += `<br><br><i>Each of the infinite Spawns entering the battlefield triggers Glaring Fleshraker, dealing infinite damage.</i>`;
+        if (F > 0) proofHTML += `<br><br><i>Each of the infinite Spawns entering the battlefield triggers Glaring Fleshraker, dealing <span class="inf-warp" style="display:inline-block;">infinite damage</span>.</i>`;
         
         currentVisualStack.push({ type: 'proof', class: 'infinite', html: proofHTML });
     } else if (U > 0 && state.payments >= 1) {
