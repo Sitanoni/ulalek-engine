@@ -154,9 +154,9 @@
       0%, 100% { text-shadow: 0 0 15px rgba(192, 38, 211, 0.6), 0 0 30px rgba(192, 38, 211, 0.3); color: #fdf4ff; }
       50% { text-shadow: 0 0 25px rgba(192, 38, 211, 1), 0 0 50px rgba(192, 38, 211, 0.8), 0 0 75px rgba(6, 182, 212, 0.5); color: #ffffff; }
   }
-  .inf-warp { animation: aetherPulseText 3s infinite ease-in-out !important; }
+  .inf-warp { animation: aetherPulseText 3s infinite ease-in-out !important; display: inline-block; }
 
-  /* Perfect SVG Pseudo-Element Aura (Bypasses iOS Drop-Shadow Bugs) */
+  /* SVG Container Aura - Fixed by wrapping in a structural span */
   .inf-glow-small { position: relative; display: inline-flex; align-items: center; justify-content: center; color: #fdf4ff !important; z-index: 1; }
   .inf-glow-small::after {
       content: ''; position: absolute; top: 50%; left: 50%; width: 70%; height: 70%;
@@ -448,7 +448,8 @@
 
 <script>
   const symC = `<svg class="sym-c" viewBox="0 0 100 100"><circle cx="48" cy="52" r="44" fill="#000000"/><circle cx="50" cy="48" r="44" fill="#cbc5be"/><path d="M 50 10 Q 50 48 88 48 Q 50 48 50 86 Q 50 48 12 48 Q 50 48 50 10 Z" fill="#181615"/></svg>`;
-  const symInf = `<svg class="sym-inf inf-glow-small" viewBox="0 0 100 50"><path d="M 28 40 C 6 40, 6 10, 28 10 C 46 10, 54 40, 72 40 C 94 40, 94 10, 72 10 C 54 10, 46 40, 28 40 Z" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  // FIX 1: Wrap SVG in structural span for Safari pseudo-element compatibility
+  const symInf = `<span class="inf-glow-small" style="display:inline-flex;"><svg class="sym-inf" viewBox="0 0 100 50"><path d="M 28 40 C 6 40, 6 10, 28 10 C 46 10, 54 40, 72 40 C 94 40, 94 10, 72 10 C 54 10, 46 40, 28 40 Z" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
   
   // Permanent API Image Routes
   const ART_CACHE = {
@@ -1249,14 +1250,13 @@
   let activePress = null;
 
   function startUpdate(e, mode, key, delta) {
-    if (e && e.cancelable) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
+    // Avoid preventDefault/setPointerCapture completely; let CSS touch-action handle it organically
     if (e && e.pointerType === 'mouse' && e.button !== 0) return;
-    if (activePress && activePress.pointerId === e.pointerId) return; 
+    if (activePress && e && activePress.pointerId === e.pointerId) return; 
     if (activePress) clearPress(false); 
 
     let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
-    if (e && e.target && e.target.setPointerCapture) { try { e.target.setPointerCapture(e.pointerId); } catch(_){} }
+    
     if (cardEl && e) {
       let rect = cardEl.getBoundingClientRect();
       cardEl.style.setProperty('--tx', ((e.clientX ?? rect.left + rect.width/2) - rect.left) + 'px');
@@ -1264,18 +1264,33 @@
       cardEl.classList.add(delta === -1 ? 'press-left' : 'press-right');
     }
 
-    activePress = { pointerId: e ? e.pointerId : null, mode, key, delta, x: e ? (e.clientX||0) : 0, y: e ? (e.clientY||0) : 0, valid: true, pending: true, cardEl, holdTimer: null, holdInterval: null };
+    // Capture primitives for the closure interval independently of the activePress reference
+    let pressMode = mode;
+    let pressKey = key;
+    let pressDelta = delta;
+
+    activePress = { 
+        pointerId: e ? e.pointerId : null, 
+        mode, key, delta, 
+        x: e ? (e.clientX||0) : 0, 
+        y: e ? (e.clientY||0) : 0, 
+        valid: true, pending: true, cardEl, 
+        holdTimer: null, holdInterval: null 
+    };
+
     activePress.holdTimer = setTimeout(() => {
       if (activePress && activePress.valid) {
         activePress.pending = false;
-        activePress.holdInterval = setInterval(() => applyDelta(activePress.mode, activePress.key, activePress.delta), 80);
+        activePress.holdInterval = setInterval(() => {
+            applyDelta(pressMode, pressKey, pressDelta);
+        }, 80);
       }
     }, 350);
   }
 
   document.addEventListener('pointermove', (e) => {
     if (!activePress || activePress.pointerId !== e.pointerId || !activePress.valid) return;
-    if (Math.abs(e.clientX - activePress.x) > 15 || Math.abs(e.clientY - activePress.y) > 15) {
+    if (Math.abs(e.clientX - activePress.x) > 25 || Math.abs(e.clientY - activePress.y) > 25) {
       activePress.valid = false;
       clearTimeout(activePress.holdTimer); clearInterval(activePress.holdInterval);
       activePress.cardEl?.classList.remove('press-left', 'press-right');
@@ -1284,14 +1299,23 @@
 
   function clearPress(applyIfPending) {
     if (!activePress) return;
-    if (applyIfPending && activePress.pending && activePress.valid) applyDelta(activePress.mode, activePress.key, activePress.delta);
-    activePress.cardEl?.classList.remove('press-left', 'press-right');
+    if (applyIfPending && activePress.pending && activePress.valid) {
+        applyDelta(activePress.mode, activePress.key, activePress.delta);
+    }
+    if (activePress.cardEl) activePress.cardEl.classList.remove('press-left', 'press-right');
     clearTimeout(activePress.holdTimer); clearInterval(activePress.holdInterval);
     activePress = null;
   }
 
   function stopUpdate(e) {
-    if (activePress && (!e || e.pointerId === activePress.pointerId)) { clearPress(true); saveState(); }
+    if (activePress && (!e || e.pointerId === activePress.pointerId)) { 
+        clearPress(true); 
+        saveState(); 
+    }
+    // Hard failsafe: Sweep all pressed classes from DOM if pointer is lifted/cancelled anywhere on screen
+    document.querySelectorAll('.press-left, .press-right').forEach(el => {
+        el.classList.remove('press-left', 'press-right');
+    });
   }
 
   document.addEventListener('pointerup', stopUpdate);
@@ -1558,10 +1582,12 @@
     }
 
     isInfCurrent = state.infinite;
-    finalSpawns = isInfCurrent ? "∞" : state.S;
-    finalMana = isInfCurrent ? "∞" : state.M;
-    let P = isInfCurrent ? "∞" : state.payments;
-    let currentSpells = isInfCurrent ? "INFINITE" : state.spells;
+    
+    // Inject the Glowing HTML Wrappers directly into the readout values if Infinite is achieved
+    finalSpawns = isInfCurrent ? `<span class="inf-warp">∞</span>` : state.S;
+    finalMana = isInfCurrent ? `<span class="inf-warp">∞</span>` : state.M;
+    let P = isInfCurrent ? `<span class="inf-warp">∞</span>` : state.payments;
+    let currentSpells = isInfCurrent ? `<span class="inf-warp">INFINITE</span>` : state.spells;
     let damage = isInfCurrent ? Infinity : state.damage;
 
     // True Seamless Organic Purple Pulse Propagation
@@ -1603,7 +1629,7 @@
     if (isInfCurrent) {
       if (!prevIsInf) pEl.innerHTML = symInf;
     } else {
-      const newPaymentsText = P.toString();
+      const newPaymentsText = state.payments.toString();
       if (pEl.innerHTML !== newPaymentsText) { pEl.innerHTML = newPaymentsText; triggerPop('out-payments', false); }
     }
 
@@ -1725,7 +1751,7 @@
     let proofHTML = "";
 
     if (isInfCurrent) {
-        proofHTML = `<b>∞ INFINITE LOOP PROOF:</b><br><br>
+        proofHTML = `<b style="display:flex; align-items:center; gap:6px;">${symInf} INFINITE LOOP PROOF:</b><br><br>
         <b>1. Initialization:</b> The top-most triggers resolve to generate mana. This provides the ${symC}${symC} needed to pay for the first Ulalek trigger.<br>
         <b>2. The Copy:</b> Paying the tax copies the entire stack beneath it. This copied payload contains ${extraUlaleks} extra Ulalek trigger(s) and generators that yield ${truePayloadSpawns} Spawn(s).<br>
         <b>3. The Cascade:</b> When the copied payload resolves, it generates ${truePayloadSpawns} mana. You sacrifice 2 of these Spawns to pay for the next copied Ulalek trigger, netting you ${truePayloadSpawns - 2 > 0 ? '+' : ''}${truePayloadSpawns - 2} ${symC} every cycle.<br>
@@ -1733,13 +1759,13 @@
         if (F > 0) proofHTML += `<br><br><i>Each of the infinite Spawns entering the battlefield triggers Glaring Fleshraker, dealing infinite damage.</i>`;
         
         currentVisualStack.push({ type: 'proof', class: 'infinite', html: proofHTML });
-    } else if (U > 0 && P >= 1) {
+    } else if (U > 0 && state.payments >= 1) {
         proofHTML = `<b>✓ RESOLUTION TRACE:</b><br><br>
         <b>1. Initialization:</b> The top-most triggers resolve to generate mana, providing the ${symC}${symC} needed to pay for the first Ulalek trigger.<br>
         <b>2. The Engine:</b> Ulalek copies the payload beneath it, which yields ${truePayloadSpawns} Spawn(s) and contains ${extraUlaleks} extra Ulalek trigger(s).<br>
         <b>3. The Collapse:</b><br>`;
         
-        if (MP !== -1 && P >= MP) proofHTML += `The loop stops intentionally because you reached your manual limit of ${MP} payment(s).<br>`;
+        if (MP !== -1 && state.payments >= MP) proofHTML += `The loop stops intentionally because you reached your manual limit of ${MP} payment(s).<br>`;
         else if (extraUlaleks === 0) proofHTML += `Because there are no extra Ulalek triggers in the payload (via Echoes or Throne), the stack can only be copied once.<br>`;
         else if (truePayloadSpawns < 2) proofHTML += `The copied payload only yields ${truePayloadSpawns} ${symC}, which means you slowly bleed mana cycle until you can no longer afford the ${symC}${symC} tax.<br>`;
         else proofHTML += `The chain breaks when you exhaust your floating mana and triggers.<br>`;
@@ -1747,7 +1773,7 @@
         proofHTML += `<br><b>4. Final Yield:</b> The chain collapses after ${P} payments. All remaining copies resolve, leaving you with ${currentSpells} total spells, ${finalSpawns} Spawns, and ${finalMana} floating ${symC}.`;
         
         currentVisualStack.push({ type: 'proof', class: 'finite', html: proofHTML });
-    } else if (U > 0 && P === 0) {
+    } else if (U > 0 && state.payments === 0) {
         let manaGained = M;
         for(let i=0; i<ulalek_blocks.length; i++) manaGained += ulalek_blocks[i].gens.reduce((s, g) => s + (g.yield || 0), 0);
         
