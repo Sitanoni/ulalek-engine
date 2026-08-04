@@ -156,12 +156,18 @@
   }
   .inf-warp { animation: aetherPulseText 3s infinite ease-in-out !important; }
 
-  @keyframes aetherPulseSvg {
-      0%, 100% { filter: drop-shadow(0 0 8px rgba(192, 38, 211, 0.8)) drop-shadow(0 0 15px rgba(192, 38, 211, 0.4)); color: #fdf4ff; }
-      50% { filter: drop-shadow(0 0 15px rgba(192, 38, 211, 1)) drop-shadow(0 0 25px rgba(192, 38, 211, 0.8)) drop-shadow(0 0 35px rgba(6, 182, 212, 0.6)); color: #ffffff; }
+  /* Perfect SVG Pseudo-Element Aura (Bypasses iOS Drop-Shadow Bugs) */
+  .inf-glow-small { position: relative; display: inline-flex; align-items: center; justify-content: center; color: #fdf4ff !important; z-index: 1; }
+  .inf-glow-small::after {
+      content: ''; position: absolute; top: 50%; left: 50%; width: 70%; height: 70%;
+      transform: translate(-50%, -50%); border-radius: 50%; z-index: -1;
+      animation: aetherPulseGlow 3s infinite ease-in-out !important;
+      pointer-events: none;
   }
-  .inf-glow-small { color: #fdf4ff !important; display: inline-block; }
-  .inf-glow-small svg { animation: aetherPulseSvg 3s infinite ease-in-out !important; overflow: visible !important; }
+  @keyframes aetherPulseGlow {
+      0%, 100% { box-shadow: 0 0 12px 3px rgba(192, 38, 211, 0.6), 0 0 24px 6px rgba(192, 38, 211, 0.3); background: rgba(192, 38, 211, 0.15); }
+      50% { box-shadow: 0 0 20px 6px rgba(192, 38, 211, 1), 0 0 40px 12px rgba(192, 38, 211, 0.8), 0 0 60px 18px rgba(6, 182, 212, 0.5); background: rgba(192, 38, 211, 0.4); }
+  }
 
   /* Flash and Settle */
   @keyframes valFlash {
@@ -1100,9 +1106,9 @@
   // ==========================================
   // LOCALSTORAGE
   // ==========================================
-  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v70', JSON.stringify(data)); }
+  function saveState() { const data = { state1, state2, state3, selectedSpellCard }; localStorage.setItem('ulalek_save_v71', JSON.stringify(data)); }
   function loadState() {
-      const saved = localStorage.getItem('ulalek_save_v70');
+      const saved = localStorage.getItem('ulalek_save_v71');
       if(saved) {
           try {
               const parsed = JSON.parse(saved); Object.assign(state1, parsed.state1); Object.assign(state2, parsed.state2); Object.assign(state3, parsed.state3);
@@ -1235,22 +1241,14 @@
   let holdTimer = null, holdInterval = null;
   let actionPending = false;
   let actionData = null;
-  let activePointerId = null;
-  
-  // Nuclear Auto-Click Defense
-  window.ulalekGlobalTouchActive = false;
-  
-  window.addEventListener('touchstart', () => window.ulalekGlobalTouchActive = true, {passive: true, capture: true});
-  window.addEventListener('touchend', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
-  window.addEventListener('touchcancel', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
-  window.addEventListener('pointerup', () => { window.ulalekGlobalTouchActive = false; stopUpdate(); }, {passive: true, capture: true});
 
   function startUpdate(e, mode, key, delta) {
+    // Native Browser Intercept: Blocks ghost mouse events causing double taps
+    if (e && e.cancelable && e.type !== 'mousedown') e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
     if (e && e.pointerType === 'mouse' && e.button !== 0) return;
 
-    if (activePointerId !== null) return; 
-    if (e && e.pointerId !== undefined) activePointerId = e.pointerId;
+    if (actionData) stopUpdate();
 
     let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
     
@@ -1273,13 +1271,9 @@
     clearTimeouts();
 
     holdTimer = setTimeout(() => {
-        if (actionData && actionData.valid && window.ulalekGlobalTouchActive) {
+        if (actionData && actionData.valid) {
             actionPending = false; 
             holdInterval = setInterval(() => {
-                if (!window.ulalekGlobalTouchActive) {
-                    clearTimeouts();
-                    return;
-                }
                 applyDelta(actionData.mode, actionData.key, actionData.delta);
             }, 80);
         }
@@ -1287,7 +1281,7 @@
   }
 
   document.addEventListener('pointermove', (e) => {
-    if (actionData && actionData.valid && activePointerId === e.pointerId) {
+    if (actionData && actionData.valid) {
         let cx = e.clientX || (e.touches && e.touches[0].clientX) || 0;
         let cy = e.clientY || (e.touches && e.touches[0].clientY) || 0;
         if (Math.abs(cx - actionData.x) > 15 || Math.abs(cy - actionData.y) > 15) {
@@ -1301,8 +1295,6 @@
   });
 
   function stopUpdate(e) {
-    if (e && e.pointerId !== undefined && e.pointerId !== activePointerId) return;
-    
     if (actionPending && actionData && actionData.valid) {
         applyDelta(actionData.mode, actionData.key, actionData.delta);
     }
@@ -1313,10 +1305,12 @@
     
     actionPending = false;
     actionData = null;
-    activePointerId = null;
     clearTimeouts();
     saveState();
   }
+
+  document.addEventListener('pointerup', stopUpdate);
+  document.addEventListener('pointercancel', stopUpdate);
 
   function clearTimeouts() {
     if (holdTimer) clearTimeout(holdTimer);
