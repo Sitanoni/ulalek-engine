@@ -448,7 +448,7 @@
 
 <script>
   const symC = `<svg class="sym-c" viewBox="0 0 100 100"><circle cx="48" cy="52" r="44" fill="#000000"/><circle cx="50" cy="48" r="44" fill="#cbc5be"/><path d="M 50 10 Q 50 48 88 48 Q 50 48 50 86 Q 50 48 12 48 Q 50 48 50 10 Z" fill="#181615"/></svg>`;
-  // FIX 1: Wrap SVG in structural span for Safari pseudo-element compatibility
+  // Wrapping SVG in a span and giving it the visual class so it can be managed cleanly.
   const symInf = `<span class="inf-glow-small" style="display:inline-flex;"><svg class="sym-inf" viewBox="0 0 100 50"><path d="M 28 40 C 6 40, 6 10, 28 10 C 46 10, 54 40, 72 40 C 94 40, 94 10, 72 10 C 54 10, 46 40, 28 40 Z" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
   
   // Permanent API Image Routes
@@ -548,43 +548,43 @@
                     <div class="card-title">Echoes of Eternity</div>
                     <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-echoes">0</div><div class="sub-btn-plus">+</div></div>
                     <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'echoes', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'echoes', 1)"></div>
+                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'echoes', -1)" oncontextmenu="event.preventDefault()"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'echoes', 1)" oncontextmenu="event.preventDefault()"></div>
                 </div>
                 <div class="card glass-panel fleshraker">
                     <div class="card-title">Glaring Fleshraker</div>
                     <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-fleshraker">0</div><div class="sub-btn-plus">+</div></div>
                     <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'fleshraker', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'fleshraker', 1)"></div>
+                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'fleshraker', -1)" oncontextmenu="event.preventDefault()"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'fleshraker', 1)" oncontextmenu="event.preventDefault()"></div>
                 </div>
                 <div class="card glass-panel throne">
                     <div class="card-title">Roaming Throne</div>
                     <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-throne">0</div><div class="sub-btn-plus">+</div></div>
                     <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'throne', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'throne', 1)"></div>
+                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'throne', -1)" oncontextmenu="event.preventDefault()"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'throne', 1)" oncontextmenu="event.preventDefault()"></div>
                 </div>
                 <div class="card glass-panel unsealing">
                     <div class="card-title">Kozilek's Unsealing</div>
                     <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-unsealing">0</div><div class="sub-btn-plus">+</div></div>
                     <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'unsealing', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'unsealing', 1)"></div>
+                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'unsealing', -1)" oncontextmenu="event.preventDefault()"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'unsealing', 1)" oncontextmenu="event.preventDefault()"></div>
                 </div>
                 <div class="card glass-panel cast">
                     <div class="card-title">Extra Spawns (Misc)</div>
                     <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-cast">0</div><div class="sub-btn-plus">+</div></div>
                     <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'cast', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'cast', 1)"></div>
+                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'cast', -1)" oncontextmenu="event.preventDefault()"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'cast', 1)" oncontextmenu="event.preventDefault()"></div>
                 </div>
                 <div class="card glass-panel colorless">
                     <div class="card-title"><script>document.write(symC);</script> Pool</div>
                     <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-mana">0</div><div class="sub-btn-plus">+</div></div>
                     <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'mana', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'mana', 1)"></div>
+                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'mana', -1)" oncontextmenu="event.preventDefault()"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'mana', 1)" oncontextmenu="event.preventDefault()"></div>
                 </div>
                 <div class="card glass-panel paymentcap grid-full">
                     <div class="card-title">Max <script>document.write(symC);</script><script>document.write(symC);</script> Payments</div>
                     <div class="card-center"><div class="sub-btn-minus">-</div><div class="card-val" id="val1-max_pay" style="font-size:2.4rem;">ALL</div><div class="sub-btn-plus">+</div></div>
                     <div class="half-bg left"></div><div class="half-bg right"></div>
-                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'max_pay', -1)"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'max_pay', 1)"></div>
+                    <div class="touch-zone touch-left" onpointerdown="startUpdate(event, 1, 'max_pay', -1)" oncontextmenu="event.preventDefault()"></div><div class="touch-zone touch-right" onpointerdown="startUpdate(event, 1, 'max_pay', 1)" oncontextmenu="event.preventDefault()"></div>
                 </div>
             </div>
         </div>
@@ -615,11 +615,11 @@
     <div class="outputs-area" id="m2-result-container"></div>
     <div class="grid-scroll-area">
       <div class="grid">
-        <div class="card glass-panel cast"><h3>Spawns on Cast</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'spawns', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-spawns">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'spawns', 1)">+</button></div></div>
-        <div class="card glass-panel colorless"><h3><script>document.write(symC);</script> Pool</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'colorless', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-colorless">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'colorless', 1)">+</button></div></div>
-        <div class="card glass-panel spellcost"><h3>New Spell MV</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'spellcost', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-spellcost">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'spellcost', 1)">+</button></div></div>
-        <div class="card glass-panel colored"><h3>Colored Mana</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'colored', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-colored">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'colored', 1)">+</button></div></div>
-        <div class="card glass-panel leftover grid-full"><h3>Target Leftover <script>document.write(symC);</script></h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'leftover', -1)">-</button><div class="val-wrapper"><span class="val" id="val2-leftover">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'leftover', 1)">+</button></div></div>
+        <div class="card glass-panel cast"><h3>Spawns on Cast</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'spawns', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val2-spawns">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'spawns', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
+        <div class="card glass-panel colorless"><h3><script>document.write(symC);</script> Pool</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'colorless', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val2-colorless">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'colorless', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
+        <div class="card glass-panel spellcost"><h3>New Spell MV</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'spellcost', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val2-spellcost">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'spellcost', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
+        <div class="card glass-panel colored"><h3>Colored Mana</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'colored', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val2-colored">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'colored', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
+        <div class="card glass-panel leftover grid-full"><h3>Target Leftover <script>document.write(symC);</script></h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 2, 'leftover', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val2-leftover">0</span></div><button class="btn" onpointerdown="startUpdate(event, 2, 'leftover', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
       </div>
     </div>
   </div>
@@ -629,10 +629,10 @@
     <div class="outputs-area" id="m3-result-container"></div>
     <div class="grid-scroll-area">
       <div class="grid">
-        <div class="card glass-panel cast"><h3>Spawns on Cast</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'spawns', -1)">-</button><div class="val-wrapper"><span class="val" id="val3-spawns">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'spawns', 1)">+</button></div></div>
-        <div class="card glass-panel colorless"><h3><script>document.write(symC);</script> Pool</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'colorless', -1)">-</button><div class="val-wrapper"><span class="val" id="val3-colorless">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'colorless', 1)">+</button></div></div>
-        <div class="card glass-panel targetmv"><h3>Target MV (Min X)</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'targetmv', -1)">-</button><div class="val-wrapper"><span class="val" id="val3-targetmv">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'targetmv', 1)">+</button></div></div>
-        <div class="card glass-panel colored"><h3>Colored Mana</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'colored', -1)">-</button><div class="val-wrapper"><span class="val" id="val3-colored">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'colored', 1)">+</button></div></div>
+        <div class="card glass-panel cast"><h3>Spawns on Cast</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'spawns', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val3-spawns">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'spawns', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
+        <div class="card glass-panel colorless"><h3><script>document.write(symC);</script> Pool</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'colorless', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val3-colorless">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'colorless', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
+        <div class="card glass-panel targetmv"><h3>Target MV (Min X)</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'targetmv', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val3-targetmv">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'targetmv', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
+        <div class="card glass-panel colored"><h3>Colored Mana</h3><div class="stepper"><button class="btn" onpointerdown="startUpdate(event, 3, 'colored', -1)" oncontextmenu="event.preventDefault()">-</button><div class="val-wrapper"><span class="val" id="val3-colored">0</span></div><button class="btn" onpointerdown="startUpdate(event, 3, 'colored', 1)" oncontextmenu="event.preventDefault()">+</button></div></div>
       </div>
     </div>
   </div>
@@ -719,7 +719,6 @@
 
       const comet = document.getElementById('spine-comet');
       if (comet) {
-          // The comet element is 400px tall. Core is absolutely centered at 200px.
           let startPx = 200 - 30 - currentTrailUp; 
           let coreTop = 200 - 2;
           let coreBot = 200 + 2;
@@ -754,7 +753,6 @@
       let y = clientY - spineTrackRect.top;
       let pct = y / spineTrackRect.height;
       
-      // Remap the 10% to 90% physical scrub zone back to the 0-100% scroll position
       let scrollPct = (pct - 0.1) / 0.8;
       scrollPct = Math.max(0, Math.min(1, scrollPct));
       
@@ -814,10 +812,8 @@
           scrollPct = container.scrollTop / (scrollHeight - clientHeight);
       }
       
-      // Calculate 10% to 90% bounded position for the scrubber
       const physicalDotY = 10 + (scrollPct * 80);
 
-      // Timeline Scrubber Elements
       const dot = document.getElementById('spine-dot');
       if (dot) {
           dot.style.setProperty('--dot-y', `${physicalDotY}%`);
@@ -827,7 +823,6 @@
           comet.style.setProperty('--dot-y', `${physicalDotY}%`);
       }
 
-      // Proximity Fade for Roman Numerals
       const pips = document.querySelectorAll('.phase-pip');
       pips.forEach(pip => {
           let pipPct = parseFloat(pip.getAttribute('data-pct'));
@@ -935,7 +930,6 @@
               document.getElementById('vis-top-pad').style.height = `${topPad}px`;
               document.getElementById('vis-bottom-pad').style.height = `${bottomPad}px`;
               
-              // Place Roman Numeral Pips & Dynamic Track Mask
               const spine = document.getElementById('vis-fixed-spine');
               const track = document.querySelector('.spine-track');
               if (spine && track) {
@@ -965,7 +959,6 @@
                       }
                   });
                   
-                  // Construct Dynamic Linear Gradient Mask to perfectly cut the line around the numerals
                   if (pipPcts.length > 0) {
                       let maskStops = [];
                       maskStops.push(`transparent 0%`);
@@ -1053,11 +1046,8 @@
           if(match) { let qty = numMap[match[1]] || 0; if (line.includes("when you cast") || line.includes("whenever you cast")) spellCastSpawns += qty; else spellResoSpawns += qty; }
       }
       if (card.type_line && card.type_line.includes('Creature')) { 
-          if (card.cmc >= 4 && card.cmc <= 6) spellTriggersUnsealing = true; 
-          if (card.cmc >= 7) {
-              spellTriggersUnsealing = true; // 7+ also triggers the 4-6 spawn effect
-              spellDrawsCards = true; 
-          }
+          if (card.cmc >= 4 && card.cmc <= 6) { spellTriggersUnsealing = true; }
+          if (card.cmc >= 7) { spellTriggersUnsealing = false; spellDrawsCards = true; }
       }
   }
 
@@ -1247,103 +1237,89 @@
   // ==========================================
   // SWIPE-SAFE INPUT ENGINE & RIPPLE
   // ==========================================
-  let activePress = null;
+  let holdTimerId = null;
+  let holdIntervalId = null;
+  let isPressing = false;
+  let startX = 0;
+  let startY = 0;
 
-  function killAllPresses(e) {
-    if (activePress) {
-        // Only trigger the increment if the interaction was a clean, intentional release
-        let isIntentionalUp = e && (e.type === 'pointerup' || e.type === 'touchend');
-        if (isIntentionalUp && activePress.pending && activePress.valid) {
-            applyDelta(activePress.mode, activePress.key, activePress.delta);
-            saveState();
-        }
-        if (activePress.cardEl) activePress.cardEl.classList.remove('press-left', 'press-right');
-        clearTimeout(activePress.holdTimer);
-        clearInterval(activePress.holdInterval);
-        activePress = null;
-    }
-    // Hard sweep: wipe lingering CSS classes no matter what happened
-    document.querySelectorAll('.press-left, .press-right').forEach(el => {
-        el.classList.remove('press-left', 'press-right');
-    });
+  function stopUpdate(e) {
+      if (holdTimerId) clearTimeout(holdTimerId);
+      if (holdIntervalId) clearInterval(holdIntervalId);
+      holdTimerId = null;
+      holdIntervalId = null;
+      
+      if (isPressing) saveState();
+      isPressing = false;
+
+      document.querySelectorAll('.press-left, .press-right').forEach(el => {
+          el.classList.remove('press-left', 'press-right');
+      });
   }
 
-  // Bind the failsafe cleanup to every possible browser interruption event
-  document.addEventListener('pointerup', killAllPresses);
-  document.addEventListener('pointercancel', killAllPresses);
-  document.addEventListener('touchend', killAllPresses);
-  document.addEventListener('touchcancel', killAllPresses);
-  window.addEventListener('blur', killAllPresses);
-  document.addEventListener('visibilitychange', killAllPresses);
-  document.addEventListener('contextmenu', killAllPresses);
-
+  // Global Failsafes to brutally kill run-away intervals if the browser shifts attention
+  window.addEventListener('blur', stopUpdate);
+  document.addEventListener('visibilitychange', stopUpdate);
+  window.addEventListener('pointerup', stopUpdate);
+  window.addEventListener('pointercancel', stopUpdate);
+  window.addEventListener('touchend', stopUpdate);
+  
   function startUpdate(e, mode, key, delta) {
-    if (e && e.pointerType === 'mouse' && e.button !== 0) return;
-    if (activePress && e && activePress.pointerId === e.pointerId) return; 
-    
-    // Always clear out any stale UI state before starting a new press
-    killAllPresses(null); 
-
-    let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
-    
-    if (cardEl && e) {
-      let rect = cardEl.getBoundingClientRect();
-      let clientX = e.clientX ?? (e.touches && e.touches.length > 0 ? e.touches[0].clientX : rect.left + rect.width/2);
-      let clientY = e.clientY ?? (e.touches && e.touches.length > 0 ? e.touches[0].clientY : rect.top + rect.height/2);
-      cardEl.style.setProperty('--tx', (clientX - rect.left) + 'px');
-      cardEl.style.setProperty('--ty', (clientY - rect.top) + 'px');
-      cardEl.classList.add(delta === -1 ? 'press-left' : 'press-right');
-    }
-
-    let pressMode = mode;
-    let pressKey = key;
-    let pressDelta = delta;
-
-    activePress = { 
-        pointerId: e ? e.pointerId : null, 
-        mode, key, delta, 
-        x: e ? (e.clientX || (e.touches && e.touches.length > 0 ? e.touches[0].clientX : 0)) : 0, 
-        y: e ? (e.clientY || (e.touches && e.touches.length > 0 ? e.touches[0].clientY : 0)) : 0, 
-        valid: true, pending: true, cardEl, 
-        holdTimer: null, holdInterval: null 
-    };
-
-    activePress.holdTimer = setTimeout(() => {
-      if (activePress && activePress.valid) {
-        activePress.pending = false;
-        activePress.holdInterval = setInterval(() => {
-            applyDelta(pressMode, pressKey, pressDelta);
-        }, 80);
+      // 1. Immediately kill any currently running presses if they got stuck
+      stopUpdate(null);
+      
+      // 2. Prevent default gesture handling to stop Android from interrupting the hold
+      if (e && e.cancelable) e.preventDefault(); 
+      if (e && e.pointerType === 'mouse' && e.button !== 0) return;
+      
+      isPressing = true;
+      
+      // 3. Visual feedback positioning
+      let cardEl = document.getElementById(`val${mode}-${key}`).closest('.card');
+      if (cardEl && e) {
+          let rect = cardEl.getBoundingClientRect();
+          startX = e.clientX ?? (e.touches && e.touches.length > 0 ? e.touches[0].clientX : rect.left + rect.width/2);
+          startY = e.clientY ?? (e.touches && e.touches.length > 0 ? e.touches[0].clientY : rect.top + rect.height/2);
+          
+          cardEl.style.setProperty('--tx', (startX - rect.left) + 'px');
+          cardEl.style.setProperty('--ty', (startY - rect.top) + 'px');
+          cardEl.classList.add(delta === -1 ? 'press-left' : 'press-right');
+      } else {
+          startX = 0;
+          startY = 0;
       }
-    }, 350);
+
+      // 4. Apply the increment immediately for a responsive single tap
+      applyDelta(mode, key, delta);
+
+      // 5. Start press-and-hold interval 
+      holdTimerId = setTimeout(() => {
+          holdIntervalId = setInterval(() => {
+              applyDelta(mode, key, delta);
+          }, 80);
+      }, 350);
   }
 
-  document.addEventListener('pointermove', (e) => {
-    if (!activePress || !activePress.valid) return;
-    if (activePress.pointerId !== null && activePress.pointerId !== e.pointerId) return;
-    
-    let cx = e.clientX || (e.touches && e.touches.length > 0 ? e.touches[0].clientX : 0);
-    let cy = e.clientY || (e.touches && e.touches.length > 0 ? e.touches[0].clientY : 0);
-    
-    if (Math.abs(cx - activePress.x) > 25 || Math.abs(cy - activePress.y) > 25) {
-      activePress.valid = false;
-      clearTimeout(activePress.holdTimer); clearInterval(activePress.holdInterval);
-      activePress.cardEl?.classList.remove('press-left', 'press-right');
-    }
-  });
-
-  // Explicitly handle touchmove to intercept Chrome's scrolling hijack
-  document.addEventListener('touchmove', (e) => {
-    if (!activePress || !activePress.valid || !e.touches || e.touches.length === 0) return;
-    let cx = e.touches[0].clientX;
-    let cy = e.touches[0].clientY;
-    
-    if (Math.abs(cx - activePress.x) > 25 || Math.abs(cy - activePress.y) > 25) {
-      activePress.valid = false;
-      clearTimeout(activePress.holdTimer); clearInterval(activePress.holdInterval);
-      activePress.cardEl?.classList.remove('press-left', 'press-right');
-    }
+  // Allow movement to cancel a hold if the user rolls their thumb too far
+  window.addEventListener('pointermove', (e) => {
+      if (!isPressing) return;
+      let cx = e.clientX;
+      let cy = e.clientY;
+      if (cx !== undefined && startX !== undefined) {
+          if (Math.abs(cx - startX) > 40 || Math.abs(cy - startY) > 40) stopUpdate();
+      }
   }, {passive: true});
+  
+  // Explicitly handle touchmove to combat mobile scroll hijacking
+  window.addEventListener('touchmove', (e) => {
+      if (!isPressing || !e.touches || e.touches.length === 0) return;
+      let cx = e.touches[0].clientX;
+      let cy = e.touches[0].clientY;
+      if (cx !== undefined && startX !== undefined) {
+          if (Math.abs(cx - startX) > 40 || Math.abs(cy - startY) > 40) stopUpdate();
+      }
+  }, {passive: true});
+
 
   function applyDelta(mode, key, delta) {
     let s = mode === 1 ? state1 : mode === 2 ? state2 : state3;
@@ -1440,25 +1416,31 @@
     const unsealDraws = spellDrawsCards ? K * (1 + E) : 0;
 
     let flat_manaGens = [];
+
+    // MATHEMATICAL FIX: Roaming Throne gives +R triggers to Fleshraker, and Echoes copies EACH of those E times.
+    if(F > 0) {
+        for(let f=0; f<F; f++) {
+            for(let r=0; r <= R; r++) {
+                flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: r===0 ? 'Original' : 'Throne Copy', originColor: r===0 ? '#10b981' : '#cbd5e1'});
+                for(let e=0; e < E; e++) {
+                    flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Echoes Copy', originColor: '#be123c'});
+                }
+            }
+        }
+    }
+
     if(spellCastSpawns > 0) {
         flat_manaGens.push({id: 'spell_cast_spawn', yield: spellCastSpawns, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: spellImg || ART_CACHE['Spawn'], origin: 'Original', originColor: '#10b981'});
-        for(let i=0; i<E; i++) flat_manaGens.push({id: 'spell_cast_spawn', yield: spellCastSpawns, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: spellImg || ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#be123c'});
+        for(let e=0; e<E; e++) flat_manaGens.push({id: 'spell_cast_spawn', yield: spellCastSpawns, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: spellImg || ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#be123c'});
     }
     if(C > 0) {
         flat_manaGens.push({id: 'misc_cast_spawn', yield: C, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Spawn'], origin: 'Original', originColor: '#10b981'});
-        for(let i=0; i<E; i++) flat_manaGens.push({id: 'misc_cast_spawn', yield: C, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#be123c'});
+        for(let e=0; e<E; e++) flat_manaGens.push({id: 'misc_cast_spawn', yield: C, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Spawn'], origin: 'Echoes Copy', originColor: '#be123c'});
     }
     if(unsealCastYield > 0) {
         for(let k=0; k<K; k++) {
             flat_manaGens.push({id: 'unseal_spawn', yield: unsealCastYield, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Unsealing'], origin: 'Original', originColor: '#10b981'});
-            for(let i=0; i<E; i++) flat_manaGens.push({id: 'unseal_spawn', yield: unsealCastYield, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#be123c'});
-        }
-    }
-    if(F > 0) {
-        for(let f=0; f<F; f++) {
-            flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Original', originColor: '#10b981'});
-            for(let i=0; i<E; i++) flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Echoes Copy', originColor: '#be123c'});
-            for(let i=0; i<R; i++) flat_manaGens.push({id: 'fleshraker_cast', yield: 1, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, isFleshraker: true, img: ART_CACHE['Fleshraker'], origin: 'Throne Copy', originColor: '#cbd5e1'});
+            for(let e=0; e<E; e++) flat_manaGens.push({id: 'unseal_spawn', yield: unsealCastYield, title: 'Cast Trigger', shortContext: `Generates {Y} Spawn(s).`, img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#be123c'});
         }
     }
 
@@ -1494,9 +1476,14 @@
     let ulalek_blocks = [];
     let payments_budget = allowed_payments;
     
-    let ulalek_sources = [{origin: 'Original', originColor: '#10b981'}];
-    for(let i=0; i<E; i++) ulalek_sources.push({origin: 'Echoes Copy', originColor: '#be123c'});
-    for(let i=0; i<R; i++) ulalek_sources.push({origin: 'Throne Copy', originColor: '#cbd5e1'});
+    // MATHEMATICAL FIX: Roaming Throne makes Ulalek trigger an extra time natively, Echoes copies BOTH.
+    let ulalek_sources = [];
+    for(let r=0; r <= R; r++) {
+        ulalek_sources.push({origin: r===0 ? 'Original' : 'Throne Copy', originColor: r===0 ? '#10b981' : '#cbd5e1'});
+        for(let e=0; e < E; e++) {
+            ulalek_sources.push({origin: 'Echoes Copy', originColor: '#be123c'});
+        }
+    }
 
     for(let i=0; i<ulalek_sources.length; i++) {
         let req = 2 - running_M;
@@ -1507,9 +1494,18 @@
             running_M += extracted.reduce((s, g) => s + g.yield, 0);
         }
         if(running_M >= 2 && payments_budget > 0) {
+            let spawns_used = block_gens.reduce((s, g) => s + g.yield, 0);
+            let floating_used = 2 - spawns_used;
+            if (floating_used < 0) floating_used = 0; 
+            
+            let pSources = [];
+            if (floating_used > 0) pSources.push(`${floating_used} Floating`);
+            if (spawns_used > 0) pSources.push(`${spawns_used} Spawn(s)`);
+            let paymentSource = `Paid via ` + pSources.join(" + ");
+
             running_M -= 2; 
             payments_budget--;
-            ulalek_blocks.push({ canPay: true, missing: 0, gens: block_gens, origin: ulalek_sources[i].origin, originColor: ulalek_sources[i].originColor});
+            ulalek_blocks.push({ canPay: true, missing: 0, gens: block_gens, origin: ulalek_sources[i].origin, originColor: ulalek_sources[i].originColor, paymentSource: paymentSource});
         } else {
             ulalek_blocks.push({ canPay: false, missing: (payments_budget <= 0) ? "Limit" : 2 - running_M, gens: block_gens, origin: ulalek_sources[i].origin, originColor: ulalek_sources[i].originColor});
             running_M = 0; 
@@ -1528,13 +1524,13 @@
     if(unsealDraws > 0) {
         for(let k=0; k<K; k++) {
             stack.push({id: 'unseal_draw', title: 'Cast Trigger', shortContext: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Original', originColor: '#10b981'});
-            for(let i=0; i<E; i++) stack.push({id: 'unseal_draw', title: 'Cast Trigger', shortContext: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#be123c'});
+            for(let e=0; e<E; e++) stack.push({id: 'unseal_draw', title: 'Cast Trigger', shortContext: 'Draws 3 cards.', img: ART_CACHE['Unsealing'], origin: 'Echoes Copy', originColor: '#be123c'});
         }
     }
     
     for(let i = ulalek_blocks.length - 1; i >= 0; i--) {
         let block = ulalek_blocks[i];
-        stack.push({id: 'ulalek_trigger', title: 'Triggered Ability', canPay: block.canPay, missing: block.missing, img: ART_CACHE['Ulalek'], origin: block.origin, originColor: block.originColor});
+        stack.push({id: 'ulalek_trigger', title: 'Triggered Ability', canPay: block.canPay, missing: block.missing, img: ART_CACHE['Ulalek'], origin: block.origin, originColor: block.originColor, paymentSource: block.paymentSource});
         for(let j=0; j<block.gens.length; j++) {
             stack.push(block.gens[j]);
         }
@@ -1543,8 +1539,10 @@
     let state = { M: M, S: 0, damage: 0, spells: 0, payments: 0, draws: 0, infinite: false };
     let loops = 0;
     let simStack = [...stack]; 
-    let F_mult = F * (1 + E + R);
-    let U = 1 + E + R;
+    
+    // Fleshraker Damage Multiplier: F_mult respects Throne and Echoes triggering natively per spawn
+    let F_mult = F * (1 + R) * (1 + E);
+    let U = (1 + R) * (1 + E);
     
     function addSpawns(n) {
         state.S += n;
@@ -1568,9 +1566,15 @@
         }
     }
 
-    while (simStack.length > 0 && loops < 20000) {
+    while (simStack.length > 0 && loops < 50000) {
         loops++;
         let item = simStack.pop();
+        
+        // CRASH PREVENTER: OOM Failsafe to halt exponential array growth
+        if (simStack.length > 5000 || state.payments > 200) {
+            state.infinite = true;
+            break;
+        }
         
         if (item.id === 'fleshraker_cast' || item.id === 'unseal_spawn' || item.id === 'spell_cast_spawn' || item.id === 'misc_cast_spawn') {
             addSpawns(item.yield || 0);
@@ -1601,10 +1605,7 @@
         }
     }
 
-    if (loops >= 20000) {
-        state.infinite = true;
-    }
-
+    if (loops >= 50000) state.infinite = true;
     isInfCurrent = state.infinite;
     
     // Inject the Glowing HTML Wrappers directly into the readout values if Infinite is achieved
@@ -1681,7 +1682,7 @@
             zone = 'RESOLVING NOW'; color = '#10b981';
         }
         
-        if (!currentGroup || currentGroup.id !== item.id || currentGroup.zone !== zone || currentGroup.shortContext !== item.shortContext || currentGroup.missing !== item.missing || currentGroup.origin !== item.origin) {
+        if (!currentGroup || currentGroup.id !== item.id || currentGroup.zone !== zone || currentGroup.shortContext !== item.shortContext || currentGroup.missing !== item.missing || currentGroup.origin !== item.origin || currentGroup.paymentSource !== item.paymentSource) {
             if (currentGroup) visItems.push(currentGroup);
             currentGroup = { ...item, count: 1, zone: zone, ribbon: zone, color: color };
         } else {
@@ -1742,7 +1743,7 @@
         
         let contextText = group.shortContext;
         if (group.zone === 'COPY ENGINE') {
-            contextText = "Copies all spells and abilities below it.";
+            contextText = `Copies all spells and abilities below it.<br><span style="font-size: 0.85em; opacity: 0.8;">${group.paymentSource || ''}</span>`;
         }
         else if (group.zone === 'TAX UNPAID') {
             if (group.missing === 'Limit') contextText = `Payment limit reached. Resolves without copying.`;
